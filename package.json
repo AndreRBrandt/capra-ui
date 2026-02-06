@@ -1,0 +1,57 @@
+{
+  "name": "@capra-ui/core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Capra UI - Core framework for analytical dashboards",
+  "main": "./dist/capra-ui-core.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/capra-ui-core.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./styles/*": "./src/styles/*"
+  },
+  "files": [
+    "dist",
+    "src/styles"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "echarts": "^6.0.0",
+    "lucide-vue-next": "^0.562.0",
+    "vue": "^3.5.26",
+    "vue-echarts": "^8.0.1"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@vue/test-utils": "^2.4.6",
+    "husky": "^9.1.7",
+    "jsdom": "^27.4.0"
+  },
+  "keywords": [
+    "vue",
+    "components",
+    "dashboard",
+    "analytics",
+    "kpi",
+    "data-visualization"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/capra-ui/capra-ui"
+  }
+}

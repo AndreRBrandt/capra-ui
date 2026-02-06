@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  /* ============================================
+   * CAPRA UI - Design Tokens Base
+   * ============================================
+   * Tokens padrão do framework. Podem ser sobrescritos
+   * pelo theme.css de cada dashboard específico.
+   * ============================================ */
+
+  /* -----------------------------------------
+   * CORES DA MARCA
+   * ----------------------------------------- */
+  --color-brand-primary: #e8dddb;
+  --color-brand-secondary: #3a1906;
+  --color-brand-tertiary: #8f3f00;
+  --color-brand-highlight: #e5a22f;
+
+  /* -----------------------------------------
+   * CORES DE TENDÊNCIA (KPIs)
+   * ----------------------------------------- */
+  --color-trend-positive: #16a34a;
+  --color-trend-negative: #dc2626;
+
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - TEXTO
+   * ----------------------------------------- */
+  --color-text: #111827; /* gray-900 - texto principal */
+  --color-text-strong: #030712; /* gray-950 - texto emphasis */
+  --color-text-muted: #6b7280; /* gray-500 - texto secundário */
+  --color-text-tertiary: #9ca3af; /* gray-400 - texto terciário */
+  --color-text-placeholder: #d1d5db; /* gray-300 - placeholders */
+
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - SUPERFÍCIES
+   * ----------------------------------------- */
+  --color-surface: #ffffff; /* white - fundo principal */
+  --color-surface-alt: #f9fafb; /* gray-50 - fundo alternado */
+  --color-hover: #f3f4f6; /* gray-100 - hover states */
+  --color-active: #e5e7eb; /* gray-200 - active states */
+  --color-border: #e5e7eb; /* gray-200 - bordas */
+  --color-border-light: #f3f4f6; /* gray-100 - bordas sutis */
+
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - ESTADOS
+   * ----------------------------------------- */
+  --color-error: #dc2626; /* red-600 */
+  --color-error-light: #fef2f2; /* red-50 */
+  --color-success: #16a34a; /* green-600 */
+  --color-success-light: #f0fdf4; /* green-50 */
+  --color-warning: #d97706; /* amber-600 */
+  --color-warning-light: #fffbeb; /* amber-50 */
+
+  /* -----------------------------------------
+   * FONTES
+   * ----------------------------------------- */
+  --font-sans: "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif";
+}
+
+/* Regras globais */
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-gray-50);
+}
