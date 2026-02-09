@@ -196,12 +196,11 @@ function handleClear(event: Event) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: inherit;
-  opacity: 0.7;
+  color: var(--color-text-muted, #6b7280);
 }
 
 .filter-trigger--active .filter-trigger__icon {
-  opacity: 1;
+  color: inherit;
 }
 
 /* Label */
@@ -215,7 +214,7 @@ function handleClear(event: Event) {
 /* Chevron */
 .filter-trigger__chevron {
   flex-shrink: 0;
-  opacity: 0.5;
+  opacity: 0.7;
   transition: transform var(--transition-fast, 0.15s ease);
 }
 
