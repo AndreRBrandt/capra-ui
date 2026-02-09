@@ -17,10 +17,12 @@
  * ```
  */
 
-export { useExport } from "./useExport";
+export { useExport, exportFromTable } from "./useExport";
 export type {
   UseExportConfig,
   UseExportReturn,
   ExportColumn,
   ExportFormat,
+  ExportFromTableColumn,
+  ExportFromTableOptions,
 } from "./useExport";
