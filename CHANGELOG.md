@@ -7,6 +7,27 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [Unreleased]
+
+### Adicionado
+
+#### Fase 1: Componentes de Layout + Theme System
+- **Theme System**: `src/styles/theme.css` com CSS variables (brand, semantic, spacing, typography, shadows)
+- **Layout Components**: AnalyticsPage, KpiGrid, SectionHeader
+- **Analytics Components**: DetailModal, KpiCardWrapper, MetricsGrid, MetricItem, TrendBadge
+- **UI Components**: SearchInput, LoadingState, EmptyState
+- Total: 11 novos componentes com testes (~121 tests)
+
+#### Fase 2: Composables Core
+- **useNavigationStack**: Stack de navegacao generico com breadcrumbs (22 tests)
+- **useDataLoader**: Loading generico com retry, cancel, stale-while-revalidate (18 tests)
+- **usePeriodComparison**: ParallelPeriod MDX helper (29 tests)
+- **useChartDrill**: Drill-down de graficos com cache e niveis (25 tests)
+- **useModalDrillDown**: Melhorado com navigation stack integrado
+- **useExport**: Melhorado com `exportFromTable` helper
+
+---
+
 ## [0.1.0] - 2026-02-06
 
 ### Adicionado
