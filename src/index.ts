@@ -64,6 +64,11 @@ export {
   // Analytics
   KpiCard,
   DataTable,
+  KpiCardWrapper,
+  DetailModal,
+  MetricsGrid,
+  MetricItem,
+  TrendBadge,
   // Charts
   BaseChart,
   BarChart,
@@ -74,6 +79,9 @@ export {
   FilterContainer,
   // Layout
   AppShell,
+  AnalyticsPage,
+  KpiGrid,
+  SectionHeader,
   // UI
   BaseButton,
   Modal,
@@ -81,6 +89,9 @@ export {
   ConfigPanel,
   ThemeConfigPanel,
   HelpModal,
+  SearchInput,
+  LoadingState,
+  EmptyState,
   // Filters (components only, types come from composables)
   FilterTrigger,
   FilterDropdown,
@@ -96,3 +107,7 @@ export type { SelectOption } from "./components/filters/SelectFilter.vue";
 export type { MultiSelectOption } from "./components/filters/MultiSelectFilter.vue";
 export type { Column, ColumnFormat, TrendConfig, SortState, TotalConfig } from "./components/analytics/DataTable.vue";
 export type { ColumnOption } from "./components/ui/ConfigPanel.vue";
+export type { KpiAction } from "./components/analytics/KpiCardWrapper.vue";
+export type { MetricVariant } from "./components/analytics/MetricItem.vue";
+export type { LoadingSize } from "./components/ui/LoadingState.vue";
+export type { EmptySize } from "./components/ui/EmptyState.vue";

@@ -5,7 +5,7 @@
  *
  * @example
  * ```ts
- * import { BaseButton, Modal, Popover, ConfigPanel } from '@/components/ui'
+ * import { BaseButton, Modal, SearchInput, LoadingState, EmptyState } from '@capra-ui/core'
  * ```
  */
 
@@ -16,3 +16,10 @@ export { default as Modal } from "./Modal.vue";
 export { default as Popover } from "./Popover.vue";
 export { default as HelpModal } from "./HelpModal.vue";
 export { default as ThemeConfigPanel } from "./ThemeConfigPanel.vue";
+export { default as SearchInput } from "./SearchInput.vue";
+export { default as LoadingState } from "./LoadingState.vue";
+export { default as EmptyState } from "./EmptyState.vue";
+
+// Types
+export type { LoadingSize } from "./LoadingState.vue";
+export type { EmptySize } from "./EmptyState.vue";

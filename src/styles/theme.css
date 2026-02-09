@@ -1,0 +1,105 @@
+/* ============================================
+ * CAPRA UI - Theme System
+ * ============================================
+ * Default theme variables. Apps override these
+ * in their own theme.css file.
+ *
+ * Usage: components use ONLY these CSS variables,
+ * never hardcoded colors.
+ *
+ * Categories:
+ * 1. Brand Colors
+ * 2. Semantic Colors (text, surface, state)
+ * 3. Trend Colors (KPI/analytics)
+ * 4. Component-specific tokens
+ * 5. Spacing & Layout
+ * 6. Typography
+ * 7. Shadows & Effects
+ * ============================================ */
+
+:root {
+  /* -----------------------------------------
+   * 1. BRAND COLORS
+   * Default: Professional blue/gray palette
+   * Override in app theme.css for custom branding
+   * ----------------------------------------- */
+  --capra-brand-primary: #e8dddb;
+  --capra-brand-secondary: #3a1906;
+  --capra-brand-tertiary: #8f3f00;
+  --capra-brand-highlight: #e5a22f;
+  --capra-brand-highlight-light: #fef3e2;
+
+  /* -----------------------------------------
+   * 2. SEMANTIC COLORS
+   * ----------------------------------------- */
+
+  /* Text */
+  --capra-text: #111827;
+  --capra-text-strong: #030712;
+  --capra-text-secondary: #4b5563;
+  --capra-text-muted: #6b7280;
+  --capra-text-tertiary: #9ca3af;
+  --capra-text-placeholder: #d1d5db;
+
+  /* Surfaces */
+  --capra-surface: #ffffff;
+  --capra-surface-alt: #f9fafb;
+  --capra-surface-hover: #f3f4f6;
+  --capra-surface-active: #e5e7eb;
+
+  /* Borders */
+  --capra-border: #e5e7eb;
+  --capra-border-light: #f3f4f6;
+
+  /* States */
+  --capra-error: #dc2626;
+  --capra-error-light: #fef2f2;
+  --capra-success: #16a34a;
+  --capra-success-light: #f0fdf4;
+  --capra-warning: #d97706;
+  --capra-warning-light: #fffbeb;
+  --capra-info: #3b82f6;
+  --capra-info-light: #eff6ff;
+
+  /* -----------------------------------------
+   * 3. TREND COLORS (Analytics)
+   * ----------------------------------------- */
+  --capra-trend-positive: #059669;
+  --capra-trend-negative: #dc2626;
+  --capra-trend-neutral: #6b7280;
+
+  /* -----------------------------------------
+   * 4. COMPONENT TOKENS
+   * ----------------------------------------- */
+
+  /* Detail Modal */
+  --capra-detail-header-bg: var(--capra-brand-highlight-light);
+  --capra-detail-header-color: var(--capra-brand-tertiary);
+
+  /* Metric Item */
+  --capra-metric-bg: var(--capra-surface-alt);
+  --capra-metric-highlight-border: var(--capra-brand-tertiary);
+  --capra-metric-highlight-bg: var(--capra-brand-highlight-light);
+
+  /* Search Input */
+  --capra-search-focus-color: var(--capra-brand-highlight);
+  --capra-search-focus-ring: rgba(229, 162, 47, 0.2);
+
+  /* Loading Spinner */
+  --capra-spinner-color: var(--capra-brand-tertiary);
+  --capra-spinner-track: var(--capra-border);
+
+  /* -----------------------------------------
+   * 5. LAYOUT TOKENS
+   * ----------------------------------------- */
+  --capra-page-max-width: 1800px;
+  --capra-page-gap: 1rem;
+  --capra-section-gap: 1.5rem;
+
+  /* KPI Grid */
+  --capra-kpi-grid-gap: 0.75rem;
+  --capra-kpi-grid-gap-mobile: 0.5rem;
+
+  /* Metrics Grid */
+  --capra-metrics-gap: 1rem;
+}
