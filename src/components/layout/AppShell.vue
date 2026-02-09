@@ -751,6 +751,7 @@ function closeMobileMenu() {
   max-width: 1920px;
   margin: 0 auto;
   padding: var(--spacing-md) var(--spacing-md);
+  overflow-x: hidden;
 }
 
 @media (min-width: 640px) {
