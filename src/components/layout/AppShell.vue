@@ -479,7 +479,7 @@ function closeMobileMenu() {
   padding: var(--spacing-md) var(--spacing-lg);
   background: none;
   border: none;
-  color: var(--color-text-placeholder);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-base);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -527,7 +527,7 @@ function closeMobileMenu() {
 }
 
 .top-nav__separator {
-  color: var(--color-text-placeholder);
+  color: var(--color-text-tertiary);
   font-weight: 300;
 }
 
@@ -592,7 +592,7 @@ function closeMobileMenu() {
   padding: var(--spacing-sm) var(--spacing-md);
   background: none;
   border: none;
-  color: var(--color-text-placeholder);
+  color: var(--color-text-tertiary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -633,7 +633,7 @@ function closeMobileMenu() {
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
-  color: var(--color-text-placeholder);
+  color: var(--color-text-tertiary);
   background-color: var(--color-brand-secondary);
 }
 
@@ -684,7 +684,7 @@ function closeMobileMenu() {
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
-  color: var(--color-text-placeholder);
+  color: var(--color-text-tertiary);
   background-color: var(--color-brand-secondary);
 }
 
