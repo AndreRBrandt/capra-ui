@@ -80,6 +80,28 @@ export interface UseExportConfig<T = unknown> {
 
 export type ExportFormat = "csv" | "excel" | "pdf";
 
+export interface ExportFromTableColumn {
+  /** Column key in the data object */
+  key: string;
+  /** Header label */
+  label: string;
+  /** Format function for export */
+  format?: (value: unknown, row: unknown) => string | number;
+}
+
+export interface ExportFromTableOptions {
+  /** Filename without extension (default: "export") */
+  filename?: string;
+  /** Export format (default: "csv") */
+  format?: ExportFormat;
+  /** CSV separator (default: ";") */
+  csvSeparator?: string;
+  /** Include timestamp in filename (default: true) */
+  includeTimestamp?: boolean;
+  /** Report title for Excel (optional) */
+  title?: string;
+}
+
 export interface UseExportReturn {
   /** Se está exportando */
   isExporting: Ref<boolean>;
@@ -399,4 +421,68 @@ export function useExport<T = unknown>(
     exportAs,
     cancel,
   };
+}
+
+// =============================================================================
+// Standalone export helper
+// =============================================================================
+
+/**
+ * Export table data directly without creating a composable instance.
+ * Useful for one-off exports from table data.
+ *
+ * @example
+ * ```typescript
+ * await exportFromTable(
+ *   tableData,
+ *   [
+ *     { key: 'loja', label: 'Loja' },
+ *     { key: 'valor', label: 'Faturamento', format: (v) => formatCurrency(v as number) },
+ *   ],
+ *   { filename: 'relatorio-vendas', format: 'csv' }
+ * );
+ * ```
+ */
+export async function exportFromTable(
+  data: unknown[],
+  columns: ExportFromTableColumn[],
+  options?: ExportFromTableOptions
+): Promise<void> {
+  const {
+    filename = "export",
+    format = "csv",
+    csvSeparator = ";",
+    includeTimestamp = true,
+    title,
+  } = options || {};
+
+  const exportColumns: ExportColumn<unknown>[] = columns.map((col) => ({
+    key: col.key,
+    label: col.label,
+    format: col.format,
+  }));
+
+  const outputFilename = getFilename(filename, format, includeTimestamp);
+
+  switch (format) {
+    case "csv": {
+      const csv = generateCSV(data, exportColumns, csvSeparator);
+      const bom = "\uFEFF";
+      const blob = new Blob([bom + csv], {
+        type: "text/csv;charset=utf-8",
+      });
+      downloadBlob(blob, outputFilename);
+      break;
+    }
+    case "excel": {
+      const xml = generateExcelXML(data, exportColumns, title);
+      const blob = new Blob([xml], {
+        type: "application/vnd.ms-excel",
+      });
+      downloadBlob(blob, outputFilename);
+      break;
+    }
+    default:
+      throw new Error(`Unsupported export format: ${format}`);
+  }
 }

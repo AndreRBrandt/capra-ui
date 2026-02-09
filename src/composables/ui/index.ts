@@ -29,6 +29,7 @@ export type {
   UseModalDrillDownConfig,
   UseModalDrillDownReturn,
   ColumnDefinition,
+  NavigationStackEntry,
 } from "./useModalDrillDown";
 
 export { useDrillStack } from "./useDrillStack";
@@ -40,3 +41,9 @@ export type {
   StackEntry,
   BreadcrumbItem,
 } from "./useDrillStack";
+
+export { useNavigationStack } from "./useNavigationStack";
+export type {
+  UseNavigationStackReturn,
+  NavigationBreadcrumb,
+} from "./useNavigationStack";

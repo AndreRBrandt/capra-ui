@@ -69,6 +69,9 @@ export {
   useAnalyticData,
   useKpiData,
   useTableState,
+  useDataLoader,
+  usePeriodComparison,
+  useChartDrill,
   type UseAnalyticDataConfig,
   type UseAnalyticDataReturn,
   type AnalyticDataRow,
@@ -78,12 +81,26 @@ export {
   type UseTableStateReturn,
   type SortState,
   type PaginationState,
+  type UseDataLoaderOptions,
+  type UseDataLoaderReturn,
+  type PeriodLevel,
+  type PeriodLevelConfig,
+  type DateFilterInfo,
+  type ValueWithPeriod,
+  type UsePeriodComparisonConfig,
+  type UsePeriodComparisonReturn,
+  type ChartDrillLevel,
+  type ChartDrillContext,
+  type ChartDrillBreadcrumb,
+  type UseChartDrillConfig,
+  type UseChartDrillReturn,
 } from "./data";
 
 // UI Composables
 export {
   useModalDrillDown,
   useDrillStack,
+  useNavigationStack,
   type UseModalDrillDownConfig,
   type UseModalDrillDownReturn,
   type ColumnDefinition,
@@ -93,15 +110,20 @@ export {
   type DrillFilter,
   type StackEntry,
   type BreadcrumbItem,
+  type UseNavigationStackReturn,
+  type NavigationBreadcrumb,
 } from "./ui";
 
 // Export Composables
 export {
   useExport,
+  exportFromTable,
   type UseExportConfig,
   type UseExportReturn,
   type ExportColumn,
   type ExportFormat,
+  type ExportFromTableColumn,
+  type ExportFromTableOptions,
 } from "./export";
 
 // FilterBar Composable

@@ -30,6 +30,7 @@
  */
 
 import { ref, computed, type Ref, type ComputedRef } from "vue";
+import { useNavigationStack, type NavigationBreadcrumb } from "./useNavigationStack";
 
 // =============================================================================
 // Types
@@ -50,6 +51,13 @@ export interface ColumnDefinition<T = unknown> {
   sortable?: boolean;
 }
 
+export interface NavigationStackEntry<TItem> {
+  /** The item for this navigation level */
+  item: TItem;
+  /** Display label for breadcrumbs */
+  label: string;
+}
+
 export interface UseModalDrillDownConfig<TItem, TData = unknown> {
   /** Função que carrega os dados quando o modal abre */
   loadData: (item: TItem) => Promise<TData[]>;
@@ -59,6 +67,12 @@ export interface UseModalDrillDownConfig<TItem, TData = unknown> {
 
   /** Função para gerar o título do modal */
   title?: string | ((item: TItem) => string);
+
+  /** Enable navigation stack for multi-level drill-down within the modal */
+  enableNavigation?: boolean;
+
+  /** Function to extract label for navigation breadcrumbs */
+  getNavigationLabel?: (item: TItem) => string;
 
   /** Callback quando o modal abre */
   onOpen?: (item: TItem) => void;
@@ -98,8 +112,26 @@ export interface UseModalDrillDownReturn<TItem, TData = unknown> {
   /** Se já carregou os dados pelo menos uma vez */
   hasLoaded: Ref<boolean>;
 
+  /** Whether can go back in navigation (only with enableNavigation) */
+  canGoBack: ComputedRef<boolean>;
+
+  /** Navigation breadcrumbs (only with enableNavigation) */
+  navigationBreadcrumbs: ComputedRef<NavigationBreadcrumb[]>;
+
+  /** Navigation depth (only with enableNavigation) */
+  navigationDepth: ComputedRef<number>;
+
   /** Abre o modal e carrega dados */
   open: (item: TItem) => Promise<void>;
+
+  /** Navigate deeper within the modal (pushes to navigation stack) */
+  navigateTo: (item: TItem) => Promise<void>;
+
+  /** Go back one level in navigation */
+  goBack: () => Promise<void>;
+
+  /** Go to a specific navigation breadcrumb index */
+  goToNavIndex: (index: number) => Promise<void>;
 
   /** Fecha o modal */
   close: () => void;
@@ -119,6 +151,8 @@ export function useModalDrillDown<TItem, TData = unknown>(
     loadData,
     columns = [],
     title: titleConfig = "",
+    enableNavigation = false,
+    getNavigationLabel,
     onOpen,
     onClose,
     onError,
@@ -136,6 +170,11 @@ export function useModalDrillDown<TItem, TData = unknown>(
   const error = ref<Error | null>(null);
   const hasLoaded = ref(false);
 
+  // Navigation stack (for multi-level drill within modal)
+  const navStack = useNavigationStack<NavigationStackEntry<TItem>>({
+    getLabel: (entry) => entry.label,
+  });
+
   // ===========================================================================
   // Computed
   // ===========================================================================
@@ -147,18 +186,30 @@ export function useModalDrillDown<TItem, TData = unknown>(
     return titleConfig;
   });
 
+  const canGoBack = computed(() => enableNavigation && navStack.hasPrevious.value);
+
+  const navigationBreadcrumbs = computed(() =>
+    enableNavigation ? navStack.breadcrumbs.value : []
+  );
+
+  const navigationDepth = computed(() =>
+    enableNavigation ? navStack.depth.value : 0
+  );
+
   // ===========================================================================
-  // Methods
+  // Internal helpers
   // ===========================================================================
 
-  async function open(item: TItem): Promise<void> {
+  function getLabel(item: TItem): string {
+    if (getNavigationLabel) return getNavigationLabel(item);
+    if (typeof titleConfig === "function") return titleConfig(item);
+    return String(titleConfig || "");
+  }
+
+  async function loadItem(item: TItem): Promise<void> {
     selected.value = item;
-    show.value = true;
     isLoading.value = true;
     error.value = null;
-
-    // Callback
-    onOpen?.(item);
 
     try {
       const result = await loadData(item);
@@ -171,6 +222,49 @@ export function useModalDrillDown<TItem, TData = unknown>(
       onError?.(err, item);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // ===========================================================================
+  // Methods
+  // ===========================================================================
+
+  async function open(item: TItem): Promise<void> {
+    show.value = true;
+
+    if (enableNavigation) {
+      navStack.clear();
+      navStack.push({ item, label: getLabel(item) });
+    }
+
+    onOpen?.(item);
+    await loadItem(item);
+  }
+
+  async function navigateTo(item: TItem): Promise<void> {
+    if (enableNavigation) {
+      navStack.push({ item, label: getLabel(item) });
+    }
+    await loadItem(item);
+  }
+
+  async function goBack(): Promise<void> {
+    if (!enableNavigation || !navStack.hasPrevious.value) return;
+
+    navStack.pop();
+    const current = navStack.current.value;
+    if (current) {
+      await loadItem(current.item);
+    }
+  }
+
+  async function goToNavIndex(index: number): Promise<void> {
+    if (!enableNavigation) return;
+
+    navStack.goTo(index);
+    const current = navStack.current.value;
+    if (current) {
+      await loadItem(current.item);
     }
   }
 
@@ -189,6 +283,7 @@ export function useModalDrillDown<TItem, TData = unknown>(
           data.value = [];
           error.value = null;
           hasLoaded.value = false;
+          if (enableNavigation) navStack.clear();
         }
       }, 300);
     }
@@ -226,7 +321,13 @@ export function useModalDrillDown<TItem, TData = unknown>(
     title,
     columns,
     hasLoaded,
+    canGoBack,
+    navigationBreadcrumbs,
+    navigationDepth,
     open,
+    navigateTo,
+    goBack,
+    goToNavIndex,
     close,
     reload,
   };
