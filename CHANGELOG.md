@@ -19,7 +19,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 #### Session 53: Popover + KpiGrid responsive
 - **AnalyticContainer**: config Popover movido para inline no header (botão config É o trigger do Popover). Antes o Popover era renderizado fora do header com `<span />` trigger — click-outside fechava imediatamente
 - **KpiGrid**: breakpoints fixos (2 cols / 3 cols) substituídos por `auto-fill + minmax(var(--kpi-min-width, 140px), 1fr)` — cards agora fazem wrap natural em qualquer tamanho de tela. Colunas fixas apenas em desktop (≥ 900px)
-- **KpiCard**: adicionado `min-width: 120px` e `max-width: 360px` — previne cards muito estreitos ou largos
+- **KpiCard**: removido `max-width: 360px` que fazia botões info/detail do KpiCardWrapper ficarem fora da área visível do card. Grid auto-fill já controla sizing. `min-width: 0` para flexibilidade total do grid
+- **AnalyticContainer**: removido `overflow: hidden` que recortava o Popover de config inline. Adicionada CSS variable `--analytic-container-bg` para customização do fundo na variante `default`
 
 #### Session 52: KPI System Foundation
 - **useDragReorder** composable — HTML5 Drag & Drop reutilizável para listas/grids: `draggedIndex`, `dragOverIndex`, `isDragging`, handlers (start/over/leave/drop/end), `getItemClass` para classes CSS
