@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type Component } from "vue";
+import { computed, ref, watch, type Component } from "vue";
 import {
   Inbox,
   AlertCircle,
@@ -87,10 +87,10 @@ function handleHelpClick() {
   emit("help");
 }
 
-function handleConfigToggle() {
-  isConfigOpen.value = !isConfigOpen.value;
-  emit("config", isConfigOpen.value);
-}
+// Emit config state changes (Popover handles toggle via v-model)
+watch(isConfigOpen, (val) => {
+  emit("config", val);
+});
 
 function handleFullscreenClick() {
   isFullscreenOpen.value = true;
@@ -220,18 +220,27 @@ function handleRetry() {
               <HelpCircle :size="18" />
             </button>
 
-            <button
+            <Popover
               v-if="showConfig"
-              ref="configTriggerRef"
-              type="button"
-              data-testid="action-config"
-              class="analytic-container__action-btn"
-              :class="{ 'analytic-container__action-btn--active': isConfigOpen }"
-              title="Configurar"
-              @click="handleConfigToggle"
+              v-model:open="isConfigOpen"
+              :title="configTitle"
+              placement="bottom-end"
+              :offset="8"
+              data-testid="config-popover"
             >
-              <SlidersHorizontal :size="18" />
-            </button>
+              <template #trigger>
+                <button
+                  type="button"
+                  data-testid="action-config"
+                  class="analytic-container__action-btn"
+                  :class="{ 'analytic-container__action-btn--active': isConfigOpen }"
+                  title="Configurar"
+                >
+                  <SlidersHorizontal :size="18" />
+                </button>
+              </template>
+              <slot name="config" />
+            </Popover>
 
             <button
               v-if="showFullscreen"
@@ -261,21 +270,6 @@ function handleRetry() {
       :tips="helpTips"
       data-testid="help-modal"
     />
-
-    <!-- Config Popover -->
-    <Popover
-      v-if="showConfig"
-      v-model:open="isConfigOpen"
-      :title="configTitle"
-      placement="bottom-end"
-      :offset="8"
-      data-testid="config-popover"
-    >
-      <template #trigger>
-        <span />
-      </template>
-      <slot name="config" />
-    </Popover>
 
     <!-- Fullscreen Modal -->
     <Modal

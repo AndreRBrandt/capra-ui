@@ -10,11 +10,23 @@ const MockIcon = defineComponent({
 });
 
 // Stubs para ícones lucide
-const lucideStubs = {
+const lucideStubs: Record<string, unknown> = {
   Inbox: { template: '<svg class="icon-inbox"></svg>' },
   AlertCircle: { template: '<svg class="icon-alert"></svg>' },
   Loader2: { template: '<svg class="icon-loader"></svg>' },
   MockIcon: MockIcon,
+  // Popover stub that renders trigger + content slots (needed because Popover is now inline in header)
+  Popover: defineComponent({
+    name: "Popover",
+    props: { open: Boolean, title: String, placement: String, offset: Number },
+    emits: ["update:open"],
+    methods: {
+      handleTriggerClick() {
+        this.$emit("update:open", !this.open);
+      },
+    },
+    template: '<div data-testid="config-popover" class="popover-stub"><div class="popover-stub__trigger" @click="handleTriggerClick"><slot name="trigger" /></div><div v-if="open" class="popover-stub__content"><slot /></div></div>',
+  }),
 };
 
 // Helper para montar com stubs
@@ -577,11 +589,10 @@ describe("AnalyticContainer", () => {
         },
       });
 
-      const buttons = wrapper.findAll(".analytic-container__integrated-actions button");
-      expect(buttons.length).toBe(3);
-      expect(buttons[0].attributes("data-testid")).toBe("action-help");
-      expect(buttons[1].attributes("data-testid")).toBe("action-config");
-      expect(buttons[2].attributes("data-testid")).toBe("action-fullscreen");
+      // Config button is now inside Popover trigger, but still rendered in order
+      const buttons = wrapper.findAll(".analytic-container__integrated-actions [data-testid]");
+      const testIds = buttons.map((b) => b.attributes("data-testid")).filter((id) => id?.startsWith("action-"));
+      expect(testIds).toEqual(["action-help", "action-config", "action-fullscreen"]);
     });
 
     it("RF17: slot #actions deve funcionar junto com botoes integrados", () => {
