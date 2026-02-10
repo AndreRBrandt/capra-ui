@@ -9,7 +9,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Adicionado
+- **useColorGroups**: 5 cores padrão pré-carregadas (Verde Floresta, Azul Corporativo, Vermelho Alerta, Dourado Destaque, Roxo Profundo) — `reset()` restaura defaults ao invés de lista vazia
+- **useColorGroups**: `DEFAULT_COLORS` exportado para uso externo
+
 ### Corrigido
+- **AppShell**: `overflow-x: hidden` → `overflow-x: clip` no `.app-shell__content` — `hidden` criava scroll container implícito que quebrava `position: sticky` nos filhos
+- **SettingsLayout**: removido `position: sticky` da sidebar (desktop) e `position: fixed` do drawer mobile — sidebar agora inline, scroll com conteúdo. Corrige breakout em iframes (BIMachine)
+- **SettingsLayout**: mobile drawer substituído por show/hide inline (`display: none/block`) — sem overlay, sem posicionamento absoluto/fixo
+- **SettingsLayout**: removido `scrollIntoView` do `navigateTo()` — causava layout shift (margin-top negativo) dentro de iframes. Navegação delegada ao parent via emit.
+- **AppShell**: cores hardcoded do nav substituídas por CSS variables com fallback (`--capra-nav-bg`, `--capra-nav-bg-active`, `--capra-nav-text`, `--capra-nav-text-active`, `--capra-shell-bg`) — permite dark mode na navegação
+- **dark.css**: adicionados overrides de navegação — nav background gray-800, texto gray-400/gray-50 em dark mode
+- **dark.css**: paleta completa de brand colors em dark mode — primary (#1c1210), secondary (#e8dddb invertido), tertiary (#d97706 amber-600), highlight (#fbbf24 amber-400). Marrom substituído por gold para melhor contraste.
+- **dark.css**: nav bar corrigida — `--capra-nav-bg` mudado de gray-800 (#1f2937) para gray-900 (#111827), criando contraste com o fundo surface-alt
+- **SettingsLayout**: sidebar com `position: sticky; top: 1rem` — acompanha scroll do conteúdo (sticky é relativo ao scroll container, seguro em iframes)
+- **SettingsLayout**: scroll suave ao clicar sidebar — `scrollIntoView({ block: "nearest" })` com nextTick evita jump do iframe
 - **AppShell**: layout agora usa CSS scoped ao invés de Tailwind utility classes (`min-h-screen`, `flex`, `flex-col`, `flex-1`, `sm:pt-16`, `pb-20`, etc.) — corrige renderização quando Tailwind v4 não scaneia arquivos de workspace packages vinculados
 - **AppShell**: breakpoints responsivos revisados — mobile/desktop agora em 768px (era 640px), modo compacto (768-1023px) com ícones-only nos nav items, labels a partir de 1024px. Grid do top-nav mais flexível (`auto 1fr auto`)
 - **tokens.css**: design tokens movidos de `@theme` para `:root` — Tailwind v4 fazia tree-shake de variáveis CSS não usadas em utility classes, removendo `--color-brand-*`, `--color-trend-*`, `--color-error`, etc. do output final
