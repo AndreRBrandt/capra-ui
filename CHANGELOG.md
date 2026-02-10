@@ -15,6 +15,8 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Corrigido
 - **AppShell**: `overflow-x: hidden` → `overflow-x: clip` no `.app-shell__content` — `hidden` criava scroll container implícito que quebrava `position: sticky` nos filhos
+- **AppShell**: nova CSS variable `--app-shell-nav-height` (0px mobile, 4rem desktop) — expõe altura do navbar fixo para sticky offset dos filhos
+- **SettingsLayout**: sidebar sticky agora usa `top: calc(var(--app-shell-nav-height) + 1rem)` — não desliza atrás do navbar ao scrollar
 - **SettingsLayout**: removido `position: sticky` da sidebar (desktop) e `position: fixed` do drawer mobile — sidebar agora inline, scroll com conteúdo. Corrige breakout em iframes (BIMachine)
 - **SettingsLayout**: mobile drawer substituído por show/hide inline (`display: none/block`) — sem overlay, sem posicionamento absoluto/fixo
 - **SettingsLayout**: removido `scrollIntoView` do `navigateTo()` — causava layout shift (margin-top negativo) dentro de iframes. Navegação delegada ao parent via emit.
