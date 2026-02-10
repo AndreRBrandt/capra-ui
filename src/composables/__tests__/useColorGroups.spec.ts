@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { effectScope, nextTick } from "vue";
-import { useColorGroups, COLOR_GROUPS_KEY, type NamedColor } from "../useColorGroups";
+import { useColorGroups, COLOR_GROUPS_KEY, DEFAULT_COLORS, type NamedColor } from "../useColorGroups";
 
 // =============================================================================
 // Mock Storage
@@ -63,9 +63,10 @@ describe("useColorGroups", () => {
   // ---------------------------------------------------------------------------
 
   describe("initialization", () => {
-    it("starts with empty colors", () => {
+    it("starts with default colors", () => {
       const { groups, scope } = createGroupsInScope();
-      expect(groups.colors.value).toEqual([]);
+      expect(groups.colors.value).toHaveLength(DEFAULT_COLORS.length);
+      expect(groups.colors.value[0].name).toBe("Verde Floresta");
       expect(groups.isDirty.value).toBe(false);
       scope.stop();
     });
@@ -84,6 +85,37 @@ describe("useColorGroups", () => {
       expect(groups.colors.value[0].name).toBe("Azul");
       scope.stop();
     });
+
+    it("has all 5 default colors with correct data", () => {
+      const { groups, scope } = createGroupsInScope();
+      expect(groups.colors.value).toHaveLength(5);
+      expect(groups.colors.value.map((c) => c.name)).toEqual([
+        "Verde Floresta",
+        "Azul Corporativo",
+        "Vermelho Alerta",
+        "Dourado Destaque",
+        "Roxo Profundo",
+      ]);
+      expect(groups.colors.value.every((c) => c.id.startsWith("default-"))).toBe(true);
+      scope.stop();
+    });
+
+    it("default colors can be edited", () => {
+      const { groups, scope } = createGroupsInScope();
+      groups.updateColor("default-1", { name: "Verde Custom", color: "#00ff00" });
+      expect(groups.colors.value[0].name).toBe("Verde Custom");
+      expect(groups.colors.value[0].color).toBe("#00ff00");
+      expect(groups.isDirty.value).toBe(true);
+      scope.stop();
+    });
+
+    it("default colors can be removed", () => {
+      const { groups, scope } = createGroupsInScope();
+      groups.removeColor("default-1");
+      expect(groups.colors.value).toHaveLength(4);
+      expect(groups.colors.value[0].name).toBe("Azul Corporativo");
+      scope.stop();
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -93,12 +125,13 @@ describe("useColorGroups", () => {
   describe("addColor", () => {
     it("adds a new color", () => {
       const { groups, scope } = createGroupsInScope();
+      const initialCount = groups.colors.value.length;
       const added = groups.addColor("Verde", "#16a34a");
 
       expect(added.name).toBe("Verde");
       expect(added.color).toBe("#16a34a");
       expect(added.id).toBeTruthy();
-      expect(groups.colors.value).toHaveLength(1);
+      expect(groups.colors.value).toHaveLength(initialCount + 1);
       scope.stop();
     });
 
@@ -111,18 +144,18 @@ describe("useColorGroups", () => {
     });
 
     it("throws when max colors reached", () => {
-      const { groups, scope } = createGroupsInScope(3);
+      const { groups, scope } = createGroupsInScope(7);
+      // Starts with 5 defaults, add 2 more to reach limit
       groups.addColor("A", "#111111");
       groups.addColor("B", "#222222");
-      groups.addColor("C", "#333333");
 
-      expect(() => groups.addColor("D", "#444444")).toThrow(
-        "Maximum of 3 colors reached",
+      expect(() => groups.addColor("C", "#333333")).toThrow(
+        "Maximum of 7 colors reached",
       );
       scope.stop();
     });
 
-    it("marks as dirty after adding", () => {
+    it("marks as dirty after adding a new color", () => {
       const { groups, scope } = createGroupsInScope();
       expect(groups.isDirty.value).toBe(false);
       groups.addColor("Test", "#000000");
@@ -141,8 +174,9 @@ describe("useColorGroups", () => {
       const added = groups.addColor("Old", "#111111");
       groups.updateColor(added.id, { name: "New" });
 
-      expect(groups.colors.value[0].name).toBe("New");
-      expect(groups.colors.value[0].color).toBe("#111111");
+      const updated = groups.colors.value.find((c) => c.id === added.id)!;
+      expect(updated.name).toBe("New");
+      expect(updated.color).toBe("#111111");
       scope.stop();
     });
 
@@ -151,17 +185,19 @@ describe("useColorGroups", () => {
       const added = groups.addColor("Test", "#111111");
       groups.updateColor(added.id, { color: "#999999" });
 
-      expect(groups.colors.value[0].color).toBe("#999999");
-      expect(groups.colors.value[0].name).toBe("Test");
+      const updated = groups.colors.value.find((c) => c.id === added.id)!;
+      expect(updated.color).toBe("#999999");
+      expect(updated.name).toBe("Test");
       scope.stop();
     });
 
     it("ignores unknown ID", () => {
       const { groups, scope } = createGroupsInScope();
-      groups.addColor("Test", "#111111");
+      const added = groups.addColor("Test", "#111111");
       groups.updateColor("nonexistent", { name: "Nope" });
 
-      expect(groups.colors.value[0].name).toBe("Test");
+      const unchanged = groups.colors.value.find((c) => c.id === added.id)!;
+      expect(unchanged.name).toBe("Test");
       scope.stop();
     });
   });
@@ -173,22 +209,24 @@ describe("useColorGroups", () => {
   describe("removeColor", () => {
     it("removes a color by id", () => {
       const { groups, scope } = createGroupsInScope();
+      const initialCount = groups.colors.value.length;
       const added = groups.addColor("Test", "#111111");
-      expect(groups.colors.value).toHaveLength(1);
+      expect(groups.colors.value).toHaveLength(initialCount + 1);
 
       groups.removeColor(added.id);
-      expect(groups.colors.value).toHaveLength(0);
+      expect(groups.colors.value).toHaveLength(initialCount);
       scope.stop();
     });
 
     it("only removes the specified color", () => {
       const { groups, scope } = createGroupsInScope();
+      const initialCount = groups.colors.value.length;
       const a = groups.addColor("A", "#111111");
       groups.addColor("B", "#222222");
 
       groups.removeColor(a.id);
-      expect(groups.colors.value).toHaveLength(1);
-      expect(groups.colors.value[0].name).toBe("B");
+      expect(groups.colors.value).toHaveLength(initialCount + 1);
+      expect(groups.colors.value[groups.colors.value.length - 1].name).toBe("B");
       scope.stop();
     });
   });
@@ -198,14 +236,15 @@ describe("useColorGroups", () => {
   // ---------------------------------------------------------------------------
 
   describe("reset", () => {
-    it("resets to empty", () => {
+    it("resets to default colors", () => {
       const { groups, scope } = createGroupsInScope();
       groups.addColor("A", "#111111");
       groups.addColor("B", "#222222");
-      expect(groups.colors.value).toHaveLength(2);
+      expect(groups.colors.value).toHaveLength(DEFAULT_COLORS.length + 2);
 
       groups.reset();
-      expect(groups.colors.value).toHaveLength(0);
+      expect(groups.colors.value).toHaveLength(DEFAULT_COLORS.length);
+      expect(groups.colors.value[0].name).toBe("Verde Floresta");
       expect(groups.isDirty.value).toBe(false);
       scope.stop();
     });

@@ -153,6 +153,7 @@ export {
 export {
   useColorGroups,
   COLOR_GROUPS_KEY,
+  DEFAULT_COLORS,
   type NamedColor,
   type UseColorGroupsReturn,
 } from "./useColorGroups";

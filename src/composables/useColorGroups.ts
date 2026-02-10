@@ -51,7 +51,7 @@ export interface UseColorGroupsReturn {
   updateColor: (id: string, updates: Partial<Pick<NamedColor, "name" | "color">>) => void;
   /** Remove uma cor */
   removeColor: (id: string) => void;
-  /** Reseta para lista vazia */
+  /** Reseta para cores padrão */
   reset: () => void;
   /** Se houve mudança desde o estado inicial */
   isDirty: ComputedRef<boolean>;
@@ -63,6 +63,18 @@ export interface UseColorGroupsReturn {
 
 export const COLOR_GROUPS_KEY: InjectionKey<UseColorGroupsReturn> =
   Symbol("capra:color-groups");
+
+// =============================================================================
+// Default Colors
+// =============================================================================
+
+export const DEFAULT_COLORS: NamedColor[] = [
+  { id: "default-1", name: "Verde Floresta",   color: "#2d6a4f" },
+  { id: "default-2", name: "Azul Corporativo", color: "#2c5282" },
+  { id: "default-3", name: "Vermelho Alerta",  color: "#9b2c2c" },
+  { id: "default-4", name: "Dourado Destaque", color: "#d97706" },
+  { id: "default-5", name: "Roxo Profundo",    color: "#6b21a8" },
+];
 
 // =============================================================================
 // Helpers
@@ -89,7 +101,7 @@ function createColorGroups(maxColors = 20): UseColorGroupsReturn {
     reset: resetConfig,
   } = useConfigState<{ colors: NamedColor[] }>({
     storageKey: "capra:color-groups",
-    defaults: { colors: [] },
+    defaults: { colors: [...DEFAULT_COLORS] },
   });
 
   const colors = computed(() => config.value.colors);
