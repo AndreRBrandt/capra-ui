@@ -268,6 +268,58 @@ describe("ThemeConfigPanel", () => {
   });
 
   // ===========================================================================
+  // Extra Presets
+  // ===========================================================================
+  describe("Extra Presets", () => {
+    it("deve renderizar extra presets quando fornecidos", async () => {
+      const wrapper = createWrapper({
+        extraPresets: [
+          { name: "Azul Corp", color: "#2c5282" },
+          { name: "Verde", color: "#16a34a" },
+        ],
+      });
+
+      await wrapper.find('[data-testid="color-swatch-main"]').trigger("click");
+
+      expect(wrapper.find('[data-testid="extra-presets"]').exists()).toBe(true);
+      expect(wrapper.text()).toContain("Minhas cores");
+    });
+
+    it("nao deve renderizar secao extra quando vazio", async () => {
+      const wrapper = createWrapper({ extraPresets: [] });
+
+      await wrapper.find('[data-testid="color-swatch-main"]').trigger("click");
+
+      expect(wrapper.find('[data-testid="extra-presets"]').exists()).toBe(false);
+    });
+
+    it("nao deve renderizar secao extra quando undefined", async () => {
+      const wrapper = createWrapper();
+
+      await wrapper.find('[data-testid="color-swatch-main"]').trigger("click");
+
+      expect(wrapper.find('[data-testid="extra-presets"]').exists()).toBe(false);
+    });
+
+    it("deve emitir update:category ao clicar em extra preset", async () => {
+      const wrapper = createWrapper({
+        extraPresets: [{ name: "Azul Corp", color: "#2c5282" }],
+      });
+
+      await wrapper.find('[data-testid="color-swatch-main"]').trigger("click");
+
+      const extraSection = wrapper.find('[data-testid="extra-presets"]');
+      const presetBtn = extraSection.find(".theme-config-panel__preset");
+      await presetBtn.trigger("click");
+
+      expect(wrapper.emitted("update:category")).toBeTruthy();
+      const emitted = wrapper.emitted("update:category") as [KpiCategory, string][];
+      expect(emitted[0][0]).toBe("main");
+      expect(emitted[0][1]).toBe("#2c5282");
+    });
+  });
+
+  // ===========================================================================
   // Acessibilidade
   // ===========================================================================
   describe("Acessibilidade", () => {

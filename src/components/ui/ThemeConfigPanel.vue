@@ -26,6 +26,11 @@ import { RotateCcw, Palette, Check } from "lucide-vue-next";
 
 export type KpiCategory = "main" | "discount" | "modalidade" | "turno";
 
+export interface ExtraPreset {
+  name: string;
+  color: string;
+}
+
 export interface ThemeConfigPanelProps {
   /** Cores atuais por categoria */
   categories: Record<KpiCategory, string>;
@@ -37,6 +42,8 @@ export interface ThemeConfigPanelProps {
   title?: string;
   /** Texto do botao reset */
   resetLabel?: string;
+  /** Cores extras do usuário (aparecem após presets built-in) */
+  extraPresets?: ExtraPreset[];
 }
 
 // =============================================================================
@@ -47,6 +54,7 @@ const props = withDefaults(defineProps<ThemeConfigPanelProps>(), {
   isDirty: false,
   title: "Cores dos KPIs",
   resetLabel: "Restaurar padrão",
+  extraPresets: () => [],
 });
 
 const emit = defineEmits<{
@@ -193,6 +201,34 @@ function handleCustomColorInput(category: KpiCategory, event: Event) {
                 class="theme-config-panel__preset-check"
               />
             </button>
+          </div>
+
+          <!-- Extra Presets (user colors) -->
+          <div
+            v-if="extraPresets && extraPresets.length > 0"
+            class="theme-config-panel__extra-presets"
+            data-testid="extra-presets"
+          >
+            <div class="theme-config-panel__extra-divider"></div>
+            <span class="theme-config-panel__extra-label">Minhas cores</span>
+            <div class="theme-config-panel__presets">
+              <button
+                v-for="preset in extraPresets"
+                :key="preset.color"
+                type="button"
+                class="theme-config-panel__preset"
+                :class="{ 'theme-config-panel__preset--active': cat.color === preset.color }"
+                :style="{ backgroundColor: preset.color }"
+                :title="preset.name"
+                @click="handlePresetClick(cat.key, preset.color)"
+              >
+                <Check
+                  v-if="cat.color === preset.color"
+                  :size="10"
+                  class="theme-config-panel__preset-check"
+                />
+              </button>
+            </div>
           </div>
 
           <!-- Custom Color Input -->
@@ -353,6 +389,24 @@ function handleCustomColorInput(category: KpiCategory, event: Event) {
 .theme-config-panel__preset-check {
   color: white;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+/* Extra Presets */
+.theme-config-panel__extra-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-config-panel__extra-divider {
+  border-top: 1px dashed var(--color-border, #e5e7eb);
+  margin: var(--spacing-xs, 0.25rem) 0;
+}
+
+.theme-config-panel__extra-label {
+  font-size: var(--font-size-caption, 0.75rem);
+  color: var(--color-text-muted, #6b7280);
+  font-weight: 500;
 }
 
 /* Custom Color */
