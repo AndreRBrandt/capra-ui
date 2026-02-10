@@ -14,6 +14,13 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 #### Session 53: Collapsible AnalyticContainer
 - **AnalyticContainer**: novas props `collapsible` (boolean) e `collapsed` (v-model) — botão toggle ChevronDown/ChevronUp no header, content/legend/footer ocultados quando colapsado. Segue mesmo padrão do FilterContainer. CSS: `.analytic-container__toggle` (28x28px, border, rounded), `.analytic-container--collapsed` remove border-bottom do header
 
+### Corrigido
+
+#### Session 53: Popover + KpiGrid responsive
+- **AnalyticContainer**: config Popover movido para inline no header (botão config É o trigger do Popover). Antes o Popover era renderizado fora do header com `<span />` trigger — click-outside fechava imediatamente
+- **KpiGrid**: breakpoints fixos (2 cols / 3 cols) substituídos por `auto-fill + minmax(var(--kpi-min-width, 140px), 1fr)` — cards agora fazem wrap natural em qualquer tamanho de tela. Colunas fixas apenas em desktop (≥ 900px)
+- **KpiCard**: adicionado `min-width: 120px` e `max-width: 360px` — previne cards muito estreitos ou largos
+
 #### Session 52: KPI System Foundation
 - **useDragReorder** composable — HTML5 Drag & Drop reutilizável para listas/grids: `draggedIndex`, `dragOverIndex`, `isDragging`, handlers (start/over/leave/drop/end), `getItemClass` para classes CSS
 - **useKpiLayout** composable — gerenciamento de visibilidade, ordem e cores de KPIs com persistência via useConfigState: `visibleKeys`, `allItems`, `toggleVisibility`, `reorder`, `setColor/getColor/removeColor`, `reset`, `isDirty`
