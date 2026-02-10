@@ -82,6 +82,7 @@ export {
   AnalyticsPage,
   KpiGrid,
   SectionHeader,
+  SettingsLayout,
   // UI
   BaseButton,
   Modal,
