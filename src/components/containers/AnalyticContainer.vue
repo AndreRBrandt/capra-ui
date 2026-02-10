@@ -365,12 +365,11 @@ function handleRetry() {
   flex-direction: column;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
 }
 
 /* Variantes */
 .analytic-container--default {
-  background-color: var(--color-surface);
+  background-color: var(--analytic-container-bg, var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);

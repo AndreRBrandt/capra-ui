@@ -295,8 +295,7 @@ const handleClick = () => {
   position: relative;
   display: flex;
   min-height: 100px; /* Altura mínima para padronizar */
-  min-width: 120px;
-  max-width: 360px;
+  min-width: 0; /* Allow grid to control sizing */
   padding: var(--spacing-sm, 0.75rem);
   background-color: var(--color-surface, #fff);
   border-radius: var(--radius-md, 0.5rem);
