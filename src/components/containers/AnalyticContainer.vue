@@ -7,6 +7,8 @@ import {
   HelpCircle,
   SlidersHorizontal,
   Maximize2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-vue-next";
 import HelpModal from "../ui/HelpModal.vue";
 import Popover from "../ui/Popover.vue";
@@ -37,6 +39,9 @@ export interface AnalyticContainerProps {
   configTitle?: string;
   showFullscreen?: boolean;
   fullscreenTitle?: string;
+  // Collapsible
+  collapsible?: boolean;
+  collapsed?: boolean;
 }
 
 const props = withDefaults(defineProps<AnalyticContainerProps>(), {
@@ -58,6 +63,9 @@ const props = withDefaults(defineProps<AnalyticContainerProps>(), {
   configTitle: "Configurar",
   showFullscreen: false,
   fullscreenTitle: undefined,
+  // Collapsible
+  collapsible: false,
+  collapsed: false,
 });
 
 const emit = defineEmits<{
@@ -65,6 +73,7 @@ const emit = defineEmits<{
   help: [];
   config: [open: boolean];
   fullscreen: [open: boolean];
+  "update:collapsed": [value: boolean];
 }>();
 
 // Estados internos para modais/popovers
@@ -129,6 +138,13 @@ const formattedDate = computed(() => {
   });
 });
 
+// Collapse
+const isExpanded = computed(() => !props.collapsed);
+
+function toggleCollapse() {
+  emit("update:collapsed", !props.collapsed);
+}
+
 // Classes do container
 const containerClasses = computed(() => [
   "analytic-container",
@@ -137,6 +153,7 @@ const containerClasses = computed(() => [
     "analytic-container--loading": props.loading,
     "analytic-container--error": !!props.error,
     "analytic-container--empty": props.empty,
+    "analytic-container--collapsed": props.collapsed,
   },
 ]);
 
@@ -171,6 +188,22 @@ function handleRetry() {
           </div>
         </div>
         <div class="analytic-container__actions">
+          <!-- Toggle Collapse -->
+          <button
+            v-if="collapsible"
+            type="button"
+            class="analytic-container__toggle"
+            :aria-expanded="isExpanded ? 'true' : 'false'"
+            aria-label="Expandir/colapsar"
+            @click="toggleCollapse"
+          >
+            <component
+              :is="collapsed ? ChevronDown : ChevronUp"
+              class="analytic-container__toggle-icon"
+              :size="20"
+            />
+          </button>
+
           <!-- Actions Integradas -->
           <div
             v-if="showHelp || showConfig || showFullscreen"
@@ -259,7 +292,7 @@ function handleRetry() {
     </Modal>
 
     <!-- Content Area -->
-    <div :class="contentClasses">
+    <div v-if="!collapsed" :class="contentClasses">
       <!-- Loading State -->
       <div
         v-if="currentState === 'loading'"
@@ -311,12 +344,12 @@ function handleRetry() {
     </div>
 
     <!-- Legend -->
-    <div v-if="$slots.legend" class="analytic-container__legend">
+    <div v-if="$slots.legend && !collapsed" class="analytic-container__legend">
       <slot name="legend" />
     </div>
 
     <!-- Footer -->
-    <div v-if="showFooter" class="analytic-container__footer">
+    <div v-if="showFooter && !collapsed" class="analytic-container__footer">
       <slot name="footer" :source="source" :lastUpdated="lastUpdated">
         <span v-if="source" class="analytic-container__source">
           Fonte: {{ source }}
@@ -588,5 +621,35 @@ function handleRetry() {
 .analytic-container__action-btn--active {
   color: var(--color-brand-tertiary, #8f3f00);
   background-color: var(--color-hover, #fef3e2);
+}
+
+/* Toggle Collapse */
+.analytic-container__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 0.25rem);
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  transition: var(--transition-fast, all 0.15s ease);
+}
+
+.analytic-container__toggle:hover {
+  background-color: var(--color-hover, #f3f4f6);
+  color: var(--color-text, #374151);
+}
+
+.analytic-container__toggle-icon {
+  flex-shrink: 0;
+}
+
+/* Collapsed State */
+.analytic-container--collapsed .analytic-container__header {
+  border-bottom: none;
 }
 </style>
