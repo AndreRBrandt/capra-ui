@@ -148,3 +148,11 @@ export {
   type ThemeMode,
   type UseThemeReturn,
 } from "./useTheme";
+
+// Color Groups Composable
+export {
+  useColorGroups,
+  COLOR_GROUPS_KEY,
+  type NamedColor,
+  type UseColorGroupsReturn,
+} from "./useColorGroups";
