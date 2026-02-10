@@ -27,6 +27,7 @@ ADRs documentam decisões técnicas importantes de forma estruturada. Cada ADR r
 | [008](./008-filter-registry.md) | Filter Registry Multi-Schema | **Aceito** | 2025-02-05 |
 | [009](./009-phase3-service-integration.md) | Phase 3 - Service Integration | **Aceito** | 2026-02-06 |
 | [010](./010-theme-system.md) | Theme System (Dark Mode) | **Aceito** | 2026-02-10 |
+| [011](./011-domain-containers.md) | Domain Containers (KpiContainer, etc.) | **Aceito** | 2026-02-10 |
 
 ---
 
