@@ -1,0 +1,110 @@
+/* ============================================
+ * CAPRA UI - Dark Mode Tokens
+ * ============================================
+ * Overrides for [data-theme="dark"].
+ * Mirrors tokens from tokens.css and theme.css.
+ *
+ * Brand colors are NOT overridden — they stay
+ * consistent across light and dark themes.
+ *
+ * Import after tokens.css:
+ *   import "@capra-ui/core/styles/dark.css";
+ * ============================================ */
+
+[data-theme="dark"] {
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - TEXTO
+   * ----------------------------------------- */
+  --color-text: #e5e7eb; /* gray-200 */
+  --color-text-strong: #f9fafb; /* gray-50 */
+  --color-text-muted: #9ca3af; /* gray-400 */
+  --color-text-tertiary: #6b7280; /* gray-500 */
+  --color-text-placeholder: #4b5563; /* gray-600 */
+
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - SUPERFÍCIES
+   * ----------------------------------------- */
+  --color-surface: #111827; /* gray-900 */
+  --color-surface-alt: #1f2937; /* gray-800 */
+  --color-hover: #374151; /* gray-700 */
+  --color-active: #4b5563; /* gray-600 */
+  --color-border: #374151; /* gray-700 */
+  --color-border-light: #1f2937; /* gray-800 */
+
+  /* -----------------------------------------
+   * CORES SEMÂNTICAS - ESTADOS
+   * ----------------------------------------- */
+  --color-error: #f87171; /* red-400 */
+  --color-error-light: #450a0a; /* red-950 */
+  --color-success: #4ade80; /* green-400 */
+  --color-success-light: #052e16; /* green-950 */
+  --color-warning: #fbbf24; /* amber-400 */
+  --color-warning-light: #451a03; /* amber-950 */
+
+  /* -----------------------------------------
+   * CAPRA THEME - TEXTO
+   * ----------------------------------------- */
+  --capra-text: #e5e7eb; /* gray-200 */
+  --capra-text-strong: #f9fafb; /* gray-50 */
+  --capra-text-secondary: #d1d5db; /* gray-300 */
+  --capra-text-muted: #9ca3af; /* gray-400 */
+  --capra-text-tertiary: #6b7280; /* gray-500 */
+  --capra-text-placeholder: #4b5563; /* gray-600 */
+
+  /* -----------------------------------------
+   * CAPRA THEME - SUPERFÍCIES
+   * ----------------------------------------- */
+  --capra-surface: #111827; /* gray-900 */
+  --capra-surface-alt: #1f2937; /* gray-800 */
+  --capra-surface-hover: #374151; /* gray-700 */
+  --capra-surface-active: #4b5563; /* gray-600 */
+
+  /* -----------------------------------------
+   * CAPRA THEME - BORDAS
+   * ----------------------------------------- */
+  --capra-border: #374151; /* gray-700 */
+  --capra-border-light: #1f2937; /* gray-800 */
+
+  /* -----------------------------------------
+   * CAPRA THEME - ESTADOS
+   * ----------------------------------------- */
+  --capra-error: #f87171; /* red-400 */
+  --capra-error-light: #450a0a; /* red-950 */
+  --capra-success: #4ade80; /* green-400 */
+  --capra-success-light: #052e16; /* green-950 */
+  --capra-warning: #fbbf24; /* amber-400 */
+  --capra-warning-light: #451a03; /* amber-950 */
+  --capra-info: #60a5fa; /* blue-400 */
+  --capra-info-light: #172554; /* blue-950 */
+
+  /* -----------------------------------------
+   * CAPRA THEME - BRAND HIGHLIGHT (dark)
+   * ----------------------------------------- */
+  --capra-brand-highlight-light: #3b2506; /* dark warm accent bg */
+
+  /* -----------------------------------------
+   * CAPRA THEME - COMPONENT TOKENS
+   * ----------------------------------------- */
+
+  /* Detail Modal */
+  --capra-detail-header-bg: #3b2506;
+  --capra-detail-header-color: #fbbf24;
+
+  /* Metric Item */
+  --capra-metric-bg: var(--capra-surface-alt);
+  --capra-metric-highlight-border: var(--capra-brand-tertiary);
+  --capra-metric-highlight-bg: #3b2506;
+
+  /* Search Input */
+  --capra-search-focus-ring: rgba(229, 162, 47, 0.3);
+
+  /* Loading Spinner */
+  --capra-spinner-track: var(--capra-border);
+}
+
+/* Background for html/body in dark mode */
+[data-theme="dark"],
+[data-theme="dark"] body,
+[data-theme="dark"] #app {
+  background-color: var(--color-surface-alt);
+}
