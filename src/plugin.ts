@@ -28,7 +28,7 @@ import {
   type QueryManagerConfig,
 } from "./services";
 import type { DataAdapter } from "./adapters";
-import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY } from "./composables";
+import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY, THEME_KEY, createThemeInstance } from "./composables";
 import { MEASURE_ENGINE_KEY } from "./composables/useMeasureEngine";
 
 // ===========================================================================
@@ -61,6 +61,10 @@ export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
         currency: options.currency,
       });
       app.provide(MEASURE_ENGINE_KEY, engine);
+
+      // Theme (always created)
+      const theme = createThemeInstance();
+      app.provide(THEME_KEY, theme);
 
       // ActionBus (always created - no adapter needed)
       const bus = createActionBus(options.actionBus);

@@ -139,3 +139,12 @@ export {
   MEASURE_ENGINE_KEY,
   type UseMeasureEngineReturn,
 } from "./useMeasureEngine";
+
+// Theme Composable
+export {
+  useTheme,
+  createThemeInstance,
+  THEME_KEY,
+  type ThemeMode,
+  type UseThemeReturn,
+} from "./useTheme";
