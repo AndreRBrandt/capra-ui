@@ -42,27 +42,18 @@ withDefaults(
 <style scoped>
 .capra-kpi-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(var(--kpi-min-width, 140px), 1fr));
   gap: var(--kpi-gap, var(--capra-kpi-grid-gap-mobile, 0.5rem));
   width: 100%;
 }
 
-/* 2 columns at 400px */
-@media (min-width: 400px) {
-  .capra-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* 3 columns at 640px */
+/* Desktop: use exact column count */
 @media (min-width: 640px) {
   .capra-kpi-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: var(--kpi-gap, var(--capra-kpi-grid-gap, 0.75rem));
   }
 }
 
-/* Full columns at 900px */
 @media (min-width: 900px) {
   .capra-kpi-grid {
     grid-template-columns: repeat(var(--kpi-columns, 6), 1fr);
