@@ -93,6 +93,7 @@ export {
   SearchInput,
   LoadingState,
   EmptyState,
+  ColorGroupManager,
   // Filters (components only, types come from composables)
   FilterTrigger,
   FilterDropdown,

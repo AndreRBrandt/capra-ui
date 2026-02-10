@@ -19,6 +19,7 @@ export { default as ThemeConfigPanel } from "./ThemeConfigPanel.vue";
 export { default as SearchInput } from "./SearchInput.vue";
 export { default as LoadingState } from "./LoadingState.vue";
 export { default as EmptyState } from "./EmptyState.vue";
+export { default as ColorGroupManager } from "./ColorGroupManager.vue";
 
 // Types
 export type { LoadingSize } from "./LoadingState.vue";
