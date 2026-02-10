@@ -350,6 +350,7 @@ function closeMobileMenu() {
    ============================================================================= */
 
 .app-shell {
+  --app-shell-nav-height: 0px;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -363,8 +364,12 @@ function closeMobileMenu() {
 }
 
 @media (min-width: 768px) {
+  .app-shell {
+    --app-shell-nav-height: 4rem;
+  }
+
   .app-shell__main {
-    padding-top: 4rem; /* espaço para top-nav (4rem) */
+    padding-top: var(--app-shell-nav-height); /* espaço para top-nav fixo */
     padding-bottom: 1rem; /* sem bottom-nav */
   }
 }

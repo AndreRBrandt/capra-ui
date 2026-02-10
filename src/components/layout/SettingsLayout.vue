@@ -16,7 +16,7 @@
  * ```
  */
 
-import { ref, computed, onMounted, onBeforeUnmount, watch, type Component } from "vue";
+import { ref, computed, nextTick, onMounted, onBeforeUnmount, watch, type Component } from "vue";
 import { Menu, X } from "lucide-vue-next";
 
 // =============================================================================
@@ -75,13 +75,17 @@ const activeSectionLabel = computed(() => {
 function navigateTo(sectionId: string) {
   activeSection.value = sectionId;
   emit("navigate", sectionId);
-
-  const el = document.getElementById(`settings-${sectionId}`);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   drawerOpen.value = false;
+
+  // Scroll to section after accordion opens (nextTick waits for v-show)
+  nextTick(() => {
+    const el = document.getElementById(`settings-${sectionId}`);
+    if (el) {
+      // Use element.scrollIntoView on the nearest scrollable parent,
+      // NOT the iframe viewport — block: "nearest" avoids iframe jump
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  });
 }
 
 // =============================================================================
@@ -275,15 +279,13 @@ watch(
 .settings-layout__sidebar {
   width: var(--sidebar-width, 240px);
   flex-shrink: 0;
-  position: sticky;
-  top: 1rem;
   align-self: flex-start;
+  position: sticky;
+  top: calc(var(--app-shell-nav-height, 0px) + 1rem);
   background: var(--color-surface, #ffffff);
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 12px;
   padding: 0.75rem;
-  max-height: calc(100vh - 6rem);
-  overflow-y: auto;
 }
 
 .settings-layout__sidebar-header {
@@ -392,27 +394,13 @@ watch(
     display: flex;
   }
 
-  .settings-layout__overlay {
-    display: block;
-  }
-
   .settings-layout__sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 280px;
-    max-height: 100vh;
-    border-radius: 0;
-    border: none;
-    border-right: 1px solid var(--color-border, #e5e7eb);
-    z-index: 50;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
+    display: none;
+    width: 100%;
   }
 
   .settings-layout__sidebar--open {
-    transform: translateX(0);
+    display: block;
   }
 
   .settings-layout__close-btn {
