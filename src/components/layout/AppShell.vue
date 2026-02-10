@@ -354,7 +354,7 @@ function closeMobileMenu() {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-brand-primary);
+  background-color: var(--capra-shell-bg, var(--color-brand-primary));
 }
 
 .app-shell__main {
@@ -395,7 +395,7 @@ function closeMobileMenu() {
 .burger-line {
   width: 100%;
   height: 2px;
-  background-color: var(--color-surface);
+  background-color: var(--capra-nav-text-active, #ffffff);
   border-radius: 1px;
   transition: var(--transition-fast);
 }
@@ -409,7 +409,7 @@ function closeMobileMenu() {
 .mobile-header__title {
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--color-surface);
+  color: var(--capra-nav-text-active, #ffffff);
   margin-left: auto;
 }
 
@@ -430,13 +430,13 @@ function closeMobileMenu() {
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-brand-tertiary);
+  border-bottom: 1px solid var(--capra-nav-bg-active, var(--color-brand-tertiary));
 }
 
 .mobile-menu__label {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--color-surface);
+  color: var(--capra-nav-text-active, #ffffff);
 }
 
 .mobile-menu__close {
@@ -447,7 +447,7 @@ function closeMobileMenu() {
   justify-content: center;
   background: none;
   border: none;
-  color: var(--color-surface);
+  color: var(--capra-nav-text-active, #ffffff);
   font-size: var(--font-size-lg);
   cursor: pointer;
   border-radius: var(--radius-md);
@@ -455,7 +455,7 @@ function closeMobileMenu() {
 }
 
 .mobile-menu__close:hover {
-  background-color: var(--color-brand-tertiary);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
 }
 
 .mobile-menu__item {
@@ -465,7 +465,7 @@ function closeMobileMenu() {
   padding: var(--spacing-md) var(--spacing-lg);
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--capra-nav-text, rgba(255, 255, 255, 0.7));
   font-size: var(--font-size-base);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -473,12 +473,12 @@ function closeMobileMenu() {
 }
 
 .mobile-menu__item:hover {
-  background-color: var(--color-brand-tertiary);
-  color: var(--color-surface);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
+  color: var(--capra-nav-text-active, #ffffff);
 }
 
 .mobile-menu__item--active {
-  background-color: var(--color-brand-tertiary);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
   color: var(--color-brand-highlight);
 }
 
@@ -495,7 +495,7 @@ function closeMobileMenu() {
   z-index: var(--z-sticky);
   height: 4rem;
   padding: 0 var(--spacing-lg);
-  background-color: var(--color-brand-secondary);
+  background-color: var(--capra-nav-bg, var(--color-brand-secondary));
 }
 
 @media (min-width: 768px) {
@@ -526,14 +526,14 @@ function closeMobileMenu() {
 }
 
 .top-nav__separator {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--capra-nav-text, rgba(255, 255, 255, 0.7));
   font-weight: 300;
 }
 
 .top-nav__title {
   font-size: var(--font-size-base);
   font-weight: 600;
-  color: var(--color-surface);
+  color: var(--capra-nav-text-active, #ffffff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -576,8 +576,8 @@ function closeMobileMenu() {
 }
 
 .section-dropdown__trigger:hover {
-  border-color: var(--color-brand-tertiary);
-  background-color: var(--color-brand-tertiary);
+  border-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
 }
 
 .section-dropdown__arrow {
@@ -591,8 +591,8 @@ function closeMobileMenu() {
   left: 0;
   margin-top: var(--spacing-xs);
   min-width: 180px;
-  background-color: var(--color-brand-secondary);
-  border: 1px solid var(--color-brand-tertiary);
+  background-color: var(--capra-nav-bg, var(--color-brand-secondary));
+  border: 1px solid var(--capra-nav-bg-active, var(--color-brand-tertiary));
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
@@ -607,7 +607,7 @@ function closeMobileMenu() {
   padding: var(--spacing-sm) var(--spacing-md);
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--capra-nav-text, rgba(255, 255, 255, 0.7));
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -615,12 +615,12 @@ function closeMobileMenu() {
 }
 
 .section-dropdown__item:hover {
-  background-color: var(--color-brand-tertiary);
-  color: var(--color-surface);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
+  color: var(--capra-nav-text-active, #ffffff);
 }
 
 .section-dropdown__item--active {
-  background-color: var(--color-brand-tertiary);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
   color: var(--color-brand-highlight);
 }
 
@@ -652,8 +652,8 @@ function closeMobileMenu() {
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
-  color: rgba(255, 255, 255, 0.7);
-  background-color: var(--color-brand-secondary);
+  color: var(--capra-nav-text, rgba(255, 255, 255, 0.7));
+  background-color: var(--capra-nav-bg, var(--color-brand-secondary));
 }
 
 /* 768-1023: apenas ícone, sem label */
@@ -674,13 +674,13 @@ function closeMobileMenu() {
 }
 
 .top-nav__item:hover {
-  color: var(--color-surface);
-  background-color: var(--color-brand-tertiary);
+  color: var(--capra-nav-text-active, #ffffff);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
 }
 
 .top-nav__item.active {
-  color: var(--color-surface);
-  background-color: var(--color-brand-tertiary);
+  color: var(--capra-nav-text-active, #ffffff);
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
 }
 
 /* =============================================================================
@@ -695,7 +695,7 @@ function closeMobileMenu() {
   right: 0;
   z-index: var(--z-mobile-nav);
   height: 3.5rem;
-  background-color: var(--color-brand-secondary);
+  background-color: var(--capra-nav-bg, var(--color-brand-secondary));
   justify-content: space-around;
   align-items: center;
   padding-bottom: env(safe-area-inset-bottom, 0);
@@ -720,12 +720,12 @@ function closeMobileMenu() {
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
-  color: rgba(255, 255, 255, 0.7);
-  background-color: var(--color-brand-secondary);
+  color: var(--capra-nav-text, rgba(255, 255, 255, 0.7));
+  background-color: var(--capra-nav-bg, var(--color-brand-secondary));
 }
 
 .bottom-nav__item:hover {
-  color: var(--color-surface);
+  color: var(--capra-nav-text-active, #ffffff);
 }
 
 .bottom-nav__item.active {
@@ -787,7 +787,7 @@ function closeMobileMenu() {
   max-width: 1920px;
   margin: 0 auto;
   padding: var(--spacing-md) var(--spacing-md);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 @media (min-width: 768px) {
