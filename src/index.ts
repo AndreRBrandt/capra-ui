@@ -113,3 +113,5 @@ export type { KpiAction } from "./components/analytics/KpiCardWrapper.vue";
 export type { MetricVariant } from "./components/analytics/MetricItem.vue";
 export type { LoadingSize } from "./components/ui/LoadingState.vue";
 export type { EmptySize } from "./components/ui/EmptyState.vue";
+export type { SettingsSection } from "./components/layout/SettingsLayout.vue";
+export type { ExtraPreset } from "./components/ui/ThemeConfigPanel.vue";
