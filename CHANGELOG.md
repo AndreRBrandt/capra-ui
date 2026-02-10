@@ -20,6 +20,16 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Adicionado
 
+#### Session 48: Theme System + Color Groups + Settings
+- **useTheme** composable — dark/light/system mode com persistência, `data-theme` attribute, matchMedia listener para preferência do OS. Singleton via THEME_KEY injection. (15 tests)
+- **dark.css** — dark mode tokens para `[data-theme="dark"]` — overrides de `--color-*` e `--capra-*` (text, surface, border, states). Brand colors inalterados.
+- **useColorGroups** composable — CRUD de cores nomeadas (NamedColor), limite de 20, persistência em localStorage via useConfigState. (12 tests)
+- **ThemeConfigPanel**: nova prop `extraPresets` — seção "Minhas cores" com divider dashed após presets built-in. (4 tests)
+- **SettingsLayout** component — layout de configurações com sidebar sticky + drawer mobile, IntersectionObserver, smooth scroll. (17 tests)
+- **ColorGroupManager** component — UI para gerenciar cores nomeadas: lista, edição inline, add form, limite, empty state. (17 tests)
+- **Plugin**: THEME_KEY providenciado automaticamente em `createCapraPlugin()`
+- **Types**: `SettingsSection`, `ExtraPreset` exportados do index.ts
+
 #### Fase 1: Componentes de Layout + Theme System
 - **Theme System**: `src/styles/theme.css` com CSS variables (brand, semantic, spacing, typography, shadows)
 - **Layout Components**: AnalyticsPage, KpiGrid, SectionHeader
