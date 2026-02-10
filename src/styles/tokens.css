@@ -2,12 +2,25 @@
 
 @theme {
   /* ============================================
-   * CAPRA UI - Design Tokens Base
+   * CAPRA UI - Tailwind Theme Extensions
    * ============================================
-   * Tokens padrão do framework. Podem ser sobrescritos
-   * pelo theme.css de cada dashboard específico.
+   * Apenas valores que precisam gerar utility classes
+   * do Tailwind (ex: font-sans → classe font-sans).
    * ============================================ */
 
+  --font-sans: "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif";
+}
+
+/* ============================================
+ * CAPRA UI - Design Tokens Base
+ * ============================================
+ * Tokens como CSS custom properties em :root.
+ * Não dependem do tree-shaking do Tailwind v4.
+ * Podem ser sobrescritos pelo theme.css de cada
+ * dashboard específico.
+ * ============================================ */
+
+:root {
   /* -----------------------------------------
    * CORES DA MARCA
    * ----------------------------------------- */
@@ -50,11 +63,6 @@
   --color-success-light: #f0fdf4; /* green-50 */
   --color-warning: #d97706; /* amber-600 */
   --color-warning-light: #fffbeb; /* amber-50 */
-
-  /* -----------------------------------------
-   * FONTES
-   * ----------------------------------------- */
-  --font-sans: "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif";
 }
 
 /* Regras globais */
@@ -64,5 +72,5 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: var(--color-gray-50);
+  background-color: var(--color-surface-alt);
 }
