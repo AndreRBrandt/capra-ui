@@ -4,14 +4,22 @@
  * Overrides for [data-theme="dark"].
  * Mirrors tokens from tokens.css and theme.css.
  *
- * Brand colors are NOT overridden — they stay
- * consistent across light and dark themes.
- *
  * Import after tokens.css:
  *   import "@capra-ui/core/styles/dark.css";
  * ============================================ */
 
 [data-theme="dark"] {
+  /* -----------------------------------------
+   * BRAND COLORS (dark overrides)
+   * Warm tones adapted for dark backgrounds.
+   * Primary/secondary inverted, tertiary/highlight
+   * shifted to gold/amber for readability.
+   * ----------------------------------------- */
+  --color-brand-primary: #1c1210; /* deep warm dark */
+  --color-brand-secondary: #e8dddb; /* cream — inverted from light */
+  --color-brand-tertiary: #d97706; /* amber-600 — readable on dark */
+  --color-brand-highlight: #fbbf24; /* amber-400 — vibrant accent */
+
   /* -----------------------------------------
    * CORES SEMÂNTICAS - TEXTO
    * ----------------------------------------- */
@@ -78,8 +86,10 @@
   --capra-info-light: #172554; /* blue-950 */
 
   /* -----------------------------------------
-   * CAPRA THEME - BRAND HIGHLIGHT (dark)
+   * CAPRA THEME - BRAND (dark)
    * ----------------------------------------- */
+  --capra-brand-tertiary: #d97706; /* amber-600 */
+  --capra-brand-highlight: #fbbf24; /* amber-400 */
   --capra-brand-highlight-light: #3b2506; /* dark warm accent bg */
 
   /* -----------------------------------------
@@ -100,6 +110,17 @@
 
   /* Loading Spinner */
   --capra-spinner-track: var(--capra-border);
+
+  /* -----------------------------------------
+   * APPSHELL / NAVIGATION
+   * Nav must contrast with surface-alt (#1f2937)
+   * so we use surface (#111827) as nav base.
+   * ----------------------------------------- */
+  --capra-shell-bg: var(--color-surface-alt);
+  --capra-nav-bg: #111827; /* gray-900 — darker than surface-alt */
+  --capra-nav-bg-active: #1f2937; /* gray-800 */
+  --capra-nav-text: #9ca3af; /* gray-400 */
+  --capra-nav-text-active: #f9fafb; /* gray-50 */
 }
 
 /* Background for html/body in dark mode */
