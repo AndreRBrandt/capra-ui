@@ -147,10 +147,7 @@ function closeMobileMenu() {
 </script>
 
 <template>
-  <div
-    class="app-shell min-h-screen flex flex-col"
-    style="background-color: var(--color-brand-primary)"
-  >
+  <div class="app-shell">
     <!-- ===================================================================
          MOBILE HEADER (Mobile: < 600px)
          =================================================================== -->
@@ -286,7 +283,7 @@ function closeMobileMenu() {
     <!-- ===================================================================
          MAIN CONTENT
          =================================================================== -->
-    <main :class="['flex-1 sm:pt-16 pb-20 sm:pb-4', sections.length > 0 ? 'pt-14' : 'pt-0']">
+    <main class="app-shell__main">
       <div class="app-shell__content">
         <slot />
       </div>
@@ -341,27 +338,45 @@ function closeMobileMenu() {
 
 <style scoped>
 /* =============================================================================
-   MOBILE HEADER
+   BREAKPOINTS
+   ===========================================================================
+   < 768px  → MOBILE:  mobile-header (topo) + bottom-nav (rodapé)
+   768-1023 → COMPACT: top-nav com ícones (sem labels nos nav items)
+   ≥ 1024   → FULL:    top-nav com ícones + labels
+   ============================================================================= */
+
+/* =============================================================================
+   SHELL LAYOUT
+   ============================================================================= */
+
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-brand-primary);
+}
+
+.app-shell__main {
+  flex: 1;
+  padding-bottom: 5rem; /* espaço para bottom-nav mobile (3.5rem + folga) */
+}
+
+@media (min-width: 768px) {
+  .app-shell__main {
+    padding-top: 4rem; /* espaço para top-nav (4rem) */
+    padding-bottom: 1rem; /* sem bottom-nav */
+  }
+}
+
+/* =============================================================================
+   MOBILE HEADER — escondido por padrão
+   Só aparece em faixa intermediária se necessário no futuro.
+   Em mobile (< 768px) o bottom-nav é suficiente.
    ============================================================================= */
 
 .mobile-header {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-sticky);
-  height: 3rem;
-  padding: 0 var(--spacing-md);
-  background-color: var(--color-brand-secondary);
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-@media (min-width: 640px) {
-  .mobile-header {
-    display: none;
-  }
+  display: none;
 }
 
 .mobile-header__burger {
@@ -399,44 +414,15 @@ function closeMobileMenu() {
 }
 
 /* =============================================================================
-   MOBILE MENU
+   MOBILE MENU — escondido (burger removido junto com mobile-header)
    ============================================================================= */
 
 .mobile-menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-sticky) + 1);
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-@media (min-width: 640px) {
-  .mobile-menu-overlay {
-    display: none;
-  }
+  display: none;
 }
 
 .mobile-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: calc(var(--z-sticky) + 2);
-  width: 280px;
-  background-color: var(--color-brand-secondary);
-  transform: translateX(-100%);
-  transition: transform var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-}
-
-.mobile-menu--open {
-  transform: translateX(0);
-}
-
-@media (min-width: 640px) {
-  .mobile-menu {
-    display: none;
-  }
+  display: none;
 }
 
 .mobile-menu__header {
@@ -497,7 +483,7 @@ function closeMobileMenu() {
 }
 
 /* =============================================================================
-   TOP NAVIGATION
+   TOP NAVIGATION (≥ 768px)
    ============================================================================= */
 
 .top-nav {
@@ -508,22 +494,35 @@ function closeMobileMenu() {
   right: 0;
   z-index: var(--z-sticky);
   height: 4rem;
-  padding: 0 var(--spacing-xl);
+  padding: 0 var(--spacing-lg);
   background-color: var(--color-brand-secondary);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .top-nav {
     display: grid;
-    grid-template-columns: minmax(250px, auto) 1fr minmax(200px, auto);
+    grid-template-columns: auto 1fr auto;
     align-items: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .top-nav {
+    padding: 0 var(--spacing-xl);
   }
 }
 
 .top-nav__left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .top-nav__left {
+    gap: var(--spacing-md);
+  }
 }
 
 .top-nav__separator {
@@ -532,9 +531,18 @@ function closeMobileMenu() {
 }
 
 .top-nav__title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--color-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+  .top-nav__title {
+    font-size: var(--font-size-lg);
+  }
 }
 
 /* =============================================================================
@@ -554,10 +562,17 @@ function closeMobileMenu() {
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   color: var(--color-brand-highlight);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .section-dropdown__trigger {
+    font-size: var(--font-size-base);
+  }
 }
 
 .section-dropdown__trigger:hover {
@@ -609,6 +624,10 @@ function closeMobileMenu() {
   color: var(--color-brand-highlight);
 }
 
+/* =============================================================================
+   TOP NAV MENU ITEMS
+   ============================================================================= */
+
 .top-nav__menu {
   display: flex;
   justify-content: center;
@@ -627,14 +646,31 @@ function closeMobileMenu() {
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--container-padding);
+  gap: 0;
+  padding: var(--spacing-sm);
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: var(--transition-normal);
   color: rgba(255, 255, 255, 0.7);
   background-color: var(--color-brand-secondary);
+}
+
+/* 768-1023: apenas ícone, sem label */
+.top-nav__item span {
+  display: none;
+}
+
+/* ≥ 1024: ícone + label */
+@media (min-width: 1024px) {
+  .top-nav__item {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--container-padding);
+  }
+
+  .top-nav__item span {
+    display: inline;
+  }
 }
 
 .top-nav__item:hover {
@@ -648,7 +684,7 @@ function closeMobileMenu() {
 }
 
 /* =============================================================================
-   BOTTOM NAVIGATION
+   BOTTOM NAVIGATION (< 768px)
    ============================================================================= */
 
 .bottom-nav {
@@ -665,7 +701,7 @@ function closeMobileMenu() {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .bottom-nav {
     display: none;
   }
@@ -754,7 +790,7 @@ function closeMobileMenu() {
   overflow-x: hidden;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .app-shell__content {
     padding: var(--spacing-md) var(--spacing-lg);
   }

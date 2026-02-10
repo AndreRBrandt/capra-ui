@@ -369,12 +369,11 @@ describe("AppShell", () => {
       expect(main.exists()).toBe(true);
     });
 
-    it("conteúdo deve ter padding bottom para Bottom Nav", () => {
+    it("conteúdo deve ter classe de layout principal", () => {
       const wrapper = createWrapper();
 
       const main = wrapper.find("main");
-      // pb-16 (64px) para dar espaço ao bottom nav + safe area
-      expect(main.classes()).toContain("pb-20");
+      expect(main.classes()).toContain("app-shell__main");
     });
   });
 });
