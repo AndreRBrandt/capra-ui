@@ -10,6 +10,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 ## [Unreleased]
 
 ### Adicionado
+
+#### Session 53: Collapsible AnalyticContainer
+- **AnalyticContainer**: novas props `collapsible` (boolean) e `collapsed` (v-model) — botão toggle ChevronDown/ChevronUp no header, content/legend/footer ocultados quando colapsado. Segue mesmo padrão do FilterContainer. CSS: `.analytic-container__toggle` (28x28px, border, rounded), `.analytic-container--collapsed` remove border-bottom do header
+
+#### Session 52: KPI System Foundation
+- **useDragReorder** composable — HTML5 Drag & Drop reutilizável para listas/grids: `draggedIndex`, `dragOverIndex`, `isDragging`, handlers (start/over/leave/drop/end), `getItemClass` para classes CSS
+- **useKpiLayout** composable — gerenciamento de visibilidade, ordem e cores de KPIs com persistência via useConfigState: `visibleKeys`, `allItems`, `toggleVisibility`, `reorder`, `setColor/getColor/removeColor`, `reset`, `isDirty`
+- **KpiCardWrapper**: novas props `showInfo`, `showDetail`, `draggable` — botões ℹ (info) e 👁 (detail) built-in com emits, drag handle GripVertical no topo-esquerdo com opacity transition
+- **KpiConfigPanel** component — painel unificado para KPIs: toggle visibilidade (Eye/EyeOff), reorder DnD (GripVertical via useDragReorder), color picker inline com presets + input nativo, botão restaurar. Usa BEM naming.
+
+- **AppShell**: `NavItem.featured` prop — item destacado no bottom nav mobile: ícone maior (26px), label maior, fundo circular, reposicionado no centro automaticamente
 - **useColorGroups**: 5 cores padrão pré-carregadas (Verde Floresta, Azul Corporativo, Vermelho Alerta, Dourado Destaque, Roxo Profundo) — `reset()` restaura defaults ao invés de lista vazia
 - **useColorGroups**: `DEFAULT_COLORS` exportado para uso externo
 
