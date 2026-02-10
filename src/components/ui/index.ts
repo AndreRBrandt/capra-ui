@@ -20,7 +20,9 @@ export { default as SearchInput } from "./SearchInput.vue";
 export { default as LoadingState } from "./LoadingState.vue";
 export { default as EmptyState } from "./EmptyState.vue";
 export { default as ColorGroupManager } from "./ColorGroupManager.vue";
+export { default as KpiConfigPanel } from "./KpiConfigPanel.vue";
 
 // Types
 export type { LoadingSize } from "./LoadingState.vue";
 export type { EmptySize } from "./EmptyState.vue";
+export type { KpiConfigItem } from "./KpiConfigPanel.vue";

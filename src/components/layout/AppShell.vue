@@ -28,7 +28,7 @@
  * ```
  */
 
-import { ref, type Component } from "vue";
+import { ref, computed, type Component } from "vue";
 
 // =============================================================================
 // Types
@@ -39,6 +39,8 @@ export interface NavItem {
   label: string;
   icon: Component;
   badge?: number;
+  /** Destaca o item no bottom-nav: ícone maior, centralizado */
+  featured?: boolean;
 }
 
 export interface SectionItem {
@@ -144,6 +146,21 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
   mobileMenuOpen.value = false;
 }
+
+// =============================================================================
+// Bottom Nav — reordena para featured ficar no centro
+// =============================================================================
+
+const bottomNavItems = computed(() => {
+  const items = props.navItems;
+  const featuredIdx = items.findIndex((i) => i.featured);
+  if (featuredIdx === -1 || items.length <= 2) return items;
+
+  const reordered = items.filter((_, i) => i !== featuredIdx);
+  const center = Math.floor(reordered.length / 2);
+  reordered.splice(center, 0, items[featuredIdx]);
+  return reordered;
+});
 </script>
 
 <template>
@@ -299,16 +316,19 @@ function closeMobileMenu() {
       class="bottom-nav"
     >
       <button
-        v-for="item in navItems"
+        v-for="item in bottomNavItems"
         :key="item.id"
         :data-nav-item="item.id"
         :aria-current="isActive(item.id) ? 'page' : undefined"
-        :class="['bottom-nav__item', { active: isActive(item.id) }]"
+        :class="[
+          'bottom-nav__item',
+          { active: isActive(item.id), 'bottom-nav__item--featured': item.featured },
+        ]"
         @click="handleNavClick(item.id)"
       >
         <component
           :is="item.icon"
-          :size="24"
+          :size="item.featured ? 26 : 20"
           :class="[
             'bottom-nav__icon',
             { 'bottom-nav__icon--active': isActive(item.id) },
@@ -317,6 +337,7 @@ function closeMobileMenu() {
         <span
           :class="[
             'bottom-nav__label',
+            item.featured ? 'bottom-nav__label--featured' : '',
             { 'bottom-nav__label--active': isActive(item.id) },
           ]"
         >
@@ -718,9 +739,10 @@ function closeMobileMenu() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: var(--spacing-xs) var(--spacing-md);
-  min-width: 4rem;
+  gap: 1px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: 0;
+  flex: 1;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
@@ -737,7 +759,34 @@ function closeMobileMenu() {
   color: var(--color-brand-highlight);
 }
 
+/* Featured item — destaque central */
+.bottom-nav__item--featured {
+  position: relative;
+  flex: 1.3;
+}
+
+.bottom-nav__item--featured::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
+  opacity: 0.5;
+  transition: var(--transition-fast);
+}
+
+.bottom-nav__item--featured.active::before {
+  opacity: 0.8;
+  background-color: var(--capra-nav-bg-active, var(--color-brand-tertiary));
+}
+
 .bottom-nav__icon {
+  position: relative;
+  z-index: 1;
   transition: var(--transition-fast);
 }
 
@@ -746,7 +795,14 @@ function closeMobileMenu() {
 }
 
 .bottom-nav__label {
-  font-size: var(--font-size-caption);
+  position: relative;
+  z-index: 1;
+  font-size: 0.6rem;
+  line-height: 1;
+}
+
+.bottom-nav__label--featured {
+  font-size: var(--font-size-caption, 0.7rem);
 }
 
 .bottom-nav__label--active {

@@ -157,3 +157,18 @@ export {
   type NamedColor,
   type UseColorGroupsReturn,
 } from "./useColorGroups";
+
+// Drag Reorder Composable
+export {
+  useDragReorder,
+  type UseDragReorderReturn,
+} from "./useDragReorder";
+
+// KPI Layout Composable
+export {
+  useKpiLayout,
+  type KpiLayoutItem,
+  type KpiLayoutConfig,
+  type UseKpiLayoutOptions,
+  type UseKpiLayoutReturn,
+} from "./useKpiLayout";
