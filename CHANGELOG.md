@@ -19,6 +19,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - **Types** — `DimensionDiscoveryConfig`, `DiscoveryResult`, `DimensionDiscoveryState` em `services/types.ts`
 - **Tests** — 36 novos testes (26 service + 10 composable): inicialização, MDX, execução, fallback, cache TTL, auto-refresh, provide/inject, estado reativo
 
+### Corrigido
+
+#### Session 59: DimensionDiscovery Hotfix
+- **DimensionDiscovery** — comparação `dimensionKeys` agora case-insensitive. `SchemaBuilder.toUpperKey()` transforma keys para UPPERCASE, mas config podia usar lowercase — causava filtro silencioso (0 dimensões elegíveis)
+
 ### Alterado
 
 #### Session 56: KpiContainer Modal Redesign
