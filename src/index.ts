@@ -12,6 +12,9 @@
  * ```
  */
 
+// Types
+export type { KpiSchemaItem, KpiData } from "./types";
+
 // Plugin
 export { createCapraPlugin, type CapraPluginOptions } from "./plugin";
 
@@ -32,6 +35,8 @@ export {
   createFilterManager,
   QueryManager,
   createQueryManager,
+  DimensionDiscovery,
+  createDimensionDiscovery,
   type FilterBinding,
   type FilterRegistryConfig,
   type FilterState,
@@ -54,6 +59,9 @@ export {
   type ActionBusConfig,
   type FilterManagerConfig,
   type QueryManagerConfig,
+  type DimensionDiscoveryConfig,
+  type DiscoveryResult,
+  type DimensionDiscoveryState,
 } from "./services";
 
 // Composables (exports DatePreset and FilterOption types)
@@ -77,6 +85,7 @@ export {
   // Containers
   AnalyticContainer,
   FilterContainer,
+  KpiContainer,
   // Layout
   AppShell,
   AnalyticsPage,

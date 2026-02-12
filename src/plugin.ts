@@ -26,9 +26,11 @@ import {
   type FilterRegistryConfig,
   createQueryManager,
   type QueryManagerConfig,
+  createDimensionDiscovery,
+  type DimensionDiscoveryConfig,
 } from "./services";
 import type { DataAdapter } from "./adapters";
-import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY, THEME_KEY, createThemeInstance } from "./composables";
+import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY, DIMENSION_DISCOVERY_KEY, THEME_KEY, createThemeInstance } from "./composables";
 import { MEASURE_ENGINE_KEY } from "./composables/useMeasureEngine";
 
 // ===========================================================================
@@ -46,6 +48,8 @@ export interface CapraPluginOptions extends MeasureEngineConfig {
   filters?: FilterRegistryConfig;
   /** Configuração do QueryManager (requer adapter) */
   queryManager?: QueryManagerConfig;
+  /** Configuração do DimensionDiscovery (requer adapter) */
+  dimensionDiscovery?: DimensionDiscoveryConfig;
 }
 
 // ===========================================================================
@@ -87,6 +91,15 @@ export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
           options.queryManager,
         );
         app.provide(QUERY_MANAGER_KEY, queryManager);
+      }
+
+      // DimensionDiscovery (only if adapter provided)
+      if (options.adapter) {
+        const discovery = createDimensionDiscovery(
+          options.adapter,
+          options.dimensionDiscovery,
+        );
+        app.provide(DIMENSION_DISCOVERY_KEY, discovery);
       }
     },
   };
