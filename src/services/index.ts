@@ -45,6 +45,9 @@ export {
 // QueryManager
 export { QueryManager, createQueryManager } from "./QueryManager";
 
+// DimensionDiscovery
+export { DimensionDiscovery, createDimensionDiscovery } from "./DimensionDiscovery";
+
 // Types
 export type {
   // Action types
@@ -72,4 +75,8 @@ export type {
   ActionBusConfig,
   FilterManagerConfig,
   QueryManagerConfig,
+  // DimensionDiscovery types
+  DimensionDiscoveryConfig,
+  DiscoveryResult,
+  DimensionDiscoveryState,
 } from "./types";

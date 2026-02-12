@@ -250,3 +250,47 @@ export type ActionMiddleware = (
   action: Action,
   next: () => Promise<ActionResult>
 ) => Promise<ActionResult>;
+
+// =============================================================================
+// DimensionDiscovery Types
+// =============================================================================
+
+/**
+ * Configuração do DimensionDiscovery
+ */
+export interface DimensionDiscoveryConfig {
+  /** TTL do cache em ms (default: 3600000 = 1h) */
+  cacheTtl?: number;
+  /** Intervalo de auto-refresh em ms (default: 0 = desabilitado) */
+  refreshInterval?: number;
+  /** Whitelist de chaves de dimensão a descobrir (default: [] = todas standard) */
+  dimensionKeys?: string[];
+  /** Prefixo para chaves no localStorage (default: "capra:discovery") */
+  storageKeyPrefix?: string;
+}
+
+/**
+ * Resultado de uma operação de discovery
+ */
+export interface DiscoveryResult {
+  /** Membros descobertos por chave de dimensão */
+  members: Record<string, string[]>;
+  /** Timestamp da descoberta */
+  timestamp: number;
+  /** ID do schema usado */
+  schemaId: string;
+}
+
+/**
+ * Estado reativo do DimensionDiscovery
+ */
+export interface DimensionDiscoveryState {
+  /** Membros descobertos por chave de dimensão */
+  members: Record<string, string[]>;
+  /** Se está carregando */
+  isLoading: boolean;
+  /** Timestamp do último refresh */
+  lastRefreshed: number | null;
+  /** Último erro ocorrido */
+  error: Error | null;
+}
