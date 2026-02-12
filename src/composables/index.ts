@@ -172,3 +172,10 @@ export {
   type UseKpiLayoutOptions,
   type UseKpiLayoutReturn,
 } from "./useKpiLayout";
+
+// DimensionDiscovery Composable
+export {
+  useDimensionDiscovery,
+  DIMENSION_DISCOVERY_KEY,
+  type UseDimensionDiscoveryReturn,
+} from "./useDimensionDiscovery";
