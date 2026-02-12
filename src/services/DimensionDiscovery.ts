@@ -250,9 +250,12 @@ export class DimensionDiscovery {
       // Excluir dimensões temporais
       if (dim.type === "time") return false;
 
-      // Se whitelist configurada, respeitar
+      // Se whitelist configurada, respeitar (case-insensitive)
       if (this.config.dimensionKeys.length > 0) {
-        return this.config.dimensionKeys.includes(key);
+        const keyLower = key.toLowerCase();
+        return this.config.dimensionKeys.some(
+          (dk) => dk.toLowerCase() === keyLower,
+        );
       }
 
       return true;
