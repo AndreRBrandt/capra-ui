@@ -33,7 +33,7 @@ import {
   type ComputedRef,
 } from "vue";
 import { schemaRegistry, type BuiltSchema } from "@/schema";
-import { MeasureEngine } from "@/measures";
+import { useMeasureEngine } from "../useMeasureEngine";
 
 // =============================================================================
 // Types
@@ -250,8 +250,8 @@ export function useAnalyticData<T = AnalyticDataRow>(
   const hasLoaded = ref(false);
   const lastUpdated = ref<number | null>(null);
 
-  // MeasureEngine instance
-  const measureEngine = new MeasureEngine({ locale: "pt-BR" });
+  // MeasureEngine via plugin inject
+  const { engine: measureEngine } = useMeasureEngine();
 
   // Schema
   const schema = computed(() => schemaRegistry.get(schemaId));

@@ -32,15 +32,8 @@ import {
   type ComputedRef,
 } from "vue";
 import { schemaRegistry, type BuiltSchema, type MeasureDefinition } from "@/schema";
-import {
-  measureEngine,
-  formatCurrency,
-  formatPercent,
-  formatNumber,
-  formatVariation,
-  variation,
-  type TrendDirection,
-} from "@/measures";
+import { type TrendDirection } from "@/measures";
+import { useMeasureEngine } from "../useMeasureEngine";
 
 // =============================================================================
 // Types
@@ -139,6 +132,8 @@ export function useKpiData(config: UseKpiDataConfig): UseKpiDataReturn {
     label: customLabel,
   } = config;
 
+  const { engine: _engine } = useMeasureEngine();
+
   // State
   const value = ref(0);
   const previousValue = ref<number | null>(null);
@@ -168,11 +163,11 @@ export function useKpiData(config: UseKpiDataConfig): UseKpiDataReturn {
 
     switch (format) {
       case "currency":
-        return formatCurrency(value.value);
+        return _engine.formatCurrency(value.value);
       case "percent":
-        return formatPercent(value.value);
+        return _engine.formatPercent(value.value);
       default:
-        return formatNumber(value.value);
+        return _engine.formatNumber(value.value);
     }
   });
 
@@ -183,22 +178,22 @@ export function useKpiData(config: UseKpiDataConfig): UseKpiDataReturn {
 
     switch (format) {
       case "currency":
-        return formatCurrency(previousValue.value);
+        return _engine.formatCurrency(previousValue.value);
       case "percent":
-        return formatPercent(previousValue.value);
+        return _engine.formatPercent(previousValue.value);
       default:
-        return formatNumber(previousValue.value);
+        return _engine.formatNumber(previousValue.value);
     }
   });
 
   const variationFormatted = computed(() => {
     if (variationValue.value === null) return null;
-    return formatVariation(variationValue.value);
+    return _engine.formatVariation(variationValue.value);
   });
 
   const trend = computed<TrendDirection>(() => {
     if (variationValue.value === null) return "neutral";
-    const direction = measureEngine.getTrendDirection(variationValue.value);
+    const direction = _engine.getTrendDirection(variationValue.value);
     // If invertTrend is true, flip up/down
     if (invertTrend) {
       if (direction === "up") return "down";

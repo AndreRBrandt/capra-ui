@@ -24,7 +24,8 @@ import { RotateCcw, Palette, Check } from "lucide-vue-next";
 // Types
 // =============================================================================
 
-export type KpiCategory = "main" | "discount" | "modalidade" | "turno";
+/** Generic category type — consumers define their own categories */
+export type KpiCategory = string;
 
 export interface ExtraPreset {
   name: string;

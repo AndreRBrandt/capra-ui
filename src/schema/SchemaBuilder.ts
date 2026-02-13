@@ -59,7 +59,7 @@ export class SchemaBuilder {
       measures: {},
       categories: {},
       filterConfigs: {},
-      governanceFilters: ["data", "loja"],
+      governanceFilters: [],
     };
   }
 

@@ -11,6 +11,100 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Adicionado
 
+#### Session 82: SegmentedControl component
+- **components/ui/SegmentedControl.vue** — Toggle entre opções mutuamente exclusivas (tabs estilo iOS/Material). Scoped CSS BEM, ARIA `tablist`/`tab`, keyboard nav (Arrow, Home/End), sizes `sm`/`md`/`lg`, `fullWidth` prop
+- **components/ui/__tests__/SegmentedControl.spec.ts** — ~20 testes cobrindo render, click, disabled, sizes, fullWidth, keyboard navigation, ARIA roles
+- Export: `SegmentedControl` component + `SegmentedOption` type
+
+#### Session 80: Core DRY utilities + provide/inject
+- **utils/debounce.ts** — Shared debounce utility com `.cancel()`, extraído de ActionBus.ts e useConfigState.ts
+- **utils/deepClone.ts** — Shared deepClone recursivo (preserva Date), extraído de useFilters.ts e useConfigState.ts
+- **utils/index.ts** — Barrel exports para utilities
+- **SchemaRegistry** — `SCHEMA_REGISTRY_KEY` InjectionKey para provide/inject
+- **plugin.ts** — `app.provide(SCHEMA_REGISTRY_KEY, schemaRegistry)` no install
+- **10 novos testes** — debounce (5) + deepClone (5)
+
+### Alterado
+
+#### Session 80: Governance defaults + DRY consolidation
+- **SchemaBuilder** — `governanceFilters` default de `["data", "loja"]` → `[]` (domain-specific não pertence ao core)
+- **ActionBus.ts** — local debounce → import de `@/utils`
+- **useConfigState.ts** — local debounce + deepClone → import de `@/utils`
+- **useFilters.ts** — local deepClone → import de `@/utils`
+
+#### Session 73: Genericização — KpiCategory, KpiCard defaults, JSDoc
+- **useKpiTheme** — `KpiCategory` mudou de `"main" | "discount" | "modalidade" | "turno"` para `string`. `DEFAULT_COLORS` reduzido a `{ main: "#2d6a4f" }`. `CATEGORY_LABELS` reduzido a `{ main: "Main" }`. Consumidor define categorias via `defaultColors` option
+- **ThemeConfigPanel** — `KpiCategory` type atualizado para `string`
+- **KpiCard** — Default `participationLabel`/`participationSecondaryLabel` de `"do faturamento"` para `"do total"`
+- **KpiContainer** — Removido cast `as Record<string, any>` (desnecessário com KpiCategory genérico)
+- **useModalDataLoader** — JSDoc exemplo genérico (sem refs de domínio)
+- **SearchInput** — JSDoc placeholder genérico
+
+### Corrigido
+
+#### Session 70: Auditoria Clean Code — Fixes Fase 3 (Final Framework)
+- **QueryManager** — `executeWithRetry()` agora verifica `CapraQueryError.isRetryable` antes de fazer retry. Erros 4xx/parse/query não são mais retriados desnecessariamente (C6)
+- **useQueryManager** — 2 locais de `error as Error` substituídos por `error instanceof Error ? error : new Error(String(error))` (H4)
+- **DimensionDiscovery** — `error as Error` substituído por safe cast (H4/M6)
+- **useListFilter** — `clearAllFilters()` agora limpa refs órfãs de definições removidas (H6)
+- **FilterManager** — `isActive()` short-circuit para referências idênticas evita `JSON.stringify` desnecessário (M4)
+
+#### Session 69: Auditoria Clean Code — Fixes Fase 1 + Fase 2
+- **usePageDataLoader** — `totalQueryCount`/`failedQueryCount` eram variáveis locais não-reativas, `errorSummary` computed não reagia a retry. Migrado para `ref()` (C1)
+- **useDataLoader** — Debounce path engolia erros: `executeLoad()` dentro de `async setTimeout` callback não propagava rejeição. Fix: `executeLoad().then(resolve, reject)` (C2)
+- **fetchWithErrorHandling** — Retorno tipado como `Promise<BIMachineApiResponse>` em vez de `Promise<any>` (H1). Removido `clearTimeout` redundante no catch (já coberto pelo finally)
+- **extractDataPayload** — Trocado `Error` genérico por `CapraQueryError('query', ...)` para "Resposta da API não contém dados" e "Formato inesperado" (H2)
+- **useChartDrill** — `drillUp()` e `goToLevel()` chamavam `loadLevel()` sem tratar a Promise. Adicionado `void` prefix para intent explícito de fire-and-forget. Fix casting: `e as Error` → `e instanceof Error ? e : new Error(String(e))` (C3)
+- **ActionBus** — `dispatchDebounced()` callback sem try/catch: se `executeAction()` falhasse, Promise ficava pendurada. Adicionado try/catch com `reject(err)` (C5)
+- **BIMachineAdapter** — `applyFilter()`/`applyFilters()` ~80 linhas duplicadas. Extraído `applyFilterPayload()` privado (H3)
+- **Plugin** — Adicionado `app.onUnmount()` para chamar `bus.destroy()` e `discovery.stopAutoRefresh()` (H7)
+
+### Adicionado
+
+#### Session 68: Error Handling Profissional (CapraQueryError + BIMachineAdapter Hardening + usePageDataLoader)
+- **CapraQueryError** classe de erro tipada — extends `Error`, `type`: `'timeout'` | `'network'` | `'http'` | `'parse'` | `'query'`. Campos: `statusCode?`, `query?`, `cause?`. Getters: `isRetryable` (timeout/network/5xx = true), `userMessage` (PT-BR por tipo). 20 testes
+- **BIMachineAdapter timeout + error typing** — `BIMachineConfig.timeout` (default: 30000ms). Novo `fetchWithErrorHandling()` privado com `AbortController` para timeout, error typing para network/http/parse. `executeQuery()` e `executeRaw()` refatorados para eliminar duplicação. Backward compat preservado (mensagens mantêm substrings `"Erro HTTP"` etc.). 15 testes
+- **usePageDataLoader** composable — compõe sobre `useDataLoader` (mesmo padrão do useModalDataLoader). `ctx.allSettled(fns)` executa queries com `Promise.allSettled` semântica, retorna `SettledResult<T>[]`. API: `data`, `isLoading`, `error`, `errors` (individuais), `hasPartialError`, `errorSummary`, `hasLoaded`, `load/reload/cancel/reset`. Herda race condition protection, retry, debounce, stale-while-revalidate do base. 17 testes
+- **Barrel exports** — `CapraQueryError` + types via `errors/index.ts` → `src/index.ts`. `usePageDataLoader` + types via `data/index.ts` → `composables/index.ts`. Total: 1868 testes passando (79 suites)
+
+### Corrigido
+
+#### Session 67: useDataLoader isLoading bug fix
+- **useDataLoader** — `isLoading` nunca voltava para `false` após `executeLoad()` completar (success ou error). Adicionado `try/finally` com guarda `if (loadId === currentLoadId)` para resetar isLoading corretamente sem afetar loads concorrentes. 2 novos testes
+
+### Alterado
+
+#### Session 67: useModalDataLoader compõe sobre useDataLoader
+- **useModalDataLoader** — Reescrito para compor sobre `useDataLoader` (base). Eliminado `loadId` manual, `_load()`, `try/catch/finally` internos. Ciclo de loading (race condition protection, isLoading, error, cancel) delegado ao `useDataLoader`. Modal adiciona camada de UI: `isVisible`, `selected`, `open()`, `close()`, `reload()`. Error mapeado via `computed()`: `Error → string`. `onError` callback preservado via wrapper. API pública e 14 testes existentes inalterados. Total: 1816 testes passando
+
+### Adicionado
+
+#### Session 66: useModalDataLoader + useInteractionHandler (Framework Abstractions)
+- **useModalDataLoader** composable — encapsula estado completo de modal com carregamento de dados: `isVisible`, `selected`, `data`, `isLoading`, `error`, `open()`, `close()`, `reload()`. Proteção contra race conditions via `loadId` counter. Callback `onError` para tratamento customizado. Genérico `<TSelected, TData>` para tipagem forte
+- **useInteractionHandler** composable — cria handlers de interação filtrados por tipo de evento. Default: `["dblclick", "select"]`. `createHandler<T>(fn)` retorna handler tipado que extrai `event.data.raw`. `isInteractive(event)` para verificação. Elimina boilerplate de `isInteractive` + `createHandler` duplicado em 5+ pages
+- **useModalDataLoader testes** — 15 testes: estado inicial, open/load, loading state, error handling, non-Error, clear on new open, close + clear, close cancels pending, reload, reload sem seleção, reload com erro, race conditions, tipos array/não-array
+- **useInteractionHandler testes** — 9 testes: dblclick/select defaults, ignore click/hover, custom triggerTypes, isInteractive, handler tipado, handlers independentes
+- **Barrel exports** — `useModalDataLoader` + types via `composables/ui/index.ts` → `composables/index.ts`. `useInteractionHandler` + types via `composables/index.ts`. Total: 1814 testes passando
+
+#### Session 65: DataTable Column Filters + Core List Building Blocks
+- **DataTable** — Filtros por coluna Excel-like: novas props `columnFilterable` (default: true), `columnFilterSearchable` (default: true). Column interface estendida com `filterable?: boolean`. Novo emit `column-filter`. Dropdown com checkboxes de valores únicos, busca interna, botões "Todas"/"Limpar". Ícone de filtro no header com indicador ativo. Overlay para fechar dropdown ao clicar fora. Pipeline: `data → column filters → category filter → search → sort → paginate`. Watcher reseta página ao filtrar. Novo método exposto: `clearColumnFilters()`
+- **DataTable testes** — 15 novos testes de column filters
+- **useListSearch** composable — busca genérica em listas com `searchQuery`, `searchedData`, `isSearchActive`, `resultCount`, `clearSearch`. Suporte a `searchKeys` e data reativa
+- **useListSort** composable — ordenação genérica com `sortState`, `sortedData`, `setSort`, `toggleSort` (asc→desc→clear), `clearSort`. Comparador default locale-aware pt-BR. Suporte a `compareFn` customizado
+- **useListFilter** composable — filtros locais multi-select com `filterValues`, `filteredData`, `hasActiveFilters`, `activeFilterCount`, `setFilter`, `clearFilter`, `clearAllFilters`. Filtros fazem AND entre si
+- **useListGroup** composable — agrupamento + collapse com `groups`, `flatItems`, `groupCount`, `collapsedGroups`, `isCollapsed`, `toggleGroup`, `expandAll`, `collapseAll`. Suporte a `groupBy` string ou função, `groupLabel`, `groupSortDirection`, `defaultCollapsed`
+- **useListState** composable — composição dos 4 composables acima com pipeline `data → filter → search → sort → group`. API unificada com `processedData`, `groups`, `search`, `sort`, `filter`, `group`, `resetAll`
+- **ListContainer** component — wrapper thin com AnalyticContainer + SearchInput + renderização de grupos built-in. Props: `title`, `icon`, `loading`, `error`, `empty`, `maxHeight`, `variant`, `collapsible`, `showSearch`, `search` (v-model), `summary`, `groups` (ListContainerGroup[]), `collapsedGroups` (Set<string>). Emit: `toggle-group`. Group headers com ChevronDown/ChevronRight toggle, label, count. Slot `#group-header` com `{ group, collapsed }` para customização. Default slot recebe `{ items, group }` em modo agrupado. CSS: 8 classes BEM para grupos (`.list-container__group-*`). Slots: `#default`, `#group-header`, `#toolbar`, `#summary`, `#actions`
+- **ListContainerGroup** type — nova interface exportada: `{ key, label, items, count }`
+- **Barrel exports** — novos composables, ListContainer e ListContainerGroup exportados via `data/index.ts`, `composables/index.ts`, `containers/index.ts`, `index.ts`
+- **Testes** — 88 novos testes (15 DataTable + 11 useListSearch + 10 useListSort + 13 useListFilter + 16 useListGroup + 14 useListState + 22 ListContainer = 1791 total)
+
+#### Session 64: DataTable Pagination + Search Default
+- **DataTable** — Paginação built-in: novas props `paginated` (default: true), `pageSize` (15), `pageSizeOptions` ([10,15,25,50]), `showPageSizeSelector` (true). Footer 3 colunas com seletor de pageSize, display range e navegação por páginas (first/prev/numbers/next/last). Auto-hide quando totalPages ≤ 1. Totais calculados sobre todos os dados filtrados, não da página atual
+- **DataTable** — `searchable` agora é `true` por padrão (era `false`)
+- **DataTable** — Novos métodos expostos via `defineExpose`: `goToPage`, `goToFirstPage`, `goToLastPage`
+- **DataTable testes** — 17 novos testes de paginação + 2 testes searchable default
+
 #### Session 59: DimensionDiscovery Service
 - **ADR-012** — nova ADR documentando decisão de descobrir membros de dimensões OLAP dinamicamente
 - **DimensionDiscovery** service — descobre membros de dimensões via queries MDX `NON EMPTY`. Cache localStorage com TTL configurável (default 1h). Auto-refresh em background. Fallback para `dimension.members` do schema. Execução paralela com `Promise.allSettled()`. Usa `adapter.executeRaw(mdx, { noFilters: true })`

@@ -465,6 +465,10 @@ export class FilterManager {
     if (!state || !definition) return false;
 
     const defaultValue = definition.defaultValue ?? null;
+
+    // Fast path: identical references or both null
+    if (state.value === defaultValue) return false;
+
     return JSON.stringify(state.value) !== JSON.stringify(defaultValue);
   }
 

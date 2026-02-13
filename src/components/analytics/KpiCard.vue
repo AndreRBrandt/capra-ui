@@ -35,11 +35,11 @@ interface Props {
   invertTrend?: boolean;
   /** Participacao percentual primaria (0-100) */
   participation?: number;
-  /** Label para participacao primaria (default: "do desconto total") */
+  /** Label para participacao primaria */
   participationLabel?: string;
-  /** Participacao percentual secundaria (0-100) - ex: % do faturamento */
+  /** Participacao percentual secundaria (0-100) */
   participationSecondary?: number;
-  /** Label para participacao secundaria (default: "do faturamento") */
+  /** Label para participacao secundaria */
   participationSecondaryLabel?: string;
   /** Icone a exibir no card */
   icon?: Component;
@@ -64,9 +64,9 @@ const props = withDefaults(defineProps<Props>(), {
   trendLabel: "",
   invertTrend: false,
   participation: undefined,
-  participationLabel: "do faturamento",
+  participationLabel: "do total",
   participationSecondary: undefined,
-  participationSecondaryLabel: "do faturamento",
+  participationSecondaryLabel: "do total",
   icon: undefined,
   variant: "default",
   accentColor: undefined,
@@ -206,7 +206,7 @@ const formattedParticipation = computed(() => {
   return engine.formatNumber(props.participation, { decimals: 1 });
 });
 
-// Participacao secundaria (ex: % do faturamento)
+// Participacao secundaria
 const hasParticipationSecondary = computed(() => {
   return props.participationSecondary !== undefined && props.participationSecondary > 0;
 });
@@ -272,7 +272,7 @@ const handleClick = () => {
         {{ formattedParticipation }}% {{ participationLabel }}
       </div>
 
-      <!-- Indicador de Participacao Secundaria (ex: % do faturamento) -->
+      <!-- Indicador de Participacao Secundaria -->
       <div
         v-if="hasParticipationSecondary"
         data-testid="participation-secondary-indicator"
@@ -294,7 +294,6 @@ const handleClick = () => {
 .kpi-card {
   position: relative;
   display: flex;
-  min-height: 100px; /* Altura mínima para padronizar */
   min-width: 0; /* Allow grid to control sizing */
   padding: var(--spacing-sm, 0.75rem);
   background-color: var(--color-surface, #fff);
@@ -304,6 +303,7 @@ const handleClick = () => {
   cursor: pointer;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .kpi-card:hover {

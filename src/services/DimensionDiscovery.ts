@@ -120,7 +120,7 @@ export class DimensionDiscovery {
 
       return discoveryResult;
     } catch (error) {
-      this.state.error = error as Error;
+      this.state.error = error instanceof Error ? error : new Error(String(error));
       this.state.isLoading = false;
       throw error;
     }

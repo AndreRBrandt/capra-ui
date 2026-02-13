@@ -6,7 +6,7 @@
  *
  * @example
  * ```vue
- * <SearchInput v-model="searchQuery" placeholder="Buscar vendedor..." />
+ * <SearchInput v-model="searchQuery" placeholder="Buscar..." />
  * ```
  */
 import { ref, watch } from "vue";

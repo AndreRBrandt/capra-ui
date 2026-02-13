@@ -344,7 +344,7 @@ describe("KpiCard", () => {
       const indicator = wrapper.find('[data-testid="participation-indicator"]');
       expect(indicator.exists()).toBe(true);
       expect(indicator.text()).toContain("2,5");
-      expect(indicator.text()).toContain("do faturamento");
+      expect(indicator.text()).toContain("do total");
     });
 
     it("RF07.3: deve formatar com 1 casa decimal e separador brasileiro", () => {
@@ -384,12 +384,12 @@ describe("KpiCard", () => {
       expect(wrapper.find('[data-testid="participation-indicator"]').exists()).toBe(true);
     });
 
-    it("RF07.8: deve exibir texto 'do faturamento'", () => {
+    it("RF07.8: deve exibir texto 'do total'", () => {
       const wrapper = mount(KpiCard, {
         props: { label: "Delivery", value: 25000, participation: 31.7 },
       });
       const indicator = wrapper.find('[data-testid="participation-indicator"]');
-      expect(indicator.text()).toContain("do faturamento");
+      expect(indicator.text()).toContain("do total");
     });
   });
 

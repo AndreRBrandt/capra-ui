@@ -23,6 +23,9 @@ export interface BIMachineConfig {
 
   /** IDs de filtros a ignorar nas requisições */
   ignoreFilterIds?: number[];
+
+  /** Request timeout in ms (default: 30000) */
+  timeout?: number;
 }
 
 /**

@@ -21,9 +21,15 @@ export interface UseMeasureEngineReturn {
 
 /**
  * Acessa o MeasureEngine injetado pelo CapraPlugin.
- * Falls back para a instância padrão (pt-BR/BRL) se não houver plugin.
+ * Falls back para a instância padrão (pt-BR/BRL) se não houver plugin
+ * ou se chamado fora do setup context (ex: testes unitários).
  */
 export function useMeasureEngine(): UseMeasureEngineReturn {
-  const engine = inject(MEASURE_ENGINE_KEY, defaultEngine);
+  let engine: MeasureEngine;
+  try {
+    engine = inject(MEASURE_ENGINE_KEY, defaultEngine) ?? defaultEngine;
+  } catch {
+    engine = defaultEngine;
+  }
   return { engine };
 }

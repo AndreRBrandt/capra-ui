@@ -18,6 +18,7 @@
 
 import { ref, computed, type Ref, type Component } from "vue";
 import type { DataAdapter } from "@/adapters";
+import { deepClone } from "@/utils";
 
 // ==========================================================================
 // Types
@@ -90,17 +91,6 @@ function deepEqual(a: unknown, b: unknown): boolean {
   }
 
   return true;
-}
-
-function deepClone<T>(value: T): T {
-  if (value === null || typeof value !== "object") return value;
-  if (value instanceof Date) return new Date(value.getTime()) as T;
-  if (Array.isArray(value)) return value.map(deepClone) as T;
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(value as object)) {
-    result[key] = deepClone((value as Record<string, unknown>)[key]);
-  }
-  return result as T;
 }
 
 // ==========================================================================

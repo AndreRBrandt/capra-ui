@@ -4,7 +4,7 @@
  * Composable para gerenciar tema de cores dos KPIs.
  *
  * Features:
- * - Cores por categoria (main, discount, modalidade, turno)
+ * - Cores por categoria (configurável pelo consumidor)
  * - Override de cor por KPI especifico
  * - Persistencia em localStorage
  * - Integracao com KPI_SCHEMA
@@ -31,8 +31,8 @@ import { useConfigState } from "./useConfigState";
 // Types
 // =============================================================================
 
-/** Categorias de KPIs para agrupamento de cores */
-export type KpiCategory = "main" | "discount" | "modalidade" | "turno";
+/** Categorias de KPIs para agrupamento de cores (genérico — consumidor define as categorias) */
+export type KpiCategory = string;
 
 /** Schema simplificado de um KPI (apenas o necessario para o tema) */
 export interface KpiSchemaItem {
@@ -89,18 +89,12 @@ export interface UseKpiThemeReturn {
 // Defaults
 // =============================================================================
 
-const DEFAULT_COLORS: Record<KpiCategory, string> = {
+const DEFAULT_COLORS: Record<string, string> = {
   main: "#2d6a4f",
-  discount: "#9b2c2c",
-  modalidade: "#5a7c3a",
-  turno: "#2c5282",
 };
 
-const CATEGORY_LABELS: Record<KpiCategory, string> = {
-  main: "Principal",
-  discount: "Descontos",
-  modalidade: "Modalidade",
-  turno: "Turno",
+const CATEGORY_LABELS: Record<string, string> = {
+  main: "Main",
 };
 
 // =============================================================================

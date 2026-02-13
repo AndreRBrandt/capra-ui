@@ -30,12 +30,14 @@ import type {
   RawQueryOptions,
   RawQueryResult,
 } from "./types";
+import { CapraQueryError } from "../errors";
 
 // =============================================================================
 // Constantes
 // =============================================================================
 
 const DEFAULT_ENDPOINT = "/spr/query/execute";
+const DEFAULT_TIMEOUT = 30_000;
 
 // =============================================================================
 // BIMachineAdapter Class
@@ -45,11 +47,13 @@ export class BIMachineAdapter implements DataAdapter {
   private dataSource: string;
   private endpoint: string;
   private ignoreFilterIds: number[];
+  private timeout: number;
 
   constructor(config: BIMachineConfig) {
     this.dataSource = config.dataSource;
     this.endpoint = config.endpoint ?? DEFAULT_ENDPOINT;
     this.ignoreFilterIds = config.ignoreFilterIds ?? [];
+    this.timeout = config.timeout ?? DEFAULT_TIMEOUT;
   }
 
   // ===========================================================================
@@ -138,38 +142,7 @@ export class BIMachineAdapter implements DataAdapter {
    * @returns true se aplicado com sucesso
    */
   applyFilter(filterId: number, members: string[]): boolean {
-    try {
-      // Pegar filtros atuais e remover o que será substituído
-      let currentFilters = this.getBIMachineFilters().filter(
-        (f) => f.id !== filterId
-      );
-
-      // Adicionar novo filtro
-      currentFilters.push({
-        id: filterId,
-        members: members,
-      });
-
-      const filterPayload = { filters: currentFilters };
-
-      // BIMACHINE_APPLY_FILTER é o NOME da função, não a função em si
-      const fnName = (window as any).BIMACHINE_APPLY_FILTER;
-
-      if (
-        window.parent &&
-        fnName &&
-        typeof (window.parent as any)[fnName] === "function"
-      ) {
-        (window.parent as any)[fnName](filterPayload);
-        return true;
-      }
-
-      console.warn("Função de filtro não disponível no parent");
-      return false;
-    } catch (error) {
-      console.error("Erro ao aplicar filtro:", error);
-      return false;
-    }
+    return this.applyFilterPayload([{ id: filterId, members }]);
   }
 
   /**
@@ -180,25 +153,25 @@ export class BIMachineAdapter implements DataAdapter {
    * @returns true se aplicado com sucesso
    */
   applyFilters(filtersToApply: { id: number; members: string[] }[]): boolean {
+    return this.applyFilterPayload(filtersToApply);
+  }
+
+  /**
+   * Constrói payload de filtros e aplica via BIMACHINE_APPLY_FILTER.
+   * Centraliza lógica compartilhada entre applyFilter e applyFilters.
+   */
+  private applyFilterPayload(
+    filtersToApply: { id: number; members: string[] }[]
+  ): boolean {
     try {
-      // Pegar filtros atuais
-      let currentFilters = this.getBIMachineFilters();
-
-      // IDs dos filtros que serão substituídos
       const idsToReplace = new Set(filtersToApply.map((f) => f.id));
+      const currentFilters = this.getBIMachineFilters().filter(
+        (f) => !idsToReplace.has(f.id)
+      );
 
-      // Remover filtros que serão substituídos
-      currentFilters = currentFilters.filter((f) => !idsToReplace.has(f.id));
-
-      // Adicionar novos filtros
-      for (const filter of filtersToApply) {
-        currentFilters.push({
-          id: filter.id,
-          members: filter.members,
-        });
-      }
-
-      const filterPayload = { filters: currentFilters };
+      const filterPayload = {
+        filters: [...currentFilters, ...filtersToApply],
+      };
 
       // BIMACHINE_APPLY_FILTER é o NOME da função, não a função em si
       const fnName = (window as any).BIMACHINE_APPLY_FILTER;
@@ -246,19 +219,7 @@ export class BIMachineAdapter implements DataAdapter {
       filters,
     };
 
-    const response = await fetch(this.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const raw = await response.json();
+    const raw = await this.fetchWithErrorHandling(requestBody, mdx);
     const payload = raw?.result?.data || raw?.data;
 
     return {
@@ -295,19 +256,62 @@ export class BIMachineAdapter implements DataAdapter {
       filters,
     };
 
-    const response = await fetch(this.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
+    return this.fetchWithErrorHandling(requestBody, mdx);
+  }
 
-    if (!response.ok) {
-      throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+  /**
+   * Faz fetch com timeout, error typing e parse seguro.
+   * Centraliza tratamento de erros para executeQuery e executeRaw.
+   */
+  private async fetchWithErrorHandling(
+    requestBody: Record<string, unknown>,
+    mdx: string
+  ): Promise<BIMachineApiResponse> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    let response: Response;
+    try {
+      response = await fetch(this.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw new CapraQueryError(
+          "timeout",
+          `Timeout após ${this.timeout}ms`,
+          { query: mdx, cause: err }
+        );
+      }
+      throw new CapraQueryError(
+        "network",
+        `Falha de rede: ${err instanceof Error ? err.message : "Erro desconhecido"}`,
+        { query: mdx, cause: err instanceof Error ? err : undefined }
+      );
+    } finally {
+      clearTimeout(timeoutId);
     }
 
-    return response.json();
+    if (!response.ok) {
+      throw new CapraQueryError(
+        "http",
+        `Erro HTTP ${response.status}: ${response.statusText}`,
+        { statusCode: response.status, query: mdx }
+      );
+    }
+
+    try {
+      return await response.json();
+    } catch (err) {
+      throw new CapraQueryError(
+        "parse",
+        `Falha ao parsear resposta JSON: ${err instanceof Error ? err.message : "Erro desconhecido"}`,
+        { query: mdx, cause: err instanceof Error ? err : undefined }
+      );
+    }
   }
 
   /**
@@ -336,11 +340,11 @@ export class BIMachineAdapter implements DataAdapter {
     const payload = response?.result?.data || response?.data;
 
     if (!payload) {
-      throw new Error("Resposta da API não contém dados");
+      throw new CapraQueryError("query", "Resposta da API não contém dados");
     }
 
     if (!payload.rows?.nodes || !payload.cells) {
-      throw new Error("Formato inesperado da resposta da API");
+      throw new CapraQueryError("query", "Formato inesperado da resposta da API");
     }
 
     return payload;

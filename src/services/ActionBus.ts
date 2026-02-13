@@ -39,29 +39,14 @@ import type {
   BusEventHandler,
 } from "./types";
 
+import { debounce } from "@/utils";
+
 // =============================================================================
 // Helpers
 // =============================================================================
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-function debounce<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  ms: number
-): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  return (...args: Parameters<T>) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    timeoutId = setTimeout(() => {
-      fn(...args);
-      timeoutId = null;
-    }, ms);
-  };
 }
 
 // =============================================================================
@@ -241,20 +226,24 @@ export class ActionBus {
         this.debouncedDispatch.set(
           action.type,
           debounce(async () => {
-            const pending = Array.from(this.pendingActions.entries())
-              .filter(([k]) => k.startsWith(action.type))
-              .map(([k, a]) => {
-                this.pendingActions.delete(k);
-                return a;
-              });
+            try {
+              const pending = Array.from(this.pendingActions.entries())
+                .filter(([k]) => k.startsWith(action.type))
+                .map(([k, a]) => {
+                  this.pendingActions.delete(k);
+                  return a;
+                });
 
-            // Executar última ação de cada tipo
-            for (const a of pending) {
-              const result = await this.executeAction(a);
-              // Só resolvemos a promise da última chamada
-              if (a.id === action.id) {
-                resolve(result);
+              // Executar última ação de cada tipo
+              for (const a of pending) {
+                const result = await this.executeAction(a);
+                // Só resolvemos a promise da última chamada
+                if (a.id === action.id) {
+                  resolve(result);
+                }
               }
+            } catch (err) {
+              reject(err instanceof Error ? err : new Error(String(err)));
             }
           }, this.config.debounceMs)
         );

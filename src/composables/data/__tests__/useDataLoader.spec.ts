@@ -68,6 +68,28 @@ describe("useDataLoader", () => {
       expect(data.value).toBe("loaded-data");
       expect(hasLoaded.value).toBe(true);
     });
+
+    it("should set isLoading false after successful load", async () => {
+      vi.useRealTimers();
+
+      const { isLoading, load } = useDataLoader(async () => "data");
+
+      await load();
+
+      expect(isLoading.value).toBe(false);
+    });
+
+    it("should set isLoading false after failed load", async () => {
+      vi.useRealTimers();
+
+      const { isLoading, load } = useDataLoader(async () => {
+        throw new Error("fail");
+      });
+
+      await load();
+
+      expect(isLoading.value).toBe(false);
+    });
   });
 
   describe("load error", () => {

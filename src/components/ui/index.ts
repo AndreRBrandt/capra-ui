@@ -21,6 +21,7 @@ export { default as LoadingState } from "./LoadingState.vue";
 export { default as EmptyState } from "./EmptyState.vue";
 export { default as ColorGroupManager } from "./ColorGroupManager.vue";
 export { default as KpiConfigPanel } from "./KpiConfigPanel.vue";
+export { default as SegmentedControl } from "./SegmentedControl.vue";
 
 // Types
 export type { LoadingSize } from "./LoadingState.vue";

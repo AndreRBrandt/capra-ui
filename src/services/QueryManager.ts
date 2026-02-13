@@ -26,6 +26,7 @@
 
 import type { DataAdapter } from "@/adapters";
 import type { QueryDefinition, QueryResult, QueryManagerConfig } from "./types";
+import { CapraQueryError } from "@/errors";
 
 // =============================================================================
 // Types
@@ -165,7 +166,8 @@ export class QueryManager {
     try {
       return await this.doExecute<T>(query);
     } catch (error) {
-      if (this.config.retryOnError && attempt < this.config.maxRetries) {
+      const isRetryable = error instanceof CapraQueryError ? error.isRetryable : true;
+      if (isRetryable && this.config.retryOnError && attempt < this.config.maxRetries) {
         console.warn(
           `[QueryManager] Query ${query.id} failed, retrying (${attempt + 1}/${this.config.maxRetries})...`
         );

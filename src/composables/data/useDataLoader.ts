@@ -104,36 +104,41 @@ export function useDataLoader<T>(
     let lastError: Error | null = null;
     const maxAttempts = retryCount + 1;
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      if (cancelled || loadId !== currentLoadId) return;
-
-      try {
-        const result = await loadFn();
+    try {
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
         if (cancelled || loadId !== currentLoadId) return;
-        data.value = result;
-        hasLoaded.value = true;
-        error.value = null;
-        return;
-      } catch (e) {
-        lastError = e as Error;
-        if (attempt < maxAttempts - 1 && !cancelled) {
-          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+
+        try {
+          const result = await loadFn();
+          if (cancelled || loadId !== currentLoadId) return;
+          data.value = result;
+          hasLoaded.value = true;
+          error.value = null;
+          return;
+        } catch (e) {
+          lastError = e as Error;
+          if (attempt < maxAttempts - 1 && !cancelled) {
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
+          }
         }
       }
-    }
 
-    if (!cancelled && loadId === currentLoadId) {
-      error.value = lastError;
+      if (!cancelled && loadId === currentLoadId) {
+        error.value = lastError;
+      }
+    } finally {
+      if (loadId === currentLoadId) {
+        isLoading.value = false;
+      }
     }
   }
 
   async function load(): Promise<void> {
     if (debounce > 0) {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         if (debounceTimer) clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(async () => {
-          await executeLoad();
-          resolve();
+        debounceTimer = setTimeout(() => {
+          executeLoad().then(resolve, reject);
         }, debounce);
       });
     }

@@ -36,6 +36,9 @@ import { computed } from "vue";
 import BaseChart from "./BaseChart.vue";
 import type { EChartsOption } from "echarts";
 import type { InteractEvent } from "@/composables/useInteraction";
+import { useMeasureEngine } from "@/composables/useMeasureEngine";
+
+const { engine } = useMeasureEngine();
 
 // =============================================================================
 // Types
@@ -136,32 +139,15 @@ const emit = defineEmits<{
 // Computed
 // =============================================================================
 
-/** Formata valor conforme configuração */
+/** Formata valor conforme configuração via MeasureEngine */
 function formatValue(value: number): string {
-  let formatted: string;
-
   switch (props.format) {
     case "currency":
-      formatted = value.toLocaleString("pt-BR", {
-        minimumFractionDigits: props.decimals || 2,
-        maximumFractionDigits: props.decimals || 2,
-      });
-      return (props.prefix || "R$ ") + formatted;
-
+      return (props.prefix ? props.prefix : "") + engine.formatCurrency(value, { decimals: props.decimals || 2 });
     case "percent":
-      formatted = value.toLocaleString("pt-BR", {
-        minimumFractionDigits: props.decimals || 1,
-        maximumFractionDigits: props.decimals || 1,
-      });
-      return formatted + (props.suffix || "%");
-
+      return engine.formatPercent(value, { decimals: props.decimals || 1 }) + (props.suffix && props.suffix !== "%" ? props.suffix : "");
     case "number":
-      formatted = value.toLocaleString("pt-BR", {
-        minimumFractionDigits: props.decimals,
-        maximumFractionDigits: props.decimals,
-      });
-      return props.prefix + formatted + props.suffix;
-
+      return props.prefix + engine.formatNumber(value, { decimals: props.decimals }) + props.suffix;
     default:
       return props.prefix + String(value) + props.suffix;
   }

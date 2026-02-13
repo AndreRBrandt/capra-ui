@@ -29,6 +29,9 @@ ADRs documentam decisões técnicas importantes de forma estruturada. Cada ADR r
 | [010](./010-theme-system.md) | Theme System (Dark Mode) | **Aceito** | 2026-02-10 |
 | [011](./011-domain-containers.md) | Domain Containers (KpiContainer, etc.) | **Aceito** | 2026-02-10 |
 | [012](./012-dimension-discovery.md) | DimensionDiscovery Service | **Aceito** | 2026-02-12 |
+| [013](./013-data-loading-patterns.md) | Data Loading Patterns | **Aceito** | 2026-02-13 |
+| [014](./014-app-query-conventions.md) | App Query Building Conventions | **Aceito** | 2026-02-13 |
+| [015](./015-dependency-boundaries.md) | Dependency Boundaries (Core vs App) | **Aceito** | 2026-02-13 |
 
 ---
 

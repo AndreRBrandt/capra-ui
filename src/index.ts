@@ -18,6 +18,12 @@ export type { KpiSchemaItem, KpiData } from "./types";
 // Plugin
 export { createCapraPlugin, type CapraPluginOptions } from "./plugin";
 
+// Utils
+export * from "./utils";
+
+// Errors
+export * from "./errors";
+
 // Adapters (data layer)
 export * from "./adapters";
 
@@ -86,6 +92,7 @@ export {
   AnalyticContainer,
   FilterContainer,
   KpiContainer,
+  ListContainer,
   // Layout
   AppShell,
   AnalyticsPage,
@@ -104,6 +111,7 @@ export {
   EmptyState,
   ColorGroupManager,
   KpiConfigPanel,
+  SegmentedControl,
   // Filters (components only, types come from composables)
   FilterTrigger,
   FilterDropdown,
@@ -126,3 +134,5 @@ export type { EmptySize } from "./components/ui/EmptyState.vue";
 export type { SettingsSection } from "./components/layout/SettingsLayout.vue";
 export type { ExtraPreset } from "./components/ui/ThemeConfigPanel.vue";
 export type { KpiConfigItem } from "./components/ui/KpiConfigPanel.vue";
+export type { SegmentedOption } from "./components/ui/SegmentedControl.vue";
+export type { ListContainerProps, ListContainerGroup } from "./components/containers/ListContainer.vue";

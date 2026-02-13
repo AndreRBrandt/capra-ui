@@ -33,6 +33,14 @@ const testSchema: Record<string, KpiSchemaItem> = {
   faturamentoJantar: { key: "faturamentoJantar", category: "turno", icon: "Moon" },
 };
 
+// Cores de teste (consumidor define suas categorias — core só tem "main" como default)
+const testColors: Record<string, string> = {
+  main: "#2d6a4f",
+  discount: "#9b2c2c",
+  modalidade: "#5a7c3a",
+  turno: "#2c5282",
+};
+
 describe("useKpiTheme", () => {
   beforeEach(() => {
     localStorageMock.clear();
@@ -44,7 +52,7 @@ describe("useKpiTheme", () => {
   // ===========================================================================
   describe("Inicializacao", () => {
     it("deve inicializar com cores padrao", () => {
-      const { theme } = useKpiTheme({ schema: testSchema });
+      const { theme } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(theme.value.categories.main).toBe("#2d6a4f");
       expect(theme.value.categories.discount).toBe("#9b2c2c");
@@ -90,7 +98,7 @@ describe("useKpiTheme", () => {
   // ===========================================================================
   describe("getKpiColor", () => {
     it("deve retornar cor da categoria main", () => {
-      const { getKpiColor } = useKpiTheme({ schema: testSchema });
+      const { getKpiColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getKpiColor("faturamento")).toBe("#2d6a4f");
       expect(getKpiColor("ticketMedio")).toBe("#2d6a4f");
@@ -98,28 +106,28 @@ describe("useKpiTheme", () => {
     });
 
     it("deve retornar cor da categoria discount", () => {
-      const { getKpiColor } = useKpiTheme({ schema: testSchema });
+      const { getKpiColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getKpiColor("descontos")).toBe("#9b2c2c");
       expect(getKpiColor("descontosPromocionais")).toBe("#9b2c2c");
     });
 
     it("deve retornar cor da categoria modalidade", () => {
-      const { getKpiColor } = useKpiTheme({ schema: testSchema });
+      const { getKpiColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getKpiColor("faturamentoSalao")).toBe("#5a7c3a");
       expect(getKpiColor("faturamentoDelivery")).toBe("#5a7c3a");
     });
 
     it("deve retornar cor da categoria turno", () => {
-      const { getKpiColor } = useKpiTheme({ schema: testSchema });
+      const { getKpiColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getKpiColor("faturamentoAlmoco")).toBe("#2c5282");
       expect(getKpiColor("faturamentoJantar")).toBe("#2c5282");
     });
 
     it("deve retornar fallback para KPI desconhecido", () => {
-      const { getKpiColor } = useKpiTheme({ schema: testSchema });
+      const { getKpiColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getKpiColor("kpiDesconhecido")).toBe("#2d6a4f");
     });
@@ -138,7 +146,7 @@ describe("useKpiTheme", () => {
   // ===========================================================================
   describe("getCategoryColor", () => {
     it("deve retornar cor de cada categoria", () => {
-      const { getCategoryColor } = useKpiTheme({ schema: testSchema });
+      const { getCategoryColor } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
       expect(getCategoryColor("main")).toBe("#2d6a4f");
       expect(getCategoryColor("discount")).toBe("#9b2c2c");
@@ -176,6 +184,7 @@ describe("useKpiTheme", () => {
     it("nao deve afetar outras categorias", () => {
       const { getCategoryColor, updateCategoryColor } = useKpiTheme({
         schema: testSchema,
+        defaultColors: testColors,
       });
 
       updateCategoryColor("main", "#newmain");
@@ -271,6 +280,7 @@ describe("useKpiTheme", () => {
     it("deve resetar cores das categorias", () => {
       const { getCategoryColor, updateCategoryColor, resetTheme } = useKpiTheme({
         schema: testSchema,
+        defaultColors: testColors,
       });
 
       updateCategoryColor("main", "#changed");
@@ -342,13 +352,10 @@ describe("useKpiTheme", () => {
   // categoryLabels
   // ===========================================================================
   describe("categoryLabels", () => {
-    it("deve ter labels para todas as categorias", () => {
-      const { categoryLabels } = useKpiTheme({ schema: testSchema });
+    it("deve ter labels para categorias base do core", () => {
+      const { categoryLabels } = useKpiTheme({ schema: testSchema, defaultColors: testColors });
 
-      expect(categoryLabels.main).toBe("Principal");
-      expect(categoryLabels.discount).toBe("Descontos");
-      expect(categoryLabels.modalidade).toBe("Modalidade");
-      expect(categoryLabels.turno).toBe("Turno");
+      expect(categoryLabels.main).toBe("Main");
     });
   });
 

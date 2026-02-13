@@ -33,9 +33,12 @@
  * ```
  */
 
-import { ref, computed, watch } from "vue";
-import { ChevronUp, ChevronDown, ChevronsUpDown, Eye, Search, ChevronDown as ChevronDownIcon, X } from "lucide-vue-next";
+import { ref, computed, watch, reactive } from "vue";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Eye, Search, ChevronDown as ChevronDownIcon, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from "lucide-vue-next";
 import type { InteractEvent } from "@/composables/useInteraction";
+import { useMeasureEngine } from "@/composables/useMeasureEngine";
+
+const { engine: _engine } = useMeasureEngine();
 
 // =============================================================================
 // Types
@@ -75,6 +78,8 @@ export interface Column {
   trend?: TrendConfig;
   /** Renderizar valor como HTML (usar v-html) */
   html?: boolean;
+  /** Habilita filtro por coluna (override per-column) */
+  filterable?: boolean;
 }
 
 export interface SortState {
@@ -164,6 +169,18 @@ const props = withDefaults(
     totalsConfig?: Record<string, TotalConfig>;
     /** Label padrão para a primeira coluna de totais */
     totalsLabel?: string;
+    /** Habilita filtros por coluna (Excel-like) */
+    columnFilterable?: boolean;
+    /** Habilita busca dentro do dropdown de filtro por coluna */
+    columnFilterSearchable?: boolean;
+    /** Habilita paginação (auto-hide quando totalPages <= 1) */
+    paginated?: boolean;
+    /** Itens por página */
+    pageSize?: number;
+    /** Opções do seletor de itens por página */
+    pageSizeOptions?: number[];
+    /** Exibe seletor de itens por página */
+    showPageSizeSelector?: boolean;
   }>(),
   {
     rowKey: "id",
@@ -179,7 +196,7 @@ const props = withDefaults(
     striped: true,
     compact: false,
     maxHeight: undefined,
-    searchable: false,
+    searchable: true,
     searchPlaceholder: "Buscar...",
     searchKeys: undefined,
     filterOptions: undefined,
@@ -192,6 +209,12 @@ const props = withDefaults(
     showTotals: true,
     totalsConfig: undefined,
     totalsLabel: "TOTAL",
+    columnFilterable: true,
+    columnFilterSearchable: true,
+    paginated: true,
+    pageSize: 15,
+    pageSizeOptions: () => [10, 15, 25, 50],
+    showPageSizeSelector: true,
   }
 );
 
@@ -210,6 +233,8 @@ const emit = defineEmits<{
   sort: [state: SortState];
   /** Colunas reordenadas */
   "columns-reorder": [columns: Column[]];
+  /** Filtro por coluna alterado */
+  "column-filter": [payload: { key: string; values: string[] }];
 }>();
 
 // =============================================================================
@@ -220,6 +245,15 @@ const sortState = ref<SortState | null>(null);
 const searchQuery = ref("");
 const selectedFilter = ref<string>("all");
 const showFilterDropdown = ref(false);
+
+// Pagination state
+const currentPage = ref(1);
+const currentPageSize = ref(props.pageSize);
+
+// Column filter state
+const columnFilters = reactive(new Map<string, Set<string>>());
+const openColumnFilter = ref<string | null>(null);
+const columnFilterSearch = ref("");
 
 // Drag-and-drop state
 const columnOrder = ref<string[]>([]);
@@ -249,9 +283,21 @@ watch(() => props.filterOptions, () => {
 // Computed
 // =============================================================================
 
-/** Dados filtrados por busca e filtro de categoria */
+/** Dados filtrados por column filters, busca e filtro de categoria */
 const filteredData = computed(() => {
   let data = props.data;
+
+  // Aplicar column filters (antes de tudo)
+  if (hasAnyColumnFilter.value) {
+    data = data.filter((row) => {
+      for (const [colKey, selectedValues] of columnFilters) {
+        if (selectedValues.size === 0) return false;
+        const rawStr = row[colKey] == null ? "" : String(row[colKey]);
+        if (!selectedValues.has(rawStr)) return false;
+      }
+      return true;
+    });
+  }
 
   // Aplicar filtro de categoria
   if (props.filterKey && selectedFilter.value !== "all") {
@@ -331,6 +377,44 @@ const orderedColumns = computed(() => {
     .filter((col): col is Column => col !== undefined);
 });
 
+// =============================================================================
+// Column Filter Computeds
+// =============================================================================
+
+/** Alguma coluna tem filtro ativo? */
+const hasAnyColumnFilter = computed(() => {
+  return columnFilters.size > 0;
+});
+
+/** Valores únicos da coluna com dropdown aberto (extraídos de props.data, não de filteredData) */
+const columnFilterValues = computed(() => {
+  if (!openColumnFilter.value) return [];
+  const key = openColumnFilter.value;
+  const uniqueValues = new Set<string>();
+  for (const row of props.data) {
+    const rawStr = row[key] == null ? "" : String(row[key]);
+    uniqueValues.add(rawStr);
+  }
+  const values = Array.from(uniqueValues).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  if (columnFilterSearch.value.trim()) {
+    const query = columnFilterSearch.value.toLowerCase().trim();
+    return values.filter((v) => v.toLowerCase().includes(query));
+  }
+  return values;
+});
+
+/** Todos os valores raw da coluna aberta (sem search do dropdown) */
+const allColumnFilterValues = computed(() => {
+  if (!openColumnFilter.value) return [];
+  const key = openColumnFilter.value;
+  const uniqueValues = new Set<string>();
+  for (const row of props.data) {
+    const rawStr = row[key] == null ? "" : String(row[key]);
+    uniqueValues.add(rawStr);
+  }
+  return Array.from(uniqueValues).sort((a, b) => a.localeCompare(b, "pt-BR"));
+});
+
 /** Calcula os totais para cada coluna */
 const columnTotals = computed(() => {
   if (!props.showTotals || sortedData.value.length === 0) {
@@ -398,6 +482,76 @@ const columnTotals = computed(() => {
 });
 
 // =============================================================================
+// Pagination Computeds
+// =============================================================================
+
+const totalPages = computed(() => {
+  if (!props.paginated || currentPageSize.value <= 0) return 1;
+  return Math.max(1, Math.ceil(sortedData.value.length / currentPageSize.value));
+});
+
+const paginatedData = computed(() => {
+  if (!props.paginated || totalPages.value <= 1) return sortedData.value;
+  const start = (currentPage.value - 1) * currentPageSize.value;
+  const end = start + currentPageSize.value;
+  return sortedData.value.slice(start, end);
+});
+
+const showPagination = computed(() => {
+  return props.paginated && totalPages.value > 1;
+});
+
+const isFirstPage = computed(() => currentPage.value <= 1);
+const isLastPage = computed(() => currentPage.value >= totalPages.value);
+
+const displayRange = computed(() => {
+  const total = sortedData.value.length;
+  if (total === 0) return "";
+  if (!props.paginated || totalPages.value <= 1) {
+    return `Exibindo ${total} de ${props.data.length} itens`;
+  }
+  const start = (currentPage.value - 1) * currentPageSize.value + 1;
+  const end = Math.min(currentPage.value * currentPageSize.value, total);
+  return `Exibindo ${start}–${end} de ${total} itens`;
+});
+
+const visiblePageNumbers = computed(() => {
+  const total = totalPages.value;
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  const current = currentPage.value;
+  let start = Math.max(1, current - 2);
+  let end = Math.min(total, start + 4);
+  if (end - start < 4) {
+    start = Math.max(1, end - 4);
+  }
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+});
+
+// =============================================================================
+// Pagination Watchers
+// =============================================================================
+
+watch(searchQuery, () => { currentPage.value = 1; });
+watch(selectedFilter, () => { currentPage.value = 1; });
+watch(sortState, () => { currentPage.value = 1; });
+watch(totalPages, (newTotal) => {
+  if (currentPage.value > newTotal) {
+    currentPage.value = Math.max(1, newTotal);
+  }
+});
+watch(() => props.pageSize, (newSize) => {
+  currentPageSize.value = newSize;
+  currentPage.value = 1;
+});
+
+// Column filter watcher — reset page
+watch(() => columnFilters.size + Array.from(columnFilters.values()).reduce((acc, s) => acc + s.size, 0), () => {
+  currentPage.value = 1;
+});
+
+// =============================================================================
 // Methods
 // =============================================================================
 
@@ -436,27 +590,6 @@ function getSortIcon(column: Column) {
 // Formatadores Built-in
 // =============================================================================
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatNumber(value: number, decimals = 0): string {
-  return value.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-}
-
-function formatPercent(value: number, decimals = 1): string {
-  return `${value.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  })}%`;
-}
-
 function applyBuiltInFormat(value: unknown, column: Column): string {
   if (value == null) return "";
 
@@ -465,11 +598,11 @@ function applyBuiltInFormat(value: unknown, column: Column): string {
 
   switch (column.type) {
     case "currency":
-      return `R$ ${formatCurrency(numValue)}`;
+      return _engine.formatCurrency(numValue, { decimals: column.decimals ?? 2 });
     case "number":
-      return formatNumber(numValue, column.decimals ?? 0);
+      return _engine.formatNumber(numValue, { decimals: column.decimals ?? 0 });
     case "percent":
-      return formatPercent(numValue, column.decimals ?? 1);
+      return _engine.formatPercent(numValue, { decimals: column.decimals ?? 1 });
     default:
       return String(value);
   }
@@ -525,11 +658,7 @@ function getTrendData(row: DataRow, column: Column): { value: number; isPositive
 
 /** Formata o valor da tendência */
 function formatTrendValue(value: number, decimals = 1): string {
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toLocaleString("pt-BR", {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  })}%`;
+  return _engine.formatVariation(value, { decimals });
 }
 
 function handleRowClick(row: DataRow, index: number) {
@@ -663,6 +792,117 @@ function clearFilter() {
 }
 
 // =============================================================================
+// Column Filter Methods
+// =============================================================================
+
+function isColumnFilterable(column: Column): boolean {
+  if (column.filterable !== undefined) return column.filterable;
+  return props.columnFilterable ?? true;
+}
+
+function hasColumnFilter(columnKey: string): boolean {
+  return columnFilters.has(columnKey);
+}
+
+function toggleColumnFilter(columnKey: string) {
+  if (openColumnFilter.value === columnKey) {
+    closeColumnFilter();
+  } else {
+    openColumnFilter.value = columnKey;
+    columnFilterSearch.value = "";
+  }
+}
+
+function closeColumnFilter() {
+  openColumnFilter.value = null;
+  columnFilterSearch.value = "";
+}
+
+function isColumnFilterValueSelected(rawValue: string): boolean {
+  if (!openColumnFilter.value) return false;
+  const selected = columnFilters.get(openColumnFilter.value);
+  // No filter entry = all selected
+  if (!selected) return true;
+  return selected.has(rawValue);
+}
+
+function toggleColumnFilterValue(rawValue: string) {
+  if (!openColumnFilter.value) return;
+  const key = openColumnFilter.value;
+  let selected = columnFilters.get(key);
+
+  if (!selected) {
+    // No filter = all selected → uncheck one = create Set with ALL minus this one
+    const allValues = new Set(allColumnFilterValues.value);
+    allValues.delete(rawValue);
+    columnFilters.set(key, allValues);
+  } else {
+    if (selected.has(rawValue)) {
+      // Uncheck: remove from set
+      selected.delete(rawValue);
+      // If empty, keep it (empty = nothing passes)
+      columnFilters.set(key, new Set(selected));
+    } else {
+      // Check: add to set
+      selected.add(rawValue);
+      // If all selected → remove entry from map
+      const allValues = allColumnFilterValues.value;
+      if (selected.size >= allValues.length) {
+        columnFilters.delete(key);
+      } else {
+        columnFilters.set(key, new Set(selected));
+      }
+    }
+  }
+
+  emit("column-filter", { key, values: Array.from(columnFilters.get(key) ?? []) });
+}
+
+function selectAllColumnFilterValues() {
+  if (!openColumnFilter.value) return;
+  columnFilters.delete(openColumnFilter.value);
+}
+
+function clearAllColumnFilterValues() {
+  if (!openColumnFilter.value) return;
+  columnFilters.set(openColumnFilter.value, new Set<string>());
+}
+
+function clearColumnFilters() {
+  columnFilters.clear();
+}
+
+// =============================================================================
+// Pagination Methods
+// =============================================================================
+
+function goToPage(page: number) {
+  const clamped = Math.max(1, Math.min(page, totalPages.value));
+  currentPage.value = clamped;
+}
+
+function goToNextPage() {
+  if (!isLastPage.value) currentPage.value++;
+}
+
+function goToPrevPage() {
+  if (!isFirstPage.value) currentPage.value--;
+}
+
+function goToFirstPage() {
+  currentPage.value = 1;
+}
+
+function goToLastPage() {
+  currentPage.value = totalPages.value;
+}
+
+function changePageSize(size: number) {
+  currentPageSize.value = size;
+  currentPage.value = 1;
+}
+
+// =============================================================================
 // Drag-and-Drop Column Reorder
 // =============================================================================
 
@@ -783,13 +1023,13 @@ function getTotalValue(column: Column, index: number): string {
 
   switch (column.type) {
     case "currency":
-      return `R$ ${formatCurrency(numValue)}`;
+      return _engine.formatCurrency(numValue, { decimals: column.decimals ?? 2 });
     case "number":
-      return formatNumber(numValue, column.decimals ?? 0);
+      return _engine.formatNumber(numValue, { decimals: column.decimals ?? 0 });
     case "percent":
-      return formatPercent(numValue, column.decimals ?? 1);
+      return _engine.formatPercent(numValue, { decimals: column.decimals ?? 1 });
     default:
-      return formatNumber(numValue, 0);
+      return _engine.formatNumber(numValue, { decimals: 0 });
   }
 }
 
@@ -797,6 +1037,10 @@ function getTotalValue(column: Column, index: number): string {
 defineExpose({
   clearSearch,
   clearFilter,
+  clearColumnFilters,
+  goToPage,
+  goToFirstPage,
+  goToLastPage,
 });
 </script>
 
@@ -875,6 +1119,13 @@ defineExpose({
       </div>
     </div>
 
+    <!-- Column filter overlay (fecha dropdown ao clicar fora) -->
+    <div
+      v-if="openColumnFilter"
+      class="data-table__col-filter-overlay"
+      @click="closeColumnFilter"
+    />
+
     <!-- Container com scroll -->
     <div
       :class="[
@@ -939,6 +1190,60 @@ defineExpose({
                 :size="16"
                 class="data-table__sort-icon"
               />
+              <button
+                v-if="isColumnFilterable(column)"
+                type="button"
+                class="data-table__col-filter-icon"
+                :class="{ 'data-table__col-filter-icon--active': hasColumnFilter(column.key) }"
+                data-testid="col-filter-icon"
+                @click.stop="toggleColumnFilter(column.key)"
+              >
+                <Filter :size="14" />
+              </button>
+            </div>
+            <!-- Column Filter Dropdown -->
+            <div
+              v-if="openColumnFilter === column.key"
+              class="data-table__col-filter-dropdown"
+              :class="{ 'data-table__col-filter-dropdown--right': column.align === 'right' }"
+              @click.stop
+            >
+              <div class="data-table__col-filter-header">
+                <span class="data-table__col-filter-count">
+                  {{ allColumnFilterValues.length }} valores
+                </span>
+                <div class="data-table__col-filter-actions">
+                  <button type="button" class="data-table__col-filter-action-btn" @click="selectAllColumnFilterValues">Todas</button>
+                  <button type="button" class="data-table__col-filter-action-btn" @click="clearAllColumnFilterValues">Limpar</button>
+                </div>
+              </div>
+              <div v-if="columnFilterSearchable" class="data-table__col-filter-search">
+                <Search :size="14" class="data-table__col-filter-search-icon" />
+                <input
+                  v-model="columnFilterSearch"
+                  type="text"
+                  class="data-table__col-filter-search-input"
+                  placeholder="Buscar..."
+                />
+              </div>
+              <div class="data-table__col-filter-list">
+                <label
+                  v-for="val in columnFilterValues"
+                  :key="val"
+                  class="data-table__col-filter-option"
+                >
+                  <input
+                    type="checkbox"
+                    class="data-table__col-filter-checkbox"
+                    :checked="isColumnFilterValueSelected(val)"
+                    @change="toggleColumnFilterValue(val)"
+                  />
+                  <span class="data-table__col-filter-label">{{ val || '(vazio)' }}</span>
+                </label>
+                <div v-if="columnFilterValues.length === 0" class="data-table__col-filter-empty">
+                  Nenhum resultado
+                </div>
+              </div>
             </div>
           </th>
           <!-- Coluna de ações -->
@@ -954,7 +1259,7 @@ defineExpose({
 
       <tbody>
         <!-- Empty state -->
-        <tr v-if="sortedData.length === 0">
+        <tr v-if="paginatedData.length === 0">
           <td :colspan="getColumnsCount()" class="data-table__empty">
             <slot name="empty">
               {{ emptyMessage }}
@@ -964,7 +1269,7 @@ defineExpose({
 
         <!-- Data rows -->
         <tr
-          v-for="(row, index) in sortedData"
+          v-for="(row, index) in paginatedData"
           :key="row[rowKey] as string"
           :class="[
             'data-table__row',
@@ -1028,7 +1333,7 @@ defineExpose({
       </tbody>
 
       <!-- Footer com totais -->
-      <tfoot v-if="showTotals && sortedData.length > 0" class="data-table__tfoot">
+      <tfoot v-if="showTotals && filteredData.length > 0" class="data-table__tfoot">
         <tr class="data-table__totals-row">
           <td
             v-for="(column, colIndex) in orderedColumns"
@@ -1054,11 +1359,78 @@ defineExpose({
     </table>
     </div>
 
-    <!-- Footer com contagem -->
-    <div v-if="filteredData.length !== data.length" class="data-table__footer">
-      <span class="data-table__count">
-        Exibindo {{ sortedData.length }} de {{ data.length }} itens
-      </span>
+    <!-- Footer com paginação -->
+    <div v-if="showPagination || filteredData.length !== data.length" class="data-table__footer">
+      <!-- Page size selector -->
+      <div class="data-table__footer-left">
+        <div v-if="showPagination && showPageSizeSelector" class="data-table__page-size">
+          <label class="data-table__page-size-label">Itens por página:</label>
+          <select
+            class="data-table__page-size-select"
+            :value="currentPageSize"
+            @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
+          >
+            <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Display range -->
+      <div class="data-table__footer-center">
+        <span class="data-table__count">{{ displayRange }}</span>
+      </div>
+
+      <!-- Pagination nav -->
+      <div class="data-table__footer-right">
+        <nav v-if="showPagination" class="data-table__pagination" aria-label="Paginação da tabela">
+          <button
+            type="button"
+            class="data-table__page-btn"
+            :disabled="isFirstPage"
+            title="Primeira página"
+            @click="goToFirstPage"
+          >
+            <ChevronsLeft :size="16" />
+          </button>
+          <button
+            type="button"
+            class="data-table__page-btn"
+            :disabled="isFirstPage"
+            title="Página anterior"
+            @click="goToPrevPage"
+          >
+            <ChevronLeft :size="16" />
+          </button>
+          <button
+            v-for="page in visiblePageNumbers"
+            :key="page"
+            type="button"
+            class="data-table__page-btn"
+            :class="{ 'data-table__page-btn--active': page === currentPage }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            type="button"
+            class="data-table__page-btn"
+            :disabled="isLastPage"
+            title="Próxima página"
+            @click="goToNextPage"
+          >
+            <ChevronRight :size="16" />
+          </button>
+          <button
+            type="button"
+            class="data-table__page-btn"
+            :disabled="isLastPage"
+            title="Última página"
+            @click="goToLastPage"
+          >
+            <ChevronsRight :size="16" />
+          </button>
+        </nav>
+      </div>
     </div>
   </div>
 </template>
@@ -1283,20 +1655,114 @@ defineExpose({
 }
 
 /* =============================================================================
-   Footer
+   Footer (Pagination)
    ============================================================================= */
 
 .data-table__footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 12px);
+  padding: var(--spacing-sm, 8px) 0;
+  margin-top: var(--spacing-xs, 4px);
+}
+
+.data-table__footer-left,
+.data-table__footer-center,
+.data-table__footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.data-table__footer-left {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.data-table__footer-center {
+  flex: 1;
+  justify-content: center;
+}
+
+.data-table__footer-right {
+  flex: 1;
   justify-content: flex-end;
-  padding: var(--spacing-sm) 0;
-  margin-top: var(--spacing-xs);
 }
 
 .data-table__count {
-  font-size: var(--font-size-small);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text-muted, #6b7280);
+  white-space: nowrap;
+}
+
+/* Page Size Selector */
+
+.data-table__page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
+}
+
+.data-table__page-size-label {
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text-muted, #6b7280);
+  white-space: nowrap;
+}
+
+.data-table__page-size-select {
+  padding: 2px var(--spacing-xs, 4px);
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text, #1f2937);
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+}
+
+.data-table__page-size-select:focus {
+  outline: none;
+  border-color: var(--color-brand-primary, #e5a22f);
+}
+
+/* Pagination Nav */
+
+.data-table__pagination {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.data-table__page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--spacing-xs, 4px);
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text, #1f2937);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: var(--transition-fast, 0.15s ease);
+}
+
+.data-table__page-btn:hover:not(:disabled):not(.data-table__page-btn--active) {
+  background-color: var(--color-hover, #f3f4f6);
+  border-color: var(--color-border, #e5e7eb);
+}
+
+.data-table__page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.data-table__page-btn--active {
+  color: var(--color-brand-primary, #e5a22f);
+  font-weight: 600;
+  border-color: var(--color-brand-primary, #e5a22f);
+  background-color: var(--color-brand-highlight, rgba(229, 162, 47, 0.1));
 }
 
 /* =============================================================================
@@ -1314,6 +1780,7 @@ defineExpose({
    ============================================================================= */
 
 .data-table__header {
+  position: relative;
   padding: var(--container-padding-sm) var(--container-padding);
   font-weight: 600;
   font-size: var(--font-size-caption);
@@ -1572,6 +2039,168 @@ defineExpose({
 
 .text-center .data-table__cell-content {
   align-items: center;
+}
+
+/* =============================================================================
+   Column Filters
+   ============================================================================= */
+
+.data-table__col-filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--color-text-tertiary, #9ca3af);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: var(--transition-fast, 0.15s ease);
+}
+
+.data-table__col-filter-icon:hover {
+  color: var(--color-text, #1f2937);
+  background-color: var(--color-hover, #f3f4f6);
+}
+
+.data-table__col-filter-icon--active {
+  color: var(--color-brand-primary, #e5a22f);
+}
+
+.data-table__col-filter-icon--active:hover {
+  color: var(--color-brand-primary, #e5a22f);
+}
+
+.data-table__col-filter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
+.data-table__col-filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 200;
+  min-width: 200px;
+  max-width: 300px;
+  margin-top: 4px;
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0,0,0,0.1));
+  font-weight: 400;
+  cursor: default;
+}
+
+.data-table__col-filter-dropdown--right {
+  left: auto;
+  right: 0;
+}
+
+.data-table__col-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.data-table__col-filter-count {
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text-muted, #6b7280);
+}
+
+.data-table__col-filter-actions {
+  display: flex;
+  gap: var(--spacing-xs, 4px);
+}
+
+.data-table__col-filter-action-btn {
+  padding: 2px var(--spacing-xs, 4px);
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-brand-primary, #e5a22f);
+  background: transparent;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+  transition: var(--transition-fast, 0.15s ease);
+}
+
+.data-table__col-filter-action-btn:hover {
+  background-color: var(--color-brand-highlight, rgba(229, 162, 47, 0.1));
+}
+
+.data-table__col-filter-search {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  gap: var(--spacing-xs, 4px);
+}
+
+.data-table__col-filter-search-icon {
+  color: var(--color-text-muted, #6b7280);
+  flex-shrink: 0;
+}
+
+.data-table__col-filter-search-input {
+  flex: 1;
+  padding: 2px var(--spacing-xs, 4px);
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text, #1f2937);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.data-table__col-filter-search-input::placeholder {
+  color: var(--color-text-muted, #6b7280);
+}
+
+.data-table__col-filter-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--spacing-xs, 4px) 0;
+}
+
+.data-table__col-filter-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  cursor: pointer;
+  transition: var(--transition-fast, 0.15s ease);
+  font-size: var(--font-size-small, 0.8125rem);
+}
+
+.data-table__col-filter-option:hover {
+  background-color: var(--color-hover, #f3f4f6);
+}
+
+.data-table__col-filter-checkbox {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--color-brand-primary, #e5a22f);
+  cursor: pointer;
+}
+
+.data-table__col-filter-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text, #1f2937);
+}
+
+.data-table__col-filter-empty {
+  padding: var(--spacing-sm, 8px);
+  text-align: center;
+  font-size: var(--font-size-small, 0.8125rem);
+  color: var(--color-text-muted, #6b7280);
 }
 
 /* =============================================================================

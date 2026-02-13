@@ -66,4 +66,5 @@ export {
   SchemaRegistry,
   schemaRegistry,
   createSchemaRegistry,
+  SCHEMA_REGISTRY_KEY,
 } from "./SchemaRegistry";

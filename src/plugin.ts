@@ -32,6 +32,7 @@ import {
 import type { DataAdapter } from "./adapters";
 import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY, DIMENSION_DISCOVERY_KEY, THEME_KEY, createThemeInstance } from "./composables";
 import { MEASURE_ENGINE_KEY } from "./composables/useMeasureEngine";
+import { schemaRegistry, SCHEMA_REGISTRY_KEY } from "./schema";
 
 // ===========================================================================
 // Plugin Options
@@ -66,6 +67,9 @@ export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
       });
       app.provide(MEASURE_ENGINE_KEY, engine);
 
+      // SchemaRegistry (singleton, always provided)
+      app.provide(SCHEMA_REGISTRY_KEY, schemaRegistry);
+
       // Theme (always created)
       const theme = createThemeInstance();
       app.provide(THEME_KEY, theme);
@@ -73,6 +77,9 @@ export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
       // ActionBus (always created - no adapter needed)
       const bus = createActionBus(options.actionBus);
       app.provide(ACTION_BUS_KEY, bus);
+
+      // Cleanup functions to call on unmount
+      const cleanups: Array<() => void> = [() => bus.destroy()];
 
       // FilterManager (only if adapter + filters provided)
       if (options.adapter && options.filters) {
@@ -100,7 +107,13 @@ export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
           options.dimensionDiscovery,
         );
         app.provide(DIMENSION_DISCOVERY_KEY, discovery);
+        cleanups.push(() => discovery.stopAutoRefresh());
       }
+
+      // Cleanup on app unmount
+      app.onUnmount(() => {
+        cleanups.forEach((fn) => fn());
+      });
     },
   };
 }

@@ -157,7 +157,7 @@ export function useQueryManager(): UseQueryManagerReturn {
       const result = await manager.execute<T>(query);
       return result;
     } catch (error) {
-      lastError.value = error as Error;
+      lastError.value = error instanceof Error ? error : new Error(String(error));
       throw error;
     } finally {
       pendingCount.value--;
@@ -183,7 +183,7 @@ export function useQueryManager(): UseQueryManagerReturn {
       const results = await manager.executeMany<T>(queries, parallel);
       return results;
     } catch (error) {
-      lastError.value = error as Error;
+      lastError.value = error instanceof Error ? error : new Error(String(error));
       throw error;
     } finally {
       pendingCount.value -= queries.length;

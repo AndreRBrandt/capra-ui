@@ -201,7 +201,7 @@ export function useChartDrill<TData = unknown>(
 
       onLevelChange?.(level, ctx);
     } catch (e) {
-      const err = e as Error;
+      const err = e instanceof Error ? e : new Error(String(e));
       error.value = err;
       onError?.(err);
     } finally {
@@ -243,8 +243,8 @@ export function useChartDrill<TData = unknown>(
     context.value = prevContext;
     contextHistory.value = contextHistory.value.slice(0, prevIndex);
 
-    // Load from cache or re-fetch
-    loadLevel(prevIndex, prevContext);
+    // Load from cache or re-fetch — loadLevel handles its own errors via error ref + onError
+    void loadLevel(prevIndex, prevContext);
   }
 
   function goToLevel(index: number): void {
@@ -257,7 +257,8 @@ export function useChartDrill<TData = unknown>(
     context.value = targetContext;
     contextHistory.value = contextHistory.value.slice(0, index);
 
-    loadLevel(index, targetContext);
+    // loadLevel handles its own errors via error ref + onError
+    void loadLevel(index, targetContext);
   }
 
   async function reset(): Promise<void> {

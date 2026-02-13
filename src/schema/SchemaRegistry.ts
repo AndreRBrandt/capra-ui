@@ -327,6 +327,15 @@ export class SchemaRegistry {
 }
 
 // =============================================================================
+// Injection Key
+// =============================================================================
+
+import { type InjectionKey } from "vue";
+
+export const SCHEMA_REGISTRY_KEY: InjectionKey<SchemaRegistry> =
+  Symbol("SchemaRegistry");
+
+// =============================================================================
 // Singleton Instance
 // =============================================================================
 

@@ -118,6 +118,7 @@ defineEmits<{
 <style scoped>
 .capra-kpi-wrapper {
   position: relative;
+  height: 100%;
 }
 
 .capra-kpi-wrapper__buttons {

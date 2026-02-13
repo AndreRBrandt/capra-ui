@@ -22,44 +22,7 @@
  */
 
 import { ref, computed, watch, onScopeDispose, type Ref, type ComputedRef } from "vue";
-
-// =============================================================================
-// Utilities
-// =============================================================================
-
-/**
- * Cria uma versão debounced de uma função.
- * Evita chamadas excessivas agrupando execuções dentro do delay.
- *
- * @param fn - Função a ser debounced
- * @param delay - Tempo em ms para aguardar antes de executar
- * @returns Função debounced com método cancel()
- */
-function debounce<T extends (...args: unknown[]) => unknown>(
-  fn: T,
-  delay: number
-): T & { cancel: () => void } {
-  let timeoutId: ReturnType<typeof setTimeout> | null = null;
-
-  const debounced = ((...args: Parameters<T>) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    timeoutId = setTimeout(() => {
-      fn(...args);
-      timeoutId = null;
-    }, delay);
-  }) as T & { cancel: () => void };
-
-  debounced.cancel = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      timeoutId = null;
-    }
-  };
-
-  return debounced;
-}
+import { debounce, deepClone } from "@/utils";
 
 // =============================================================================
 // Types
@@ -105,13 +68,6 @@ export interface UseConfigStateReturn<T> {
 // =============================================================================
 // Helpers
 // =============================================================================
-
-/**
- * Deep clone de um objeto
- */
-function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
-}
 
 /**
  * Merge profundo: adiciona propriedades de defaults que não existem em target

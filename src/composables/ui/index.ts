@@ -47,3 +47,9 @@ export type {
   UseNavigationStackReturn,
   NavigationBreadcrumb,
 } from "./useNavigationStack";
+
+export { useModalDataLoader } from "./useModalDataLoader";
+export type {
+  UseModalDataLoaderConfig,
+  UseModalDataLoaderReturn,
+} from "./useModalDataLoader";

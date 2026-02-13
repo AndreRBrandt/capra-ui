@@ -176,7 +176,18 @@ function handleRetry() {
     :aria-busy="loading"
   >
     <!-- Header -->
-    <div v-if="showHeader" class="analytic-container__header">
+    <div
+      v-if="showHeader"
+      class="analytic-container__header"
+      :class="{ 'analytic-container__header--clickable': collapsible }"
+      :role="collapsible ? 'button' : undefined"
+      :tabindex="collapsible ? 0 : undefined"
+      :aria-expanded="collapsible ? (isExpanded ? 'true' : 'false') : undefined"
+      :aria-label="collapsible ? 'Expandir/colapsar' : undefined"
+      @click="collapsible && toggleCollapse()"
+      @keydown.enter="collapsible && toggleCollapse()"
+      @keydown.space.prevent="collapsible && toggleCollapse()"
+    >
       <slot name="header" :title="title" :subtitle="subtitle" :icon="icon">
         <div class="analytic-container__header-content">
           <component v-if="icon" :is="icon" class="analytic-container__icon" />
@@ -186,23 +197,15 @@ function handleRetry() {
               {{ subtitle }}
             </p>
           </div>
-        </div>
-        <div class="analytic-container__actions">
-          <!-- Toggle Collapse -->
-          <button
+          <!-- Collapse chevron inline with title -->
+          <component
             v-if="collapsible"
-            type="button"
-            class="analytic-container__toggle"
-            :aria-expanded="isExpanded ? 'true' : 'false'"
-            aria-label="Expandir/colapsar"
-            @click="toggleCollapse"
-          >
-            <component
-              :is="collapsed ? ChevronDown : ChevronUp"
-              class="analytic-container__toggle-icon"
-              :size="20"
-            />
-          </button>
+            :is="collapsed ? ChevronDown : ChevronUp"
+            class="analytic-container__collapse-indicator"
+            :size="18"
+          />
+        </div>
+        <div class="analytic-container__actions" @click.stop>
 
           <!-- Actions Integradas -->
           <div
@@ -226,6 +229,7 @@ function handleRetry() {
               :title="configTitle"
               placement="bottom-end"
               :offset="8"
+              max-height="420px"
               data-testid="config-popover"
             >
               <template #trigger>
@@ -616,29 +620,25 @@ function handleRetry() {
   background-color: var(--color-hover, #fef3e2);
 }
 
-/* Toggle Collapse */
-.analytic-container__toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background-color: transparent;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: var(--radius-sm, 0.25rem);
-  color: var(--color-text-muted, #6b7280);
+/* Clickable Header (collapsible) */
+.analytic-container__header--clickable {
   cursor: pointer;
+  user-select: none;
+}
+
+.analytic-container__header--clickable:hover {
+  background-color: var(--color-hover, #f9fafb);
+}
+
+/* Collapse Indicator (chevron next to title) */
+.analytic-container__collapse-indicator {
+  flex-shrink: 0;
+  color: var(--color-text-muted, #6b7280);
   transition: var(--transition-fast, all 0.15s ease);
 }
 
-.analytic-container__toggle:hover {
-  background-color: var(--color-hover, #f3f4f6);
+.analytic-container__header--clickable:hover .analytic-container__collapse-indicator {
   color: var(--color-text, #374151);
-}
-
-.analytic-container__toggle-icon {
-  flex-shrink: 0;
 }
 
 /* Collapsed State */
