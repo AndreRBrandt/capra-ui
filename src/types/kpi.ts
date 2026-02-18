@@ -80,6 +80,8 @@ export interface KpiData {
   previousValue?: number;
   /** Primary participation percentage (0-100) */
   participation?: number;
+  /** Label for primary participation (e.g. "do faturamento") */
+  participationLabel?: string;
   /** Secondary participation percentage (0-100) */
   participationSecondary?: number;
   /** Additional metadata for custom rendering */

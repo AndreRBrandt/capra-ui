@@ -294,8 +294,9 @@ const handleClick = () => {
 .kpi-card {
   position: relative;
   display: flex;
+  height: 100%; /* Fill wrapper/grid cell so all cards in a row match height */
   min-width: 0; /* Allow grid to control sizing */
-  padding: var(--spacing-sm, 0.75rem);
+  padding: var(--kpi-card-padding, var(--spacing-sm, 0.75rem));
   background-color: var(--color-surface, #fff);
   border-radius: var(--radius-md, 0.5rem);
   border: 1px solid var(--color-border, #e5e7eb);
@@ -345,7 +346,7 @@ const handleClick = () => {
 }
 
 .kpi-card__label {
-  font-size: 0.75rem;
+  font-size: var(--kpi-label-size, 0.75rem);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -371,7 +372,7 @@ const handleClick = () => {
 }
 
 .kpi-card__value {
-  font-size: 1.25rem;
+  font-size: var(--kpi-value-size, 1.25rem);
   font-weight: 700;
   margin: 0;
   line-height: 1.2;
@@ -386,7 +387,7 @@ const handleClick = () => {
   gap: var(--spacing-xs, 0.25rem);
   margin-top: auto; /* Empurra para baixo */
   padding-top: var(--spacing-xs, 0.25rem);
-  font-size: 0.7rem;
+  font-size: var(--kpi-trend-size, 0.7rem);
   font-weight: 500;
 }
 
@@ -399,7 +400,7 @@ const handleClick = () => {
    =========================================================================== */
 .kpi-card__participation {
   margin-top: 0.125rem;
-  font-size: 0.65rem;
+  font-size: calc(var(--kpi-trend-size, 0.7rem) - 0.05rem);
   color: var(--color-text-muted, #6b7280);
 }
 

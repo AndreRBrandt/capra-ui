@@ -486,6 +486,7 @@ const trendChartOption = computed(() => {
                 :show-trend-value="true"
                 :invert-trend="schemaMap.get(kpiKey)?.invertTrend"
                 :participation="kpis[kpiKey]?.participation"
+                :participation-label="kpis[kpiKey]?.participationLabel"
                 :icon="iconMap[schemaMap.get(kpiKey)?.icon || '']"
                 :accent-color="getAccentColor(kpiKey)"
                 :trend-affects-value="true"
