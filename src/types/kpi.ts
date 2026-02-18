@@ -84,4 +84,6 @@ export interface KpiData {
   participationSecondary?: number;
   /** Additional metadata for custom rendering */
   meta?: Record<string, unknown>;
+  /** Historical data points for trend visualization in detail modal */
+  history?: Array<{ label: string; value: number }>;
 }

@@ -34,6 +34,7 @@ import KpiGrid from "../layout/KpiGrid.vue";
 import KpiCard from "../analytics/KpiCard.vue";
 import KpiCardWrapper from "../analytics/KpiCardWrapper.vue";
 import KpiConfigPanel from "../ui/KpiConfigPanel.vue";
+import BaseChart from "../charts/BaseChart.vue";
 
 const { engine: _engine } = useMeasureEngine();
 import Modal from "../ui/Modal.vue";
@@ -95,6 +96,8 @@ interface Props {
   showDetailButton?: boolean;
   /** Enable drag-and-drop reordering */
   draggable?: boolean;
+  /** Highlight header with subtle background */
+  highlightHeader?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -115,6 +118,7 @@ const props = withDefaults(defineProps<Props>(), {
   showInfoButton: true,
   showDetailButton: true,
   draggable: true,
+  highlightHeader: false,
 });
 
 // =============================================================================
@@ -326,6 +330,71 @@ function calcVariation(
   if (v === undefined) return null;
   return _engine.formatVariation(v, { decimals: 1 });
 }
+
+// =============================================================================
+// Trend Chart (sparkline in detail modal)
+// =============================================================================
+
+const trendChartOption = computed(() => {
+  const history = selectedKpiData.value?.history;
+  if (!history?.length) return null;
+
+  const accent = selectedAccentColor.value || "#e5a22f";
+  const format = selectedSchema.value?.format || "number";
+  const decimals = selectedSchema.value?.decimals;
+
+  return {
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      borderColor: "#e5e7eb",
+      borderWidth: 1,
+      padding: [8, 12],
+      textStyle: { color: "#374151", fontSize: 12 },
+      formatter: (params: any) => {
+        if (!params?.[0]) return "";
+        const p = params[0];
+        return `<div style="font-size:12px;">
+          <div style="font-weight:600;margin-bottom:4px;">${p.name}</div>
+          <div>${formatValue(p.value, format, decimals)}</div>
+        </div>`;
+      },
+    },
+    grid: { left: 8, right: 8, top: 8, bottom: 24, containLabel: false },
+    xAxis: {
+      type: "category",
+      data: history.map((h) => h.label),
+      axisLabel: { fontSize: 10, color: "#9ca3af" },
+      axisLine: { lineStyle: { color: "#e5e7eb" } },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      show: false,
+    },
+    series: [
+      {
+        type: "line",
+        data: history.map((h) => h.value),
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 6,
+        lineStyle: { color: accent, width: 2 },
+        itemStyle: { color: accent, borderWidth: 2, borderColor: "#fff" },
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: accent + "40" },
+              { offset: 1, color: accent + "08" },
+            ],
+          },
+        },
+      },
+    ],
+  };
+});
 </script>
 
 <template>
@@ -341,6 +410,7 @@ function calcVariation(
     :error="error"
     :show-config="showConfig"
     :config-title="configTitle"
+    :highlight-header="highlightHeader"
     @update:collapsed="handleCollapseUpdate"
     @retry="emit('refresh')"
   >
@@ -539,6 +609,12 @@ function calcVariation(
               {{ selectedVariation > 0 ? '+' : '' }}{{ selectedVariation.toFixed(1) }}%
             </span>
           </div>
+        </div>
+
+        <!-- Trend Chart (when history available) -->
+        <div v-if="trendChartOption" class="kpi-detail-chart">
+          <span class="kpi-detail-chart__label">Evolução</span>
+          <BaseChart :option="trendChartOption" height="160px" />
         </div>
 
         <!-- Metrics Grid -->
@@ -765,18 +841,32 @@ function calcVariation(
 }
 
 .kpi-detail-hero__trend--up {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--color-success-light, #f0fdf4);
+  color: var(--color-trend-positive, #16a34a);
 }
 
 .kpi-detail-hero__trend--down {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--color-error-light, #fef2f2);
+  color: var(--color-trend-negative, #dc2626);
 }
 
 .kpi-detail-hero__trend--neutral {
   background: var(--color-hover, #f3f4f6);
   color: var(--color-text-muted, #9ca3af);
+}
+
+.kpi-detail-chart {
+  margin-top: 1rem;
+}
+
+.kpi-detail-chart__label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted, #9ca3af);
+  margin-bottom: 0.5rem;
 }
 
 .kpi-detail-metrics {
@@ -811,11 +901,11 @@ function calcVariation(
 }
 
 .kpi-detail-metric--positive {
-  color: #16a34a;
+  color: var(--color-trend-positive, #16a34a);
 }
 
 .kpi-detail-metric--negative {
-  color: #dc2626;
+  color: var(--color-trend-negative, #dc2626);
 }
 
 .kpi-detail-metric--muted {

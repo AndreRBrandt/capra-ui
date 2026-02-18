@@ -19,7 +19,7 @@ const AnalyticContainerStub = defineComponent({
     title: String, subtitle: String, icon: Object,
     variant: String, padding: String, collapsible: Boolean,
     collapsed: Boolean, loading: Boolean, error: [Error, String],
-    showConfig: Boolean, configTitle: String,
+    showConfig: Boolean, configTitle: String, highlightHeader: Boolean,
   },
   emits: ["retry", "update:collapsed"],
   template: `<div data-testid="analytic-container">
@@ -76,6 +76,12 @@ const BaseButtonStub = defineComponent({
   template: '<button><slot /></button>',
 });
 
+const BaseChartStub = defineComponent({
+  name: "BaseChart",
+  props: { option: Object, height: String },
+  template: '<div data-testid="base-chart"></div>',
+});
+
 const allStubs: Record<string, any> = {
   AnalyticContainer: AnalyticContainerStub,
   KpiGrid: KpiGridStub,
@@ -84,6 +90,7 @@ const allStubs: Record<string, any> = {
   KpiConfigPanel: KpiConfigPanelStub,
   Modal: ModalStub,
   BaseButton: BaseButtonStub,
+  BaseChart: BaseChartStub,
 };
 
 // =============================================================================
@@ -535,6 +542,56 @@ describe("KpiContainer", () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Trend Chart (Detail Modal Sparkline)
+  // ---------------------------------------------------------------------------
+  describe("Trend Chart", () => {
+    it("não renderiza chart quando KPI não tem history", async () => {
+      const wrapper = mountKpiContainer();
+      wrapper.findAllComponents(KpiCardWrapperStub)[0].vm.$emit("detail");
+      await nextTick();
+
+      expect(wrapper.find(".kpi-detail-chart").exists()).toBe(false);
+      expect(wrapper.findComponent(BaseChartStub).exists()).toBe(false);
+    });
+
+    it("renderiza chart quando KPI tem history", async () => {
+      const wrapper = mountKpiContainer({
+        props: {
+          kpis: {
+            ...testKpis,
+            faturamento: {
+              ...testKpis.faturamento,
+              history: [
+                { label: "Set/25", value: 120000 },
+                { label: "Out/25", value: 130000 },
+                { label: "Nov/25", value: 140000 },
+                { label: "Dez/25", value: 125000 },
+                { label: "Jan/26", value: 145000 },
+                { label: "Fev/26", value: 150000 },
+              ],
+            },
+          },
+        },
+      });
+      wrapper.findAllComponents(KpiCardWrapperStub)[0].vm.$emit("detail");
+      await nextTick();
+
+      expect(wrapper.find(".kpi-detail-chart").exists()).toBe(true);
+      expect(wrapper.find(".kpi-detail-chart__label").text()).toBe("Evolução");
+      expect(wrapper.findComponent(BaseChartStub).exists()).toBe(true);
+      expect(wrapper.findComponent(BaseChartStub).props("height")).toBe("160px");
+    });
+
+    it("não renderiza chart para KPI sem history (vendas)", async () => {
+      const wrapper = mountKpiContainer();
+      wrapper.findAllComponents(KpiCardWrapperStub)[1].vm.$emit("detail");
+      await nextTick();
+
+      expect(wrapper.find(".kpi-detail-chart").exists()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Edge Cases
   // ---------------------------------------------------------------------------
   describe("Edge Cases", () => {
@@ -578,6 +635,12 @@ describe("KpiContainer", () => {
       const ac = wrapper.findComponent(AnalyticContainerStub);
       expect(ac.props("variant")).toBe("flat");
       expect(ac.props("padding")).toBe("lg");
+    });
+
+    it("highlightHeader propagado para AnalyticContainer", () => {
+      const wrapper = mountKpiContainer({ props: { highlightHeader: true } });
+      const ac = wrapper.findComponent(AnalyticContainerStub);
+      expect(ac.props("highlightHeader")).toBe(true);
     });
 
     it("label usa kpi.label com fallback para schema.label", () => {
