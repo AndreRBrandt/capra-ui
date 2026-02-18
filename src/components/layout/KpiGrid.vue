@@ -2,11 +2,12 @@
 /**
  * KpiGrid
  * =======
- * Responsive grid for KPI cards. Adapts from 1 to 6 columns.
+ * Responsive grid for KPI cards. Uses CSS Grid auto-fit for uniform card sizing.
+ * Cards stretch to fill available space (min→1fr), capped by optional maxCardWidth.
  *
  * @example
  * ```vue
- * <KpiGrid :columns="6">
+ * <KpiGrid min-card-width="220px" max-card-width="320px" card-height="110px">
  *   <KpiCard v-for="kpi in kpis" :key="kpi.id" v-bind="kpi" />
  * </KpiGrid>
  * ```
@@ -14,14 +15,12 @@
 
 withDefaults(
   defineProps<{
-    columns?: number;
     gap?: string;
     minCardWidth?: string;
     maxCardWidth?: string;
     cardHeight?: string;
   }>(),
   {
-    columns: 6,
     gap: "0.75rem",
   }
 );
@@ -31,7 +30,6 @@ withDefaults(
   <div
     class="capra-kpi-grid"
     :style="{
-      '--kpi-columns': columns,
       '--kpi-gap': gap,
       '--kpi-min-width': minCardWidth,
       '--kpi-max-width': maxCardWidth,
@@ -44,28 +42,31 @@ withDefaults(
 </template>
 
 <style scoped>
+/* Mobile: 2-column grid */
 .capra-kpi-grid {
   display: grid;
-  /* Mobile: stretch to fill (1fr) for single/double column layouts */
-  grid-template-columns: repeat(auto-fill, minmax(var(--kpi-min-width, 160px), 1fr));
+  grid-template-columns: repeat(2, 1fr);
   grid-auto-rows: var(--kpi-card-height, 110px);
-  gap: var(--kpi-gap, var(--capra-kpi-grid-gap-mobile, 0.5rem));
+  gap: var(--kpi-gap, 0.5rem);
   width: 100%;
 }
 
+/* Desktop: auto-fit grid — cards stretch to fill container.
+   auto-fit collapses empty tracks so cards grow to use available space.
+   max-width on children prevents excessive stretching in incomplete rows.
+   Height is fixed for uniform cards. */
 @media (min-width: 640px) {
   .capra-kpi-grid {
-    /* Desktop: auto-fit collapses empty tracks, max caps card width,
-       justify-content distributes remaining space evenly */
-    grid-template-columns: repeat(auto-fit, minmax(var(--kpi-min-width, 160px), var(--kpi-max-width, 260px)));
-    justify-content: space-evenly;
-    gap: var(--kpi-gap, var(--capra-kpi-grid-gap, 0.75rem));
+    grid-template-columns: repeat(auto-fit, minmax(var(--kpi-min-width, 200px), 1fr));
+    grid-auto-rows: var(--kpi-card-height, 110px);
+    gap: var(--kpi-gap, 0.75rem);
   }
 }
 
-/* Ensure all direct children and nested wrappers fill the grid row height */
+/* Ensure all children fill the grid cell, cap width if maxCardWidth set */
 .capra-kpi-grid > :deep(*) {
   height: 100%;
+  max-width: var(--kpi-max-width);
 }
 
 .capra-kpi-grid :deep([data-testid="kpi-card"]) {
