@@ -42,6 +42,8 @@ export interface AnalyticContainerProps {
   // Collapsible
   collapsible?: boolean;
   collapsed?: boolean;
+  // Header highlight
+  highlightHeader?: boolean;
 }
 
 const props = withDefaults(defineProps<AnalyticContainerProps>(), {
@@ -66,6 +68,8 @@ const props = withDefaults(defineProps<AnalyticContainerProps>(), {
   // Collapsible
   collapsible: false,
   collapsed: false,
+  // Header highlight
+  highlightHeader: false,
 });
 
 const emit = defineEmits<{
@@ -179,7 +183,10 @@ function handleRetry() {
     <div
       v-if="showHeader"
       class="analytic-container__header"
-      :class="{ 'analytic-container__header--clickable': collapsible }"
+      :class="{
+        'analytic-container__header--clickable': collapsible,
+        'analytic-container__header--highlight': highlightHeader,
+      }"
       :role="collapsible ? 'button' : undefined"
       :tabindex="collapsible ? 0 : undefined"
       :aria-expanded="collapsible ? (isExpanded ? 'true' : 'false') : undefined"
@@ -385,7 +392,7 @@ function handleRetry() {
 
 .analytic-container--outlined {
   background-color: transparent;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-light, rgba(0, 0, 0, 0.08));
   border-radius: var(--radius-md);
 }
 
@@ -612,12 +619,44 @@ function handleRetry() {
 
 .analytic-container__action-btn:hover {
   color: var(--color-brand-tertiary, #8f3f00);
-  background-color: var(--color-hover, #fef3e2);
+  background-color: var(--color-brand-primary, #e8dddb);
 }
 
 .analytic-container__action-btn--active {
   color: var(--color-brand-tertiary, #8f3f00);
-  background-color: var(--color-hover, #fef3e2);
+  background-color: var(--color-brand-primary, #e8dddb);
+}
+
+/* Highlighted Header — matches nav bar color for visual hierarchy */
+.analytic-container__header--highlight {
+  background-color: var(--analytic-header-bg, var(--color-brand-secondary, #3a1906));
+  color: #fff;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.analytic-container__header--highlight .analytic-container__icon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.analytic-container__header--highlight .analytic-container__title {
+  color: #fff;
+}
+
+.analytic-container__header--highlight .analytic-container__subtitle {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.analytic-container__header--highlight .analytic-container__collapse-indicator {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.analytic-container__header--highlight .analytic-container__action-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.analytic-container__header--highlight .analytic-container__action-btn:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Clickable Header (collapsible) */
@@ -627,7 +666,12 @@ function handleRetry() {
 }
 
 .analytic-container__header--clickable:hover {
-  background-color: var(--color-hover, #f9fafb);
+  background-color: var(--color-brand-primary, #e8dddb);
+}
+
+/* Clickable + Highlighted: hover uses brand accent instead of gray */
+.analytic-container__header--clickable.analytic-container__header--highlight:hover {
+  background-color: var(--color-brand-tertiary, #8f3f00);
 }
 
 /* Collapse Indicator (chevron next to title) */

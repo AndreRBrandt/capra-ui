@@ -151,6 +151,18 @@ describe("AnalyticContainer", () => {
     });
   });
 
+  describe("Header Highlight", () => {
+    it("não aplica highlight por padrão", () => {
+      const wrapper = mountContainer({ props: { title: "Test" } });
+      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(false);
+    });
+
+    it("aplica highlight quando highlightHeader=true", () => {
+      const wrapper = mountContainer({ props: { title: "Test", highlightHeader: true } });
+      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(true);
+    });
+  });
+
   describe("Padding", () => {
     it("aplica padding none", () => {
       const wrapper = mountContainer({
