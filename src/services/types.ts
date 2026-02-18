@@ -121,6 +121,8 @@ export interface QueryDefinition {
   useCache?: boolean;
   /** TTL do cache em ms */
   cacheTtl?: number;
+  /** Options for executeRaw path (filters, noFilters, dataSource) */
+  rawOptions?: import("@/adapters").RawQueryOptions;
 }
 
 /**

@@ -481,6 +481,105 @@ describe("QueryManager", () => {
   });
 
   // ===========================================================================
+  // executeRaw path
+  // ===========================================================================
+
+  describe("executeRaw path", () => {
+    it("chama executeRaw do adapter quando rawOptions presente", async () => {
+      const query: QueryDefinition = {
+        id: "raw-test",
+        schemaId: "gold",
+        query: "SELECT * FROM Cube",
+        rawOptions: { filters: [{ id: 1001, members: ["[2024]"] }] },
+      };
+
+      const result = await manager.execute(query);
+
+      expect(adapter.executeRaw).toHaveBeenCalledWith("SELECT * FROM Cube", {
+        filters: [{ id: 1001, members: ["[2024]"] }],
+      });
+      expect(adapter.fetchList).not.toHaveBeenCalled();
+      expect(result.queryId).toBe("raw-test");
+      expect(result.data).toEqual({ data: [], skipped: false });
+    });
+
+    it("usa cache para queries raw", async () => {
+      const query: QueryDefinition = {
+        id: "raw-cache",
+        schemaId: "gold",
+        query: "SELECT * FROM Cube",
+        rawOptions: { noFilters: true },
+      };
+
+      await manager.execute(query);
+      const result2 = await manager.execute(query);
+
+      expect(adapter.executeRaw).toHaveBeenCalledTimes(1);
+      expect(result2.fromCache).toBe(true);
+    });
+
+    it("deduplica queries raw em voo", async () => {
+      (adapter.executeRaw as ReturnType<typeof vi.fn>).mockImplementation(
+        () => new Promise((resolve) => setTimeout(() => resolve({ data: [1], skipped: false }), 100))
+      );
+
+      const query: QueryDefinition = {
+        id: "raw-dedup",
+        schemaId: "gold",
+        query: "SELECT 1",
+        rawOptions: { noFilters: true },
+        useCache: false,
+      };
+
+      const p1 = manager.execute(query);
+      const p2 = manager.execute(query);
+
+      vi.advanceTimersByTime(100);
+
+      await Promise.all([p1, p2]);
+
+      expect(adapter.executeRaw).toHaveBeenCalledTimes(1);
+    });
+
+    it("inclui rawOptions no hash — filtros diferentes geram cache entries diferentes", async () => {
+      const q1: QueryDefinition = {
+        id: "raw-hash",
+        schemaId: "gold",
+        query: "SELECT 1",
+        rawOptions: { filters: [{ id: 1, members: ["[A]"] }] },
+      };
+      const q2: QueryDefinition = {
+        id: "raw-hash",
+        schemaId: "gold",
+        query: "SELECT 1",
+        rawOptions: { filters: [{ id: 2, members: ["[B]"] }] },
+      };
+
+      await manager.execute(q1);
+      const result2 = await manager.execute(q2);
+
+      expect(result2.fromCache).toBe(false);
+      expect(adapter.executeRaw).toHaveBeenCalledTimes(2);
+    });
+
+    it("extrai mdx de query objeto quando rawOptions presente", async () => {
+      const query: QueryDefinition = {
+        id: "raw-obj",
+        schemaId: "gold",
+        query: { mdx: "SELECT {[Measures].[X]} ON COLUMNS", type: "list" } as Record<string, unknown>,
+        rawOptions: { noFilters: true },
+      };
+
+      await manager.execute(query);
+
+      expect(adapter.executeRaw).toHaveBeenCalledWith(
+        "SELECT {[Measures].[X]} ON COLUMNS",
+        { noFilters: true }
+      );
+    });
+  });
+
+  // ===========================================================================
   // maxCacheSize + LRU Eviction
   // ===========================================================================
 

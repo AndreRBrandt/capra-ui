@@ -183,6 +183,15 @@ export class QueryManager {
    * Executa a query no adapter.
    */
   private async doExecute<T>(query: QueryDefinition): Promise<T> {
+    // executeRaw path: usa adapter.executeRaw com filtros explícitos
+    if (query.rawOptions) {
+      const mdx = typeof query.query === "string"
+        ? query.query
+        : (query.query as Record<string, unknown>).mdx as string;
+      const result = await this.adapter.executeRaw(mdx, query.rawOptions);
+      return result as T;
+    }
+
     // Se query é string, é MDX direto
     if (typeof query.query === "string") {
       const result = await this.adapter.fetchList(query.query);
@@ -327,7 +336,10 @@ export class QueryManager {
     const queryPart = typeof query.query === "string"
       ? query.query
       : JSON.stringify(query.query, Object.keys(query.query as Record<string, unknown>).sort());
-    return `${query.schemaId}:${query.id}:${queryPart}`;
+    const rawPart = query.rawOptions
+      ? `:raw:${JSON.stringify(query.rawOptions)}`
+      : "";
+    return `${query.schemaId}:${query.id}:${queryPart}${rawPart}`;
   }
 
   /**

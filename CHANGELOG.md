@@ -11,6 +11,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Adicionado
 
+#### Session 86: QueryManager executeRaw Path
+- **services/types.ts** — Campo `rawOptions?: RawQueryOptions` em `QueryDefinition` para suportar queries com filtros explícitos via `adapter.executeRaw()`
+- **services/QueryManager.ts** — Branch `executeRaw` em `doExecute()` (quando `rawOptions` presente, roteia por `adapter.executeRaw` em vez de `fetchKpi/fetchList`). `hashQuery()` inclui `rawOptions` no hash para cache entries distintas por filtro.
+- **services/__tests__/QueryManager.spec.ts** — +5 testes para executeRaw path (execução, cache, deduplicação, hash, query objeto)
+
+#### Session 85: Participation Label Support
+- **types/kpi.ts** — Campo `participationLabel?: string` em `KpiData` para labels contextuais (ex: "do faturamento" ao invés de genérico "do total")
+- **components/containers/KpiContainer.vue** — Pass-through de `participationLabel` do `KpiData` para `KpiCard`
+
 #### Session 84: BIMachineExternalAdapter
 - **adapters/bimachine-external.ts** — Novo adapter `BIMachineExternalAdapter` implementando `DataAdapter` para acesso via API externa (Publisher Full). Token lifecycle automático (30min sliding, refresh 2min antes de expirar), deduplicação de requests de token concorrentes, auto-retry em 401/403. Suporta `fetchKpi`, `fetchList`, `fetchMultiMeasure`, `executeRaw`, filtros locais (`setFilters`, `applyFilter`).
 - **adapters/types.ts** — `"bimachine-external"` adicionado ao tipo `AdapterType`
@@ -34,7 +43,17 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 #### Session 83: KpiGrid auto-fit + min width
 - **components/layout/KpiGrid.vue** — Trocou `auto-fill` por `auto-fit` para cards esticarem e preencherem container. Min width default 180→200px. `max-width: var(--kpi-max-width)` nos children para limitar esticamento em linhas incompletas. Removido prop `columns` (dead code — CSS usa auto-fit). JSDoc e testes atualizados.
 
+### Alterado
+
+#### Session 85: KpiGrid 3-Breakpoint Responsive System
+- **components/layout/KpiGrid.vue** — Reescrita completa do sistema responsivo. 3 breakpoints: `< 400px` (1 coluna, fontes compactas), `400–639px` (2 colunas, fontes médias), `≥ 640px` (auto-fit grid com min/max width). CSS custom properties (`--kpi-value-size`, `--kpi-label-size`, `--kpi-trend-size`, `--kpi-card-padding`) setadas por media query para controle fino de tamanho.
+- **components/analytics/KpiCard.vue** — Padding, font-size de valor/label/trend/participation agora consomem CSS custom properties com fallback para valores desktop padrão. Permite que KpiGrid controle responsividade dos cards via media queries.
+
 ### Corrigido
+
+#### Session 85: Mobile KpiGrid Responsive + Card Height
+- **components/layout/KpiGrid.vue** — Mobile usava 2 colunas fixas com height fixo (110px) que clipava conteúdo com participation labels. Agora usa 1 coluna em `< 400px` com `grid-auto-rows: auto` e fontes reduzidas progressivamente. Desktop também usa `grid-auto-rows: auto` para que a altura se adapte ao conteúdo.
+- **components/analytics/KpiCard.vue** — Adicionado `height: 100%` no `.kpi-card` para preencher o grid cell via wrapper. Garante que todos os cards numa linha tenham a mesma altura (definida pelo mais alto).
 
 #### Session 83: Desacoplamento de cores hardcoded
 - **components/containers/KpiContainer.vue** — Trend badge colors trocados de hex hardcoded (`#16a34a`, `#dc2626`, `#dcfce7`, `#fef2f2`) para CSS tokens (`--color-trend-positive`, `--color-trend-negative`, `--color-success-light`, `--color-error-light`). Metric positive/negative idem.
