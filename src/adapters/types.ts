@@ -292,7 +292,7 @@ export interface DataAdapter {
 /**
  * Tipos de adapter disponíveis
  */
-export type AdapterType = "bimachine" | "mock";
+export type AdapterType = "bimachine" | "bimachine-external" | "mock";
 
 /**
  * Assinatura da função factory

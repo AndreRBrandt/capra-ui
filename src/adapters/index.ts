@@ -30,6 +30,7 @@ export * from "./types";
 // Adapters
 export { MockAdapter, mockAdapter } from "./mock";
 export { BIMachineAdapter } from "./bimachine";
+export { BIMachineExternalAdapter, type BIMachineExternalConfig } from "./bimachine-external";
 
 // MDX Period Helpers
 export {
