@@ -32,6 +32,7 @@ ADRs documentam decisões técnicas importantes de forma estruturada. Cada ADR r
 | [013](./013-data-loading-patterns.md) | Data Loading Patterns | **Aceito** | 2026-02-13 |
 | [014](./014-app-query-conventions.md) | App Query Building Conventions | **Aceito** | 2026-02-13 |
 | [015](./015-dependency-boundaries.md) | Dependency Boundaries (Core vs App) | **Aceito** | 2026-02-13 |
+| [016](./016-kpi-grid-layout-strategy.md) | KPI Grid Layout Strategy & Container Theming | **Aceito** | 2026-02-18 |
 
 ---
 

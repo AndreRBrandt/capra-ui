@@ -11,6 +11,34 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Adicionado
 
+#### Session 84: BIMachineExternalAdapter
+- **adapters/bimachine-external.ts** — Novo adapter `BIMachineExternalAdapter` implementando `DataAdapter` para acesso via API externa (Publisher Full). Token lifecycle automático (30min sliding, refresh 2min antes de expirar), deduplicação de requests de token concorrentes, auto-retry em 401/403. Suporta `fetchKpi`, `fetchList`, `fetchMultiMeasure`, `executeRaw`, filtros locais (`setFilters`, `applyFilter`).
+- **adapters/types.ts** — `"bimachine-external"` adicionado ao tipo `AdapterType`
+- **adapters/index.ts** — Export de `BIMachineExternalAdapter` e `BIMachineExternalConfig`
+
+#### Session 83: KPI UI/UX Improvements
+- **types/kpi.ts** — Campo `history?: Array<{ label: string; value: number }>` em `KpiData` para dados de tendência temporal
+- **components/containers/KpiContainer.vue** — Sparkline trend chart (BaseChart) no detail modal entre hero card e metrics grid. Computed `trendChartOption` gera config ECharts minimalista (line + area gradient). Prop `highlightHeader` propagada para AnalyticContainer.
+- **components/containers/AnalyticContainer.vue** — Nova prop `highlightHeader` (boolean) que aplica background sutil no header (`--analytic-header-bg`). Desacoplado: configuração via prop, não CSS override na page.
+- **components/containers/__tests__/KpiContainer.spec.ts** — +4 novos testes (3 trend chart + 1 highlightHeader propagation)
+- **components/containers/__tests__/AnalyticContainer.spec.ts** — +2 novos testes para highlightHeader
+
+### Alterado
+
+#### Session 83: KPI Grid Layout
+- **components/layout/KpiGrid.vue** — Substituiu CSS Grid `auto-fit` + `space-evenly` por CSS Grid `auto-fill` + `minmax(180px, 1fr)`. `auto-fill` mantém tracks vazias para que TODOS os cards tenham exatamente a mesma largura (1fr). Height fixo (default 110px) via `grid-auto-rows`. Mobile mantém grid 2 colunas.
+
+#### Session 83: AnalyticContainer Brand Colors + Hover Fix
+- **components/containers/AnalyticContainer.vue** — Header highlight usa `var(--color-brand-secondary)` (dark brown, mesma cor do nav bar) com texto branco. Hover em header clickable+highlight usa `var(--color-brand-tertiary)` (medium brown). Variante `outlined` usa borda sutil `rgba(0,0,0,0.08)`. Action buttons hover e active trocaram `var(--color-hover)` (cinza) por `var(--color-brand-primary)` (cream da marca). Header clickable hover idem.
+
+#### Session 83: KpiGrid auto-fit + min width
+- **components/layout/KpiGrid.vue** — Trocou `auto-fill` por `auto-fit` para cards esticarem e preencherem container. Min width default 180→200px. `max-width: var(--kpi-max-width)` nos children para limitar esticamento em linhas incompletas. Removido prop `columns` (dead code — CSS usa auto-fit). JSDoc e testes atualizados.
+
+### Corrigido
+
+#### Session 83: Desacoplamento de cores hardcoded
+- **components/containers/KpiContainer.vue** — Trend badge colors trocados de hex hardcoded (`#16a34a`, `#dc2626`, `#dcfce7`, `#fef2f2`) para CSS tokens (`--color-trend-positive`, `--color-trend-negative`, `--color-success-light`, `--color-error-light`). Metric positive/negative idem.
+
 #### Session 82: SegmentedControl component
 - **components/ui/SegmentedControl.vue** — Toggle entre opções mutuamente exclusivas (tabs estilo iOS/Material). Scoped CSS BEM, ARIA `tablist`/`tab`, keyboard nav (Arrow, Home/End), sizes `sm`/`md`/`lg`, `fullWidth` prop
 - **components/ui/__tests__/SegmentedControl.spec.ts** — ~20 testes cobrindo render, click, disabled, sizes, fullWidth, keyboard navigation, ARIA roles
