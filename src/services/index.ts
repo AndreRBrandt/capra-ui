@@ -45,6 +45,25 @@ export {
 // QueryManager
 export { QueryManager, createQueryManager } from "./QueryManager";
 
+// QueryOrchestrator (v2)
+export {
+  QueryOrchestrator,
+  createQueryOrchestrator,
+  type OrchestratorConfig,
+  type QueryPriority,
+  type ExecuteOptions,
+  type OrchestratorMetrics,
+} from "./QueryOrchestrator";
+
+// FilterEngine (v2)
+export {
+  FilterEngine,
+  createFilterEngine,
+  resolveDatePreset,
+  type FilterValue,
+  type FilterChangeListener,
+} from "./FilterEngine";
+
 // DimensionDiscovery
 export { DimensionDiscovery, createDimensionDiscovery } from "./DimensionDiscovery";
 
