@@ -12,8 +12,31 @@
  * ```
  */
 
-// Types
+// Types (v1)
 export type { KpiSchemaItem, KpiData } from "./types";
+
+// Types (v2 — generic, adapter-agnostic)
+export type {
+  CapraQuery,
+  CapraMeasure,
+  CapraDimension,
+  CapraFilter,
+  CapraComparison,
+  CapraSort,
+  CapraAggregation,
+  CapraFilterOperator,
+  CapraComparisonType,
+  CapraTimeUnit,
+  CapraSortDirection,
+  CapraResult,
+  CapraRow,
+  CapraResultMetadata,
+  CapraFilterDefinition,
+  CapraFilterState,
+  CapraFilterType,
+  CapraDatePreset,
+  DateRange,
+} from "./types";
 
 // Plugin
 export { createCapraPlugin, type CapraPluginOptions } from "./plugin";
@@ -24,7 +47,7 @@ export * from "./utils";
 // Errors
 export * from "./errors";
 
-// Adapters (data layer)
+// Adapters (data layer — V1 + V2)
 export * from "./adapters";
 
 // Schema (foundational module)
@@ -35,6 +58,7 @@ export * from "./measures";
 
 // Services (explicit exports to avoid conflicts with composables' ActionType, FilterOption, FilterDefinition)
 export {
+  // V1 services
   ActionBus,
   createActionBus,
   FilterManager,
@@ -43,6 +67,13 @@ export {
   createQueryManager,
   DimensionDiscovery,
   createDimensionDiscovery,
+  // V2 services
+  QueryOrchestrator,
+  createQueryOrchestrator,
+  FilterEngine,
+  createFilterEngine,
+  resolveDatePreset,
+  // V1 types
   type FilterBinding,
   type FilterRegistryConfig,
   type FilterState,
@@ -68,6 +99,13 @@ export {
   type DimensionDiscoveryConfig,
   type DiscoveryResult,
   type DimensionDiscoveryState,
+  // V2 types
+  type OrchestratorConfig,
+  type QueryPriority,
+  type ExecuteOptions,
+  type OrchestratorMetrics,
+  type FilterValue,
+  type FilterChangeListener,
 } from "./services";
 
 // Composables (exports DatePreset and FilterOption types)
