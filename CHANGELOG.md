@@ -11,6 +11,37 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ### Adicionado
 
+#### Session 94: Capra v2 Core Abstractions (Phase 1)
+- **[CROSS-PROJECT] types/query.ts** — Novos tipos genericos CapraQuery, CapraMeasure, CapraDimension, CapraFilter, CapraComparison, CapraSort que substituem MDX strings. Adapter-agnostic.
+- **[CROSS-PROJECT] types/result.ts** — CapraResult, CapraRow, CapraResultMetadata substituem BIMachineDataPayload.
+- **[CROSS-PROJECT] types/filter.ts** — CapraFilterDefinition, CapraFilterState, DateRange, CapraDatePreset substituem filtros por ID numerico.
+- **[CROSS-PROJECT] adapters/types.ts** — Nova interface DataAdapterV2 (execute, getAvailableFilters, getFilterState, applyFilter). V1 intocada.
+- **adapters/AdapterBridge.ts** — Bridge bidirecional V1↔V2 para migracao incremental. Helpers estaticos toKpiResult/toListItems.
+- **services/QueryOrchestrator.ts** — Evolucao do QueryManager com priority queue, concurrency limit, blocking de duplicatas, metrics.
+- **services/FilterEngine.ts** — Filtros semanticos por dimensao com resolucao de date presets, conversao para CapraFilter[], change listeners.
+- **index.ts, types/index.ts, adapters/index.ts, services/index.ts** — Barrel exports atualizados para todos os novos tipos e classes.
+
+#### Session 91b: DataTable mobile sticky header + trend size reduction
+- **components/analytics/DataTable.vue** — No mobile (≤768px), tabelas com `stickyFirstColumn` agora recebem `max-height: 70vh` e `overflow-y: auto`, habilitando header sticky automático ao rolar verticalmente. Coluna "Loja" (sticky) e cabeçalho ficam fixos simultaneamente. Corner cell (1ª coluna do header) recebe `z-index: 12` para ficar acima de ambos os stickies.
+- **components/analytics/DataTable.vue** — Indicador de tendência (`.data-table__trend`) reduzido de `--font-size-small` (~14px) para `--font-size-caption` (12px desktop, 10.4px mobile). Gap entre valor principal e trend reduzido de 2px para 1px. Adicionado `opacity: 0.85` para suavizar visualmente.
+
+#### Session 91: DetailModal period bar + formatDateWithWeekday
+- **components/analytics/DetailModal.vue** — Novas props opcionais `periodLabel` e `previousPeriodLabel`. Quando fornecidas, renderiza uma barra de período entre header-metrics e conteúdo com ícone de calendário SVG inline. CSS scoped com variáveis customizáveis (`--capra-detail-period-bg`, `--capra-detail-period-color`, `--capra-detail-period-prev-color`). Backwards compatible — sem props = sem period bar.
+- **measures/formatters/date.ts** — Nova função `formatDateWithWeekday(dateStr, locale?)` que formata data DD/MM/YYYY com nome do dia da semana (ex: "18/02/2026 - quarta-feira"). Exportada via barrel `formatters/index.ts`.
+- **components/analytics/__tests__/DetailModal.spec.ts** — +5 testes para period bar (RF06): sem props = oculta, com periodLabel, com previousPeriodLabel, com ambos, strings vazias = oculta.
+
+#### Session 90: DataTable rowClass prop
+- **components/analytics/DataTable.vue** — Nova prop `rowClass?: (row, index) => string | Record<string, boolean> | undefined` que permite ao consumidor aplicar classes CSS customizadas em linhas individuais da tabela. Aplicada no `:class` do `<tr>` de cada data row.
+
+### Alterado
+
+#### Session 89: Hover chevron-only + highlightHeader default true + Loading blur overlay
+- **components/containers/AnalyticContainer.vue** — Removido hover background no header inteiro (collapsible). Hover visual agora só no chevron. Adicionada regra CSS para chevron hover em header highlighted (cor branca). Default de `highlightHeader` alterado de `false` para `true`. Loading state substituído: em vez de esconder o conteúdo e mostrar spinner, conteúdo fica visível com blur (`filter: blur(3px)`) + overlay com spinner. Transição suave com `<Transition>` fade.
+- **components/containers/KpiContainer.vue** — Default de `highlightHeader` alterado de `false` para `true`.
+- **components/containers/__tests__/AnalyticContainer.spec.ts** — Testes de Header Highlight invertidos para refletir novo default `true`. Testes de loading atualizados para novo comportamento (overlay + conteúdo visível).
+
+### Adicionado
+
 #### Session 86: QueryManager executeRaw Path
 - **services/types.ts** — Campo `rawOptions?: RawQueryOptions` em `QueryDefinition` para suportar queries com filtros explícitos via `adapter.executeRaw()`
 - **services/QueryManager.ts** — Branch `executeRaw` em `doExecute()` (quando `rawOptions` presente, roteia por `adapter.executeRaw` em vez de `fetchKpi/fetchList`). `hashQuery()` inclui `rawOptions` no hash para cache entries distintas por filtro.
