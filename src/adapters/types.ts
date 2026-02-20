@@ -5,7 +5,14 @@
  *
  * O padrão Adapter permite que os dashboards consumam dados de
  * diferentes fontes através de uma interface comum.
+ *
+ * V1 (DataAdapter): MDX-based, BIMachine-specific.
+ * V2 (DataAdapterV2): Generic CapraQuery/CapraResult, adapter-agnostic.
  */
+
+import type { CapraQuery } from "@/types/query";
+import type { CapraResult } from "@/types/result";
+import type { CapraFilterDefinition, CapraFilterState, DateRange } from "@/types/filter";
 
 // =============================================================================
 // Tipos de Configuração
@@ -283,6 +290,58 @@ export interface DataAdapter {
    * @returns Resultado bruto com dados, status de skip, e resposta raw
    */
   executeRaw(mdx: string, options?: RawQueryOptions): Promise<RawQueryResult>;
+}
+
+// =============================================================================
+// DataAdapterV2 — Generic Interface (v2)
+// =============================================================================
+
+/**
+ * Generic data adapter interface (v2).
+ *
+ * Replaces MDX-based DataAdapter with a generic query/result interface.
+ * Adapters translate CapraQuery to target query language (SQL, REST, etc.)
+ * and return CapraResult.
+ *
+ * @example
+ * ```ts
+ * class SupabaseAdapter implements DataAdapterV2 {
+ *   async execute(query: CapraQuery): Promise<CapraResult> { ... }
+ * }
+ * ```
+ */
+export interface DataAdapterV2 {
+  /**
+   * Execute a generic query and return results.
+   * @param query - Generic query definition
+   * @returns Generic result with rows, totals, and metadata
+   */
+  execute(query: CapraQuery): Promise<CapraResult>;
+
+  /**
+   * Get available filter definitions for this adapter.
+   * @returns Array of filter definitions
+   */
+  getAvailableFilters(): CapraFilterDefinition[];
+
+  /**
+   * Get current filter state.
+   * @returns Array of current filter states
+   */
+  getFilterState(): CapraFilterState[];
+
+  /**
+   * Apply a filter value.
+   * @param key - Filter key
+   * @param value - Filter value
+   */
+  applyFilter(key: string, value: string | string[] | DateRange): void;
+
+  /**
+   * Get the project/source name.
+   * @returns Project name string
+   */
+  getProjectName(): string;
 }
 
 // =============================================================================

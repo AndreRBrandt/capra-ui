@@ -32,6 +32,9 @@ export { MockAdapter, mockAdapter } from "./mock";
 export { BIMachineAdapter } from "./bimachine";
 export { BIMachineExternalAdapter, type BIMachineExternalConfig } from "./bimachine-external";
 
+// V2 Bridge
+export { AdapterBridge, createV2Bridge, createV1Bridge } from "./AdapterBridge";
+
 // MDX Period Helpers
 export {
   generatePreviousPeriodMdx,
