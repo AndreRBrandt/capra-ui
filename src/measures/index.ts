@@ -53,6 +53,7 @@ export {
   formatCompact,
   formatCurrencyCompact,
   formatCompactNative,
+  formatDateWithWeekday,
 } from "./formatters";
 
 // Types

@@ -8,3 +8,4 @@ export { formatCurrency, formatCurrencyValue, formatCurrencyInteger } from "./cu
 export { formatPercent, formatVariation, formatDecimalAsPercent } from "./percent";
 export { formatNumber, formatInteger, formatDecimal } from "./number";
 export { formatCompact, formatCurrencyCompact, formatCompactNative } from "./compact";
+export { formatDateWithWeekday } from "./date";
