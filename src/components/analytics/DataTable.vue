@@ -181,6 +181,8 @@ const props = withDefaults(
     pageSizeOptions?: number[];
     /** Exibe seletor de itens por página */
     showPageSizeSelector?: boolean;
+    /** Função para aplicar classes CSS customizadas em linhas */
+    rowClass?: (row: DataRow, index: number) => string | Record<string, boolean> | undefined;
   }>(),
   {
     rowKey: "id",
@@ -215,6 +217,7 @@ const props = withDefaults(
     pageSize: 15,
     pageSizeOptions: () => [10, 15, 25, 50],
     showPageSizeSelector: true,
+    rowClass: undefined,
   }
 );
 
@@ -1278,6 +1281,7 @@ defineExpose({
               clickable,
               selected: isRowSelected(row),
             },
+            rowClass?.(row, index),
           ]"
           @click="handleRowClick(row, index)"
           @dblclick="handleRowDblClick(row, index)"
@@ -1975,6 +1979,24 @@ defineExpose({
   pointer-events: none;
 }
 
+/* Mobile: sticky tables get bounded height + sticky header */
+@media (max-width: 768px) {
+  .data-table-container--sticky {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .data-table-container--sticky .data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .data-table-container--sticky .data-table thead .data-table__header--sticky {
+    z-index: 12;
+  }
+}
+
 /* =============================================================================
    Striped Rows
    ============================================================================= */
@@ -2020,16 +2042,17 @@ defineExpose({
 .data-table__cell-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .data-table__trend {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-caption, 0.75rem);
   font-weight: 500;
   white-space: nowrap;
+  opacity: 0.85;
 }
 
 /* Alinhamentos com trend */

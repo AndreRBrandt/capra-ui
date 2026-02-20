@@ -191,6 +191,58 @@ describe("DetailModal", () => {
   });
 
   // ===========================================================================
+  // RF06: Period Bar
+  // ===========================================================================
+  describe("RF06: Period Bar", () => {
+    it("não deve renderizar period bar quando props não são fornecidas", () => {
+      const wrapper = createWrapper();
+
+      expect(wrapper.find('[data-testid="period-bar"]').exists()).toBe(false);
+    });
+
+    it("deve renderizar period bar com periodLabel", () => {
+      const wrapper = createWrapper({
+        periodLabel: "18/02/2026 - quarta-feira",
+      });
+
+      const periodBar = wrapper.find('[data-testid="period-bar"]');
+      expect(periodBar.exists()).toBe(true);
+      expect(periodBar.text()).toContain("18/02/2026 - quarta-feira");
+    });
+
+    it("deve renderizar period bar com previousPeriodLabel", () => {
+      const wrapper = createWrapper({
+        previousPeriodLabel: "11/02/2026 - quarta-feira",
+      });
+
+      const periodBar = wrapper.find('[data-testid="period-bar"]');
+      expect(periodBar.exists()).toBe(true);
+      expect(periodBar.text()).toContain("Anterior: 11/02/2026 - quarta-feira");
+    });
+
+    it("deve renderizar period bar com ambos os labels", () => {
+      const wrapper = createWrapper({
+        periodLabel: "18/02/2026 - quarta-feira",
+        previousPeriodLabel: "11/02/2026 - quarta-feira",
+      });
+
+      const periodBar = wrapper.find('[data-testid="period-bar"]');
+      expect(periodBar.exists()).toBe(true);
+      expect(periodBar.text()).toContain("18/02/2026 - quarta-feira");
+      expect(periodBar.text()).toContain("Anterior: 11/02/2026 - quarta-feira");
+    });
+
+    it("não deve renderizar period bar quando props são strings vazias", () => {
+      const wrapper = createWrapper({
+        periodLabel: "",
+        previousPeriodLabel: "",
+      });
+
+      expect(wrapper.find('[data-testid="period-bar"]').exists()).toBe(false);
+    });
+  });
+
+  // ===========================================================================
   // Integração: Props combinadas
   // ===========================================================================
   describe("Integração: Props combinadas", () => {

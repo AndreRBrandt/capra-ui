@@ -28,6 +28,8 @@ withDefaults(
     size?: "sm" | "md" | "lg" | "xl" | "full";
     headerBg?: string;
     headerColor?: string;
+    periodLabel?: string;
+    previousPeriodLabel?: string;
   }>(),
   {
     size: "lg",
@@ -70,6 +72,19 @@ function close() {
           <!-- Header Metrics -->
           <div v-if="$slots['header-metrics']" class="capra-detail__metrics">
             <slot name="header-metrics" />
+          </div>
+
+          <!-- Period Bar -->
+          <div v-if="periodLabel || previousPeriodLabel" class="capra-detail__period-bar" data-testid="period-bar">
+            <div v-if="periodLabel" class="capra-detail__period">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span>{{ periodLabel }}</span>
+            </div>
+            <div v-if="previousPeriodLabel" class="capra-detail__period capra-detail__period--prev">
+              <span>Anterior: {{ previousPeriodLabel }}</span>
+            </div>
           </div>
 
           <!-- Content -->
@@ -163,6 +178,31 @@ function close() {
 .capra-detail__metrics {
   padding: 0 1.5rem 1rem;
   flex-shrink: 0;
+}
+
+.capra-detail__period-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  padding: 0.5rem 1.5rem;
+  background: var(--capra-detail-period-bg, #f9fafb);
+  border-top: 1px solid var(--capra-border, #e5e7eb);
+  border-bottom: 1px solid var(--capra-border, #e5e7eb);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.capra-detail__period {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--capra-detail-period-color, #374151);
+  font-weight: 500;
+}
+
+.capra-detail__period--prev {
+  color: var(--capra-detail-period-prev-color, #6b7280);
+  font-weight: 400;
 }
 
 .capra-detail__content {

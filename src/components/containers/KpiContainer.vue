@@ -118,7 +118,7 @@ const props = withDefaults(defineProps<Props>(), {
   showInfoButton: true,
   showDetailButton: true,
   draggable: true,
-  highlightHeader: false,
+  highlightHeader: true,
 });
 
 // =============================================================================

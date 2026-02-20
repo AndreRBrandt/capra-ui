@@ -152,14 +152,14 @@ describe("AnalyticContainer", () => {
   });
 
   describe("Header Highlight", () => {
-    it("não aplica highlight por padrão", () => {
+    it("aplica highlight por padrão", () => {
       const wrapper = mountContainer({ props: { title: "Test" } });
-      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(false);
+      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(true);
     });
 
-    it("aplica highlight quando highlightHeader=true", () => {
-      const wrapper = mountContainer({ props: { title: "Test", highlightHeader: true } });
-      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(true);
+    it("remove highlight quando highlightHeader=false", () => {
+      const wrapper = mountContainer({ props: { title: "Test", highlightHeader: false } });
+      expect(wrapper.find(".analytic-container__header--highlight").exists()).toBe(false);
     });
   });
 
@@ -182,10 +182,10 @@ describe("AnalyticContainer", () => {
       ).toBe(true);
     });
 
-    it("aplica padding md por padrão", () => {
+    it("aplica padding sm por padrão", () => {
       const wrapper = mountContainer();
       expect(
-        wrapper.find(".analytic-container__content--padding-md").exists()
+        wrapper.find(".analytic-container__content--padding-sm").exists()
       ).toBe(true);
     });
 
@@ -200,15 +200,16 @@ describe("AnalyticContainer", () => {
   });
 
   describe("Estados", () => {
-    it("exibe loading quando loading=true", () => {
+    it("exibe loading overlay com blur quando loading=true", () => {
       const wrapper = mountContainer({
         props: { loading: true },
         slots: {
           default: '<div data-testid="content">Conteúdo</div>',
         },
       });
-      expect(wrapper.find(".analytic-container__loading").exists()).toBe(true);
-      expect(wrapper.find('[data-testid="content"]').exists()).toBe(false);
+      expect(wrapper.find(".analytic-container__loading-overlay").exists()).toBe(true);
+      expect(wrapper.find(".analytic-container__slot-wrapper--loading").exists()).toBe(true);
+      expect(wrapper.find('[data-testid="content"]').exists()).toBe(true);
     });
 
     it("exibe error quando error fornecido", () => {
@@ -260,7 +261,7 @@ describe("AnalyticContainer", () => {
           empty: true,
         },
       });
-      expect(wrapper.find(".analytic-container__loading").exists()).toBe(true);
+      expect(wrapper.find(".analytic-container__loading-overlay").exists()).toBe(true);
       expect(wrapper.find(".analytic-container__error").exists()).toBe(false);
       expect(wrapper.find(".analytic-container__empty").exists()).toBe(false);
     });

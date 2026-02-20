@@ -54,7 +54,7 @@ const props = withDefaults(defineProps<AnalyticContainerProps>(), {
   showHeader: true,
   showFooter: false,
   variant: "default",
-  padding: "md",
+  padding: "sm",
   // Actions integradas
   showHelp: false,
   helpTitle: "Ajuda",
@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<AnalyticContainerProps>(), {
   collapsible: false,
   collapsed: false,
   // Header highlight
-  highlightHeader: false,
+  highlightHeader: true,
 });
 
 const emit = defineEmits<{
@@ -298,20 +298,9 @@ function handleRetry() {
 
     <!-- Content Area -->
     <div v-if="!collapsed" :class="contentClasses">
-      <!-- Loading State -->
-      <div
-        v-if="currentState === 'loading'"
-        class="analytic-container__loading"
-      >
-        <slot name="loading">
-          <Loader2 class="analytic-container__loading-icon" />
-          <span class="analytic-container__loading-text">Carregando...</span>
-        </slot>
-      </div>
-
       <!-- Error State -->
       <div
-        v-else-if="currentState === 'error'"
+        v-if="!loading && error"
         class="analytic-container__error"
         role="alert"
       >
@@ -330,7 +319,7 @@ function handleRetry() {
 
       <!-- Empty State -->
       <div
-        v-else-if="currentState === 'empty'"
+        v-else-if="!loading && empty"
         class="analytic-container__empty"
       >
         <slot name="empty" :message="emptyMessage" :icon="emptyIcon">
@@ -342,9 +331,21 @@ function handleRetry() {
         </slot>
       </div>
 
-      <!-- Default Content -->
+      <!-- Content + Loading Overlay -->
       <template v-else>
-        <slot />
+        <div
+          class="analytic-container__slot-wrapper"
+          :class="{ 'analytic-container__slot-wrapper--loading': loading }"
+        >
+          <slot />
+        </div>
+        <Transition name="analytic-fade">
+          <div v-if="loading" class="analytic-container__loading-overlay">
+            <slot name="loading">
+              <Loader2 class="analytic-container__loading-spinner" />
+            </slot>
+          </div>
+        </Transition>
       </template>
     </div>
 
@@ -452,12 +453,13 @@ function handleRetry() {
 
 /* Content */
 .analytic-container__content {
+  position: relative;
   flex: 1;
   min-height: 0;
 }
 
 .analytic-container__content--padding-none {
-  padding: 0;
+  padding: var(--spacing-sm, 0.5rem);
 }
 
 .analytic-container__content--padding-sm {
@@ -472,21 +474,33 @@ function handleRetry() {
   padding: var(--spacing-xl);
 }
 
-/* Loading State */
-.analytic-container__loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-2xl);
-  color: var(--color-text-muted);
+/* Loading: blur overlay */
+.analytic-container__slot-wrapper {
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
-.analytic-container__loading-icon {
-  animation: spin 1s linear infinite;
+.analytic-container__slot-wrapper--loading {
+  filter: blur(3px);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  min-height: 120px;
+}
+
+.analytic-container__loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.analytic-container__loading-spinner {
   width: var(--icon-size-xl);
   height: var(--icon-size-xl);
+  color: var(--color-brand-tertiary, #8f3f00);
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -498,8 +512,14 @@ function handleRetry() {
   }
 }
 
-.analytic-container__loading-text {
-  font-size: var(--font-size-body);
+.analytic-fade-enter-active,
+.analytic-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.analytic-fade-enter-from,
+.analytic-fade-leave-to {
+  opacity: 0;
 }
 
 /* Error State */
@@ -665,15 +685,6 @@ function handleRetry() {
   user-select: none;
 }
 
-.analytic-container__header--clickable:hover {
-  background-color: var(--color-brand-primary, #e8dddb);
-}
-
-/* Clickable + Highlighted: hover uses brand accent instead of gray */
-.analytic-container__header--clickable.analytic-container__header--highlight:hover {
-  background-color: var(--color-brand-tertiary, #8f3f00);
-}
-
 /* Collapse Indicator (chevron next to title) */
 .analytic-container__collapse-indicator {
   flex-shrink: 0;
@@ -683,6 +694,10 @@ function handleRetry() {
 
 .analytic-container__header--clickable:hover .analytic-container__collapse-indicator {
   color: var(--color-text, #374151);
+}
+
+.analytic-container__header--highlight.analytic-container__header--clickable:hover .analytic-container__collapse-indicator {
+  color: #fff;
 }
 
 /* Collapsed State */
