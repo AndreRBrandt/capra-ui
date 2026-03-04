@@ -33,6 +33,9 @@ ADRs documentam decisões técnicas importantes de forma estruturada. Cada ADR r
 | [014](./014-app-query-conventions.md) | App Query Building Conventions | **Aceito** | 2026-02-13 |
 | [015](./015-dependency-boundaries.md) | Dependency Boundaries (Core vs App) | **Aceito** | 2026-02-13 |
 | [016](./016-kpi-grid-layout-strategy.md) | KPI Grid Layout Strategy & Container Theming | **Aceito** | 2026-02-18 |
+| [017](./ADR-017-endpoint-schema-discovery.md) | Endpoint-Driven Schema Discovery | Proposto | 2026-02-23 |
+| [018](./ADR-018.md) | Design Token Enforcement | **Aceito** | 2026-02-24 |
+| [019](./ADR-019.md) | Design System Contract — Framework-First Visual Ownership | **Aceito** | 2026-02-24 |
 
 ---
 

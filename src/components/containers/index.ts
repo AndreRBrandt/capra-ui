@@ -18,3 +18,5 @@ export { default as KpiContainer } from "./KpiContainer.vue";
 
 export { default as ListContainer } from "./ListContainer.vue";
 export type { ListContainerProps, ListContainerGroup } from "./ListContainer.vue";
+
+export { default as RecordCardList } from "./RecordCardList.vue";

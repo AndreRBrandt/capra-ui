@@ -33,6 +33,8 @@ import type { DataAdapter } from "./adapters";
 import { ACTION_BUS_KEY, FILTER_MANAGER_KEY, QUERY_MANAGER_KEY, DIMENSION_DISCOVERY_KEY, THEME_KEY, createThemeInstance } from "./composables";
 import { MEASURE_ENGINE_KEY } from "./composables/useMeasureEngine";
 import { schemaRegistry, SCHEMA_REGISTRY_KEY } from "./schema";
+import type { CapraTranslations } from "./i18n";
+import { CAPRA_I18N_KEY, DEFAULT_TRANSLATIONS } from "./i18n";
 
 // ===========================================================================
 // Plugin Options
@@ -51,6 +53,8 @@ export interface CapraPluginOptions extends MeasureEngineConfig {
   queryManager?: QueryManagerConfig;
   /** Configuração do DimensionDiscovery (requer adapter) */
   dimensionDiscovery?: DimensionDiscoveryConfig;
+  /** Override framework translations (merged with defaults) */
+  i18n?: Partial<CapraTranslations>;
 }
 
 // ===========================================================================
@@ -60,6 +64,17 @@ export interface CapraPluginOptions extends MeasureEngineConfig {
 export function createCapraPlugin(options: CapraPluginOptions = {}): Plugin {
   return {
     install(app) {
+      // i18n (always provided — merge user overrides with defaults)
+      const i18n: CapraTranslations = options.i18n
+        ? {
+            filters: { ...DEFAULT_TRANSLATIONS.filters, ...options.i18n.filters },
+            table: { ...DEFAULT_TRANSLATIONS.table, ...options.i18n.table },
+            common: { ...DEFAULT_TRANSLATIONS.common, ...options.i18n.common },
+            datePresets: { ...DEFAULT_TRANSLATIONS.datePresets, ...options.i18n.datePresets },
+          }
+        : DEFAULT_TRANSLATIONS;
+      app.provide(CAPRA_I18N_KEY, i18n);
+
       // MeasureEngine (always created)
       const engine = new MeasureEngine({
         locale: options.locale,

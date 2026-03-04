@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, type Component } from "vue";
 import { useMeasureEngine } from "../../composables/useMeasureEngine";
+import { useCapraI18n } from "../../i18n";
 
 const { engine } = useMeasureEngine();
+const { t } = useCapraI18n();
 
 // ===========================================================================
 // Types
@@ -64,9 +66,9 @@ const props = withDefaults(defineProps<Props>(), {
   trendLabel: "",
   invertTrend: false,
   participation: undefined,
-  participationLabel: "do total",
+  participationLabel: undefined,
   participationSecondary: undefined,
-  participationSecondaryLabel: "do total",
+  participationSecondaryLabel: undefined,
   icon: undefined,
   variant: "default",
   accentColor: undefined,
@@ -80,6 +82,10 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   click: [];
 }>();
+
+// i18n-aware fallbacks
+const resolvedParticipationLabel = computed(() => props.participationLabel ?? t.common.ofTotal);
+const resolvedParticipationSecondaryLabel = computed(() => props.participationSecondaryLabel ?? t.common.ofTotal);
 
 // ===========================================================================
 // Computed: Formatação do valor principal
@@ -132,9 +138,9 @@ const trendArrow = computed(() => {
 
 const trendColorClass = computed(() => {
   if (trendPercent.value === 0) {
-    return "text-gray-500";
+    return "kpi-card__trend--neutral";
   }
-  return isPositiveTrend.value ? "text-trend-positive" : "text-trend-negative";
+  return isPositiveTrend.value ? "kpi-card__trend--positive" : "kpi-card__trend--negative";
 });
 
 const formattedTrendPercent = computed(() => {
@@ -178,9 +184,9 @@ const labelStyle = computed(() => {
 // ===========================================================================
 const valueColorClass = computed(() => {
   if (!props.trendAffectsValue || !hasTrend.value || trendPercent.value === 0) {
-    return "text-brand-secondary";
+    return "kpi-card__value--default";
   }
-  return isPositiveTrend.value ? "text-trend-positive" : "text-trend-negative";
+  return isPositiveTrend.value ? "kpi-card__trend--positive" : "kpi-card__trend--negative";
 });
 
 // ===========================================================================
@@ -269,7 +275,7 @@ const handleClick = () => {
         data-testid="participation-indicator"
         class="kpi-card__participation"
       >
-        {{ formattedParticipation }}% {{ participationLabel }}
+        {{ formattedParticipation }}% {{ resolvedParticipationLabel }}
       </div>
 
       <!-- Indicador de Participacao Secundaria -->
@@ -278,7 +284,7 @@ const handleClick = () => {
         data-testid="participation-secondary-indicator"
         class="kpi-card__participation kpi-card__participation--secondary"
       >
-        {{ formattedParticipationSecondary }}% {{ participationSecondaryLabel }}
+        {{ formattedParticipationSecondary }}% {{ resolvedParticipationSecondaryLabel }}
       </div>
 
       <!-- Slot para conteúdo customizado -->
@@ -343,6 +349,8 @@ const handleClick = () => {
   align-items: center;
   gap: var(--spacing-xs, 0.25rem);
   margin-bottom: var(--spacing-xs, 0.25rem);
+  padding-left: var(--kpi-header-padding-left, 0);
+  padding-right: var(--kpi-header-padding-right, 0);
 }
 
 .kpi-card__label {
@@ -410,21 +418,21 @@ const handleClick = () => {
 }
 
 /* ===========================================================================
-   Cores de Tendencia
+   Cores de Tendencia / Valor
    =========================================================================== */
-.text-trend-positive {
+.kpi-card__trend--positive {
   color: var(--color-success, #22c55e);
 }
 
-.text-trend-negative {
+.kpi-card__trend--negative {
   color: var(--color-danger, #ef4444);
 }
 
-.text-gray-500 {
+.kpi-card__trend--neutral {
   color: var(--color-text-muted, #6b7280);
 }
 
-.text-brand-secondary {
+.kpi-card__value--default {
   color: var(--color-brand-secondary, #4a2c00);
 }
 </style>

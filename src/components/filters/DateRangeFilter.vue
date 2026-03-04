@@ -17,6 +17,9 @@
 
 import { computed, ref, watch } from "vue";
 import { Check, Calendar } from "lucide-vue-next";
+import { useCapraI18n } from "../../i18n";
+
+const { t } = useCapraI18n();
 
 // ==========================================================================
 // Types
@@ -49,6 +52,8 @@ export interface DateRangeFilterProps {
   minDate?: Date | string;
   /** Data maxima permitida */
   maxDate?: Date | string;
+  /** Show custom date picker inline at the top instead of toggling */
+  customFirst?: boolean;
   /** Locale para formatacao */
   locale?: string;
   /** Formato de exibicao */
@@ -81,66 +86,68 @@ function startOfYear(date: Date): Date {
   return new Date(date.getFullYear(), 0, 1);
 }
 
-const DEFAULT_PRESETS: DatePreset[] = [
-  {
-    value: "lastday",
-    label: "Ontem",
-    mdxValue: "LastDay",
-    getRange: () => {
-      const yesterday = subDays(new Date(), 1);
-      return { start: yesterday, end: yesterday };
+function getDefaultPresets(): DatePreset[] {
+  return [
+    {
+      value: "lastday",
+      label: t.datePresets.yesterday,
+      mdxValue: "LastDay",
+      getRange: () => {
+        const yesterday = subDays(new Date(), 1);
+        return { start: yesterday, end: yesterday };
+      },
     },
-  },
-  {
-    value: "today",
-    label: "Hoje",
-    mdxValue: "CurrentDay",
-    getRange: () => {
-      const today = new Date();
-      return { start: today, end: today };
+    {
+      value: "today",
+      label: t.datePresets.today,
+      mdxValue: "CurrentDay",
+      getRange: () => {
+        const today = new Date();
+        return { start: today, end: today };
+      },
     },
-  },
-  {
-    value: "last7days",
-    label: "Últimos 7 dias",
-    mdxValue: "LastSevenDays",
-    getRange: () => {
-      const end = subDays(new Date(), 1);
-      const start = subDays(new Date(), 7);
-      return { start, end };
+    {
+      value: "last7days",
+      label: t.datePresets.last7days,
+      mdxValue: "LastSevenDays",
+      getRange: () => {
+        const end = subDays(new Date(), 1);
+        const start = subDays(new Date(), 7);
+        return { start, end };
+      },
     },
-  },
-  {
-    value: "weektodate",
-    label: "Semana até ontem",
-    mdxValue: "WeekToDate",
-    getRange: () => {
-      const end = subDays(new Date(), 1);
-      const start = startOfWeek(new Date());
-      return { start, end };
+    {
+      value: "weektodate",
+      label: t.datePresets.weekToYesterday,
+      mdxValue: "WeekToDate",
+      getRange: () => {
+        const end = subDays(new Date(), 1);
+        const start = startOfWeek(new Date());
+        return { start, end };
+      },
     },
-  },
-  {
-    value: "monthtodate",
-    label: "Mês até ontem",
-    mdxValue: "MonthToDate",
-    getRange: () => {
-      const end = subDays(new Date(), 1);
-      const start = startOfMonth(new Date());
-      return { start, end };
+    {
+      value: "monthtodate",
+      label: t.datePresets.monthToYesterday,
+      mdxValue: "MonthToDate",
+      getRange: () => {
+        const end = subDays(new Date(), 1);
+        const start = startOfMonth(new Date());
+        return { start, end };
+      },
     },
-  },
-  {
-    value: "yeartodate",
-    label: "Ano atual",
-    mdxValue: "YearToDate",
-    getRange: () => {
-      const end = new Date();
-      const start = startOfYear(new Date());
-      return { start, end };
+    {
+      value: "yeartodate",
+      label: t.datePresets.currentYear,
+      mdxValue: "YearToDate",
+      getRange: () => {
+        const end = new Date();
+        const start = startOfYear(new Date());
+        return { start, end };
+      },
     },
-  },
-];
+  ];
+}
 
 // ==========================================================================
 // Props & Emits
@@ -148,13 +155,14 @@ const DEFAULT_PRESETS: DatePreset[] = [
 
 const props = withDefaults(defineProps<DateRangeFilterProps>(), {
   showCustom: true,
+  customFirst: false,
   customLabel: "Periodo personalizado",
   locale: "pt-BR",
   dateFormat: "DD/MM/YYYY",
 });
 
 // Use default presets if not provided
-const activePresets = computed(() => props.presets ?? DEFAULT_PRESETS);
+const activePresets = computed(() => props.presets ?? getDefaultPresets());
 
 const emit = defineEmits<{
   "update:modelValue": [value: DateRangeValue];
@@ -284,12 +292,12 @@ function validateDates() {
   const end = parseDateFromInput(customEndDate.value);
 
   if (!start || !end) {
-    validationError.value = "Datas inválidas";
+    validationError.value = t.filters.invalidDates;
     return;
   }
 
   if (start > end) {
-    validationError.value = "Data inicial deve ser menor ou igual à final";
+    validationError.value = t.filters.startBeforeEnd;
   }
 }
 
@@ -335,16 +343,74 @@ watch([customStartDate, customEndDate], validateDates);
 // Generate unique IDs for accessibility
 const startDateId = `date-range-start-${Math.random().toString(36).slice(2, 9)}`;
 const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
+
+// Eagerly initialize custom date fields when customFirst is enabled
+if (props.customFirst) {
+  if (props.modelValue?.type === "custom" && props.modelValue.startDate && props.modelValue.endDate) {
+    customStartDate.value = formatDateForInput(props.modelValue.startDate);
+    customEndDate.value = formatDateForInput(props.modelValue.endDate);
+  } else {
+    const today = new Date();
+    customEndDate.value = formatDateForInput(today);
+    customStartDate.value = formatDateForInput(startOfMonth(today));
+  }
+}
 </script>
 
 <template>
   <div class="date-range-filter">
+    <!-- Custom inline picker (customFirst mode — always visible at top) -->
+    <div v-if="customFirst" class="date-range-filter__custom-inline">
+      <div class="date-range-filter__custom-inline-header">
+        <Calendar class="date-range-filter__custom-icon" :size="16" />
+        <span class="date-range-filter__preset-label">{{ customLabel }}</span>
+      </div>
+      <div class="date-range-filter__custom-fields">
+        <div class="date-range-filter__custom-field">
+          <label :for="startDateId" class="date-range-filter__custom-label">{{ t.filters.from }}</label>
+          <input
+            :id="startDateId"
+            v-model="customStartDate"
+            type="date"
+            class="date-range-filter__custom-input"
+            :min="minDateString"
+            :max="maxDateString"
+          />
+        </div>
+        <div class="date-range-filter__custom-field">
+          <label :for="endDateId" class="date-range-filter__custom-label">{{ t.filters.to }}</label>
+          <input
+            :id="endDateId"
+            v-model="customEndDate"
+            type="date"
+            class="date-range-filter__custom-input"
+            :min="minDateString"
+            :max="maxDateString"
+          />
+        </div>
+      </div>
+      <div v-if="validationError" class="date-range-filter__error">{{ validationError }}</div>
+      <div class="date-range-filter__custom-inline-footer">
+        <button
+          type="button"
+          class="date-range-filter__custom-btn date-range-filter__custom-btn--primary"
+          :disabled="isApplyDisabled"
+          @click="handleApply"
+        >
+          {{ t.filters.apply }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Divider between custom and presets -->
+    <div v-if="customFirst" class="date-range-filter__divider"></div>
+
     <!-- Presets List -->
     <div
-      v-if="!showCustomPicker"
+      v-if="customFirst || !showCustomPicker"
       class="date-range-filter__presets"
       role="radiogroup"
-      aria-label="Selecione o período"
+      :aria-label="t.filters.selectPeriod"
     >
       <div
         v-for="preset in activePresets"
@@ -368,9 +434,9 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
         </slot>
       </div>
 
-      <!-- Custom Trigger -->
+      <!-- Custom Trigger (default mode only) -->
       <div
-        v-if="showCustom"
+        v-if="showCustom && !customFirst"
         class="date-range-filter__custom-trigger"
         :class="{ 'date-range-filter__custom-trigger--active': isCustomSelected }"
         role="radio"
@@ -390,12 +456,12 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
       </div>
     </div>
 
-    <!-- Custom Date Picker -->
-    <div v-else class="date-range-filter__custom-picker">
+    <!-- Custom Date Picker (default mode only) -->
+    <div v-if="!customFirst && showCustomPicker" class="date-range-filter__custom-picker">
       <!-- Header -->
       <div class="date-range-filter__custom-header">
         <slot name="custom-header">
-          <span>Selecione o período</span>
+          <span>{{ t.filters.selectPeriod }}</span>
         </slot>
       </div>
 
@@ -406,7 +472,7 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
             :for="startDateId"
             class="date-range-filter__custom-label"
           >
-            De:
+            {{ t.filters.from }}
           </label>
           <input
             :id="startDateId"
@@ -423,7 +489,7 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
             :for="endDateId"
             class="date-range-filter__custom-label"
           >
-            Até:
+            {{ t.filters.to }}
           </label>
           <input
             :id="endDateId"
@@ -449,7 +515,7 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
             class="date-range-filter__custom-btn date-range-filter__custom-btn--secondary"
             @click="handleCancel"
           >
-            Cancelar
+            {{ t.filters.cancel }}
           </button>
           <button
             type="button"
@@ -457,7 +523,7 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
             :disabled="isApplyDisabled"
             @click="handleApply"
           >
-            Aplicar
+            {{ t.filters.apply }}
           </button>
         </slot>
       </div>
@@ -643,5 +709,31 @@ const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
 .date-range-filter__custom-btn--primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Custom Inline (customFirst mode) */
+.date-range-filter__custom-inline {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-range-filter__custom-inline-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 0.25rem);
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 0.75rem);
+  font-weight: 600;
+  font-size: var(--font-size-body, 0.875rem);
+  color: var(--color-text, #374151);
+}
+
+.date-range-filter__custom-inline-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 var(--spacing-md, 0.75rem) var(--spacing-sm, 0.5rem);
+}
+
+.date-range-filter__divider {
+  border-top: 1px solid var(--color-border, #e5e7eb);
 }
 </style>

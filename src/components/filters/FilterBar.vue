@@ -20,6 +20,9 @@
 
 import { computed, type Component } from "vue";
 import { RotateCcw } from "lucide-vue-next";
+import { useCapraI18n } from "../../i18n";
+
+const { t } = useCapraI18n();
 
 export interface FilterBarProps {
   /** Exibe botao de resetar */
@@ -40,7 +43,7 @@ export interface FilterBarProps {
 
 const props = withDefaults(defineProps<FilterBarProps>(), {
   showReset: true,
-  resetLabel: "Resetar",
+  resetLabel: undefined,
   hasActiveFilters: false,
   gap: "sm",
   wrap: true,
@@ -78,7 +81,7 @@ function handleReset() {
   <div
     :class="barClasses"
     role="toolbar"
-    aria-label="Filtros"
+    :aria-label="t.filters.filtersLabel"
   >
     <!-- Prepend -->
     <div v-if="$slots.prepend" class="filter-bar__prepend">
@@ -101,7 +104,7 @@ function handleReset() {
         <button
           type="button"
           :class="resetClasses"
-          aria-label="Resetar filtros"
+          :aria-label="t.filters.resetFilters"
           @click="handleReset"
         >
           <component
@@ -109,7 +112,7 @@ function handleReset() {
             class="filter-bar__reset-icon"
             :size="16"
           />
-          <span class="filter-bar__reset-label">{{ resetLabel }}</span>
+          <span class="filter-bar__reset-label">{{ resetLabel ?? t.filters.reset }}</span>
         </button>
       </slot>
     </div>

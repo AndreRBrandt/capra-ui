@@ -41,6 +41,10 @@ export type {
 // Plugin
 export { createCapraPlugin, type CapraPluginOptions } from "./plugin";
 
+// i18n
+export { useCapraI18n, CAPRA_I18N_KEY, DEFAULT_TRANSLATIONS } from "./i18n";
+export type { CapraTranslations } from "./i18n";
+
 // Utils
 export * from "./utils";
 
@@ -131,6 +135,7 @@ export {
   FilterContainer,
   KpiContainer,
   ListContainer,
+  RecordCardList,
   // Layout
   AppShell,
   AnalyticsPage,
@@ -150,6 +155,9 @@ export {
   ColorGroupManager,
   KpiConfigPanel,
   SegmentedControl,
+  Collapsible,
+  RecordCard,
+  StatusBadge,
   // Filters (components only, types come from composables)
   FilterTrigger,
   FilterDropdown,
@@ -158,11 +166,13 @@ export {
   DateRangeFilter,
   FilterBar,
   AnalyticsFilterBar,
+  CollapsibleFilterBar,
 } from "./components";
 
 // Component types (re-exported explicitly to avoid conflicts with composable types)
 export type { SelectOption } from "./components/filters/SelectFilter.vue";
 export type { MultiSelectOption } from "./components/filters/MultiSelectFilter.vue";
+export type { DateRangeValue, DateRangeFilterProps } from "./components/filters/DateRangeFilter.vue";
 export type { Column, ColumnFormat, TrendConfig, SortState, TotalConfig } from "./components/analytics/DataTable.vue";
 export type { ColumnOption } from "./components/ui/ConfigPanel.vue";
 export type { KpiAction } from "./components/analytics/KpiCardWrapper.vue";

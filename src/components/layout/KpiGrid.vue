@@ -53,10 +53,6 @@ withDefaults(
   grid-auto-rows: auto;
   gap: var(--kpi-gap, 0.375rem);
   width: 100%;
-}
-
-/* Scale down card content on small screens */
-.capra-kpi-grid :deep([data-testid="kpi-card"]) {
   --kpi-value-size: 1.1rem;
   --kpi-label-size: 0.65rem;
   --kpi-trend-size: 0.6rem;
@@ -70,9 +66,6 @@ withDefaults(
   .capra-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--kpi-gap, 0.5rem);
-  }
-
-  .capra-kpi-grid :deep([data-testid="kpi-card"]) {
     --kpi-value-size: 1.15rem;
     --kpi-label-size: 0.7rem;
     --kpi-trend-size: 0.65rem;
@@ -90,9 +83,6 @@ withDefaults(
     grid-template-columns: repeat(auto-fit, minmax(var(--kpi-min-width, 200px), 1fr));
     grid-auto-rows: auto;
     gap: var(--kpi-gap, 0.75rem);
-  }
-
-  .capra-kpi-grid :deep([data-testid="kpi-card"]) {
     --kpi-value-size: 1.25rem;
     --kpi-label-size: 0.75rem;
     --kpi-trend-size: 0.7rem;
@@ -100,7 +90,7 @@ withDefaults(
 }
 
 /* Ensure all children fill the grid cell, cap width if maxCardWidth set */
-.capra-kpi-grid > :deep(*) {
+.capra-kpi-grid > :slotted(*) {
   height: 100%;
   max-width: var(--kpi-max-width);
 }

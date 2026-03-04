@@ -106,9 +106,9 @@ describe("DataTable", () => {
 
       const headerCells = wrapper.findAll("thead th");
       // Primeira coluna: left (padrão)
-      expect(headerCells[0].classes()).toContain("text-left");
+      expect(headerCells[0].classes()).toContain("dt-align-left");
       // Segunda coluna: right
-      expect(headerCells[1].classes()).toContain("text-right");
+      expect(headerCells[1].classes()).toContain("dt-align-right");
     });
 
     it("deve aplicar largura das colunas quando especificada", () => {

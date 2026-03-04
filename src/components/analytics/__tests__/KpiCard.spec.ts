@@ -128,7 +128,7 @@ describe("KpiCard", () => {
         },
       });
       const trend = wrapper.find('[data-testid="trend-indicator"]');
-      expect(trend.classes()).toContain("text-trend-positive");
+      expect(trend.classes()).toContain("kpi-card__trend--positive");
     });
 
     it("deve aplicar classe de cor negativa quando valor diminuiu", () => {
@@ -140,7 +140,7 @@ describe("KpiCard", () => {
         },
       });
       const trend = wrapper.find('[data-testid="trend-indicator"]');
-      expect(trend.classes()).toContain("text-trend-negative");
+      expect(trend.classes()).toContain("kpi-card__trend--negative");
     });
 
     it("invertTrend=true deve inverter as cores (queda = positivo)", () => {
@@ -154,7 +154,7 @@ describe("KpiCard", () => {
       });
       const trend = wrapper.find('[data-testid="trend-indicator"]');
       // Queda com invertTrend deve ser positivo (verde)
-      expect(trend.classes()).toContain("text-trend-positive");
+      expect(trend.classes()).toContain("kpi-card__trend--positive");
     });
 
     it("deve exibir trendLabel quando fornecido", () => {
@@ -490,7 +490,7 @@ describe("KpiCard", () => {
         },
       });
       const value = wrapper.find('[data-testid="kpi-value"]');
-      expect(value.classes().some((c) => c.includes("brand-secondary"))).toBe(true);
+      expect(value.classes()).toContain("kpi-card__value--default");
     });
 
     it("RF10.2: valor deve ter cor positiva quando tendência é de alta", () => {

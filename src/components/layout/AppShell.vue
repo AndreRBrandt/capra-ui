@@ -847,25 +847,25 @@ const bottomNavItems = computed(() => {
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
-  padding: var(--spacing-md) var(--spacing-md);
+  padding: 0 var(--spacing-md) var(--spacing-md);
   overflow-x: clip;
 }
 
 @media (min-width: 768px) {
   .app-shell__content {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 0 var(--spacing-lg) var(--spacing-md);
   }
 }
 
 @media (min-width: 1280px) {
   .app-shell__content {
-    padding: var(--spacing-md) var(--spacing-xl);
+    padding: 0 var(--spacing-xl) var(--spacing-md);
   }
 }
 
 @media (min-width: 1536px) {
   .app-shell__content {
-    padding: var(--spacing-md) 2rem;
+    padding: 0 2rem var(--spacing-md);
   }
 }
 </style>

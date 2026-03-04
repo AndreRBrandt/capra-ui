@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
+import { render, screen } from "@testing-library/vue";
+import userEvent from "@testing-library/user-event";
 import BaseButton from "../BaseButton.vue";
 
 describe("BaseButton", () => {
@@ -7,144 +8,77 @@ describe("BaseButton", () => {
   // RF01: Renderização básica
   // ===========================================================================
   describe("RF01: Renderização básica", () => {
-    it("deve renderizar um elemento <button> nativo", () => {
-      const wrapper = mount(BaseButton);
-      expect(wrapper.element.tagName).toBe("BUTTON");
+    it("deve renderizar um botão acessível", () => {
+      render(BaseButton, { slots: { default: "Salvar" } });
+      expect(screen.getByRole("button", { name: "Salvar" })).toBeInTheDocument();
     });
 
     it("deve renderizar o conteúdo do slot default", () => {
-      const wrapper = mount(BaseButton, {
-        slots: {
-          default: "Click me",
-        },
-      });
-      expect(wrapper.text()).toBe("Click me");
+      render(BaseButton, { slots: { default: "Click me" } });
+      expect(screen.getByRole("button")).toHaveTextContent("Click me");
     });
 
-    it("deve aplicar classes base de estilo", () => {
-      const wrapper = mount(BaseButton);
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("rounded-md");
-      expect(classes).toContain("font-medium");
-      expect(classes).toContain("transition-colors");
+    it("deve renderizar sem slot (botão vazio)", () => {
+      render(BaseButton);
+      expect(screen.getByRole("button")).toBeInTheDocument();
     });
   });
 
   // ===========================================================================
-  // RF02: Variantes visuais
+  // RF02: Variantes visuais (testadas por renderização, não classes)
   // ===========================================================================
   describe("RF02: Variantes visuais", () => {
-    it('variant="primary" deve aplicar classes corretas (default)', () => {
-      const wrapper = mount(BaseButton);
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("bg-brand-primary");
-      expect(classes).toContain("text-brand-secondary");
-    });
-
-    it('variant="secondary" deve aplicar classes corretas', () => {
-      const wrapper = mount(BaseButton, {
-        props: { variant: "secondary" },
-      });
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("bg-brand-secondary");
-      expect(classes).toContain("text-brand-primary");
-    });
-
-    it('variant="outline" deve aplicar classes corretas', () => {
-      const wrapper = mount(BaseButton, {
-        props: { variant: "outline" },
-      });
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("border");
-      expect(classes).toContain("border-brand-secondary");
-      expect(classes).toContain("text-brand-secondary");
-    });
-
-    it('variant="ghost" deve aplicar classes corretas', () => {
-      const wrapper = mount(BaseButton, {
-        props: { variant: "ghost" },
-      });
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("text-brand-secondary");
-      expect(classes).toContain("hover:bg-gray-100");
-    });
+    it.each(["primary", "secondary", "outline", "ghost", "accent"] as const)(
+      'variant="%s" deve renderizar botão funcional',
+      (variant) => {
+        render(BaseButton, {
+          props: { variant },
+          slots: { default: "Botão" },
+        });
+        expect(screen.getByRole("button", { name: "Botão" })).toBeInTheDocument();
+      }
+    );
   });
 
   // ===========================================================================
   // RF03: Tamanhos
   // ===========================================================================
   describe("RF03: Tamanhos", () => {
-    it('size="sm" deve aplicar classes corretas', () => {
-      const wrapper = mount(BaseButton, {
-        props: { size: "sm" },
-      });
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("h-8");
-      expect(classes).toContain("px-3");
-      expect(classes).toContain("text-xs");
-    });
-
-    it('size="md" deve aplicar classes corretas (default)', () => {
-      const wrapper = mount(BaseButton);
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("h-10");
-      expect(classes).toContain("px-4");
-      expect(classes).toContain("text-sm");
-    });
-
-    it('size="lg" deve aplicar classes corretas', () => {
-      const wrapper = mount(BaseButton, {
-        props: { size: "lg" },
-      });
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("h-12");
-      expect(classes).toContain("px-8");
-      expect(classes).toContain("text-base");
-    });
+    it.each(["sm", "md", "lg"] as const)(
+      'size="%s" deve renderizar botão funcional',
+      (size) => {
+        render(BaseButton, {
+          props: { size },
+          slots: { default: "Botão" },
+        });
+        expect(screen.getByRole("button", { name: "Botão" })).toBeInTheDocument();
+      }
+    );
   });
 
   // ===========================================================================
   // RF04: Estado desabilitado
   // ===========================================================================
   describe("RF04: Estado desabilitado", () => {
-    it("deve aplicar atributo disabled no elemento nativo", () => {
-      const wrapper = mount(BaseButton, {
+    it("deve estar desabilitado quando disabled=true", () => {
+      render(BaseButton, {
         props: { disabled: true },
+        slots: { default: "Enviar" },
       });
-
-      expect(wrapper.attributes("disabled")).toBeDefined();
+      expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
     });
 
-    it("deve aplicar classe de opacidade reduzida quando desabilitado", () => {
-      const wrapper = mount(BaseButton, {
-        props: { disabled: true },
-      });
-
-      expect(wrapper.classes()).toContain("disabled:opacity-50");
-    });
-
-    it("deve aplicar classe de pointer-events-none quando desabilitado", () => {
-      const wrapper = mount(BaseButton, {
-        props: { disabled: true },
-      });
-
-      expect(wrapper.classes()).toContain("disabled:pointer-events-none");
-    });
-
-    it("não deve ter atributo disabled quando disabled=false", () => {
-      const wrapper = mount(BaseButton, {
+    it("deve estar habilitado quando disabled=false", () => {
+      render(BaseButton, {
         props: { disabled: false },
+        slots: { default: "Enviar" },
       });
+      expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled();
+    });
 
-      expect(wrapper.attributes("disabled")).toBeUndefined();
+    it("deve estar habilitado por padrão", () => {
+      render(BaseButton, { slots: { default: "Enviar" } });
+      expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled();
     });
   });
 
@@ -153,25 +87,24 @@ describe("BaseButton", () => {
   // ===========================================================================
   describe("RF05: Tipo do botão", () => {
     it('deve ter type="button" por padrão', () => {
-      const wrapper = mount(BaseButton);
-
-      expect(wrapper.attributes("type")).toBe("button");
+      render(BaseButton, { slots: { default: "Btn" } });
+      expect(screen.getByRole("button")).toHaveAttribute("type", "button");
     });
 
-    it('deve aplicar type="submit" quando especificado', () => {
-      const wrapper = mount(BaseButton, {
+    it('deve aplicar type="submit"', () => {
+      render(BaseButton, {
         props: { type: "submit" },
+        slots: { default: "Enviar" },
       });
-
-      expect(wrapper.attributes("type")).toBe("submit");
+      expect(screen.getByRole("button")).toHaveAttribute("type", "submit");
     });
 
-    it('deve aplicar type="reset" quando especificado', () => {
-      const wrapper = mount(BaseButton, {
+    it('deve aplicar type="reset"', () => {
+      render(BaseButton, {
         props: { type: "reset" },
+        slots: { default: "Limpar" },
       });
-
-      expect(wrapper.attributes("type")).toBe("reset");
+      expect(screen.getByRole("button")).toHaveAttribute("type", "reset");
     });
   });
 
@@ -179,46 +112,68 @@ describe("BaseButton", () => {
   // RF06: Acessibilidade
   // ===========================================================================
   describe("RF06: Acessibilidade", () => {
-    it("deve ter classes de focus ring para indicador visual", () => {
-      const wrapper = mount(BaseButton);
-      const classes = wrapper.classes();
-
-      expect(classes).toContain("focus:outline-none");
-      expect(classes).toContain("focus:ring-2");
-      expect(classes).toContain("focus:ring-offset-2");
+    it("deve ser focável", () => {
+      render(BaseButton, { slots: { default: "Foco" } });
+      const button = screen.getByRole("button", { name: "Foco" });
+      // tabindex não deve ser negativo
+      const tabindex = button.getAttribute("tabindex");
+      expect(tabindex === null || parseInt(tabindex) >= 0).toBe(true);
     });
 
-    it("deve ser focável (não ter tabindex negativo)", () => {
-      const wrapper = mount(BaseButton);
-      const tabindex = wrapper.attributes("tabindex");
-
-      // tabindex não deve existir (usa default) ou não ser negativo
-      expect(tabindex === undefined || parseInt(tabindex) >= 0).toBe(true);
+    it("deve ser encontrável por role=button", () => {
+      render(BaseButton, { slots: { default: "Acessível" } });
+      expect(screen.getByRole("button", { name: "Acessível" })).toBeTruthy();
     });
   });
 
   // ===========================================================================
-  // Testes de integração: Props combinadas
+  // Interação
+  // ===========================================================================
+  describe("Interação", () => {
+    it("deve responder a clique quando habilitado", async () => {
+      const user = userEvent.setup();
+      const onClick = vi.fn();
+      render(BaseButton, {
+        slots: { default: "Clique" },
+        attrs: { onClick },
+      });
+
+      await user.click(screen.getByRole("button", { name: "Clique" }));
+      expect(onClick).toHaveBeenCalledOnce();
+    });
+
+    it("não deve responder a clique quando desabilitado", async () => {
+      const user = userEvent.setup();
+      const onClick = vi.fn();
+      render(BaseButton, {
+        props: { disabled: true },
+        slots: { default: "Clique" },
+        attrs: { onClick },
+      });
+
+      await user.click(screen.getByRole("button", { name: "Clique" }));
+      expect(onClick).not.toHaveBeenCalled();
+    });
+  });
+
+  // ===========================================================================
+  // Integração: Props combinadas
   // ===========================================================================
   describe("Integração: Props combinadas", () => {
     it("deve aceitar múltiplas props simultaneamente", () => {
-      const wrapper = mount(BaseButton, {
+      render(BaseButton, {
         props: {
           variant: "outline",
           size: "lg",
           type: "submit",
           disabled: true,
         },
-        slots: {
-          default: "Submit Form",
-        },
+        slots: { default: "Submit Form" },
       });
 
-      expect(wrapper.text()).toBe("Submit Form");
-      expect(wrapper.attributes("type")).toBe("submit");
-      expect(wrapper.attributes("disabled")).toBeDefined();
-      expect(wrapper.classes()).toContain("border");
-      expect(wrapper.classes()).toContain("h-12");
+      const button = screen.getByRole("button", { name: "Submit Form" });
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute("type", "submit");
     });
   });
 });

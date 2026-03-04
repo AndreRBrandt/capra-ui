@@ -18,6 +18,9 @@
 
 import { computed, ref } from "vue";
 import { Search } from "lucide-vue-next";
+import { useCapraI18n } from "../../i18n";
+
+const { t } = useCapraI18n();
 
 export interface MultiSelectOption {
   value: string | number;
@@ -60,18 +63,25 @@ export interface MultiSelectFilterProps {
 const props = withDefaults(defineProps<MultiSelectFilterProps>(), {
   modelValue: () => [],
   searchable: false,
-  searchPlaceholder: "Buscar...",
-  emptyMessage: "Nenhum resultado",
+  searchPlaceholder: undefined,
+  emptyMessage: undefined,
   showHeader: true,
   showSelectAll: true,
   showClearAll: true,
-  selectAllLabel: "Todas",
-  clearAllLabel: "Limpar",
-  countLabel: "selecionada(s)",
+  selectAllLabel: undefined,
+  clearAllLabel: undefined,
+  countLabel: undefined,
   maxHeight: "240px",
   minSelected: 0,
   maxSelected: undefined,
 });
+
+// Resolve i18n defaults for props that weren't explicitly set
+const resolvedSearchPlaceholder = computed(() => props.searchPlaceholder ?? t.filters.search);
+const resolvedEmptyMessage = computed(() => props.emptyMessage ?? t.filters.noResults);
+const resolvedSelectAllLabel = computed(() => props.selectAllLabel ?? t.filters.selectAll);
+const resolvedClearAllLabel = computed(() => props.clearAllLabel ?? t.filters.clearAll);
+const resolvedCountLabel = computed(() => props.countLabel ?? t.filters.selected);
 
 const emit = defineEmits<{
   "update:modelValue": [value: (string | number)[]];
@@ -215,7 +225,7 @@ function getClearAllClasses() {
     <div v-if="showHeader" class="multi-select-filter__header">
       <slot name="header" :count="selectedCount" :total="totalCount">
         <span class="multi-select-filter__count">
-          {{ selectedCount }} {{ countLabel }}
+          {{ selectedCount }} {{ resolvedCountLabel }}
         </span>
         <div class="multi-select-filter__actions">
           <button
@@ -226,7 +236,7 @@ function getClearAllClasses() {
             :disabled="allVisibleSelected || isAtMaximum"
             @click="selectAll"
           >
-            {{ selectAllLabel }}
+            {{ resolvedSelectAllLabel }}
           </button>
           <button
             v-if="showClearAll"
@@ -236,7 +246,7 @@ function getClearAllClasses() {
             :disabled="selectedCount === 0 || isAtMinimum"
             @click="clearAll"
           >
-            {{ clearAllLabel }}
+            {{ resolvedClearAllLabel }}
           </button>
         </div>
       </slot>
@@ -249,7 +259,7 @@ function getClearAllClasses() {
         v-model="searchQuery"
         type="text"
         class="multi-select-filter__search-input"
-        :placeholder="searchPlaceholder"
+        :placeholder="resolvedSearchPlaceholder"
       />
     </div>
 
@@ -292,7 +302,7 @@ function getClearAllClasses() {
       <!-- Empty -->
       <div v-else class="multi-select-filter__empty">
         <slot name="empty">
-          {{ emptyMessage }}
+          {{ resolvedEmptyMessage }}
         </slot>
       </div>
     </div>

@@ -9,7 +9,143 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Adicionado (S161) — i18n: Sistema de traduções tipado
+- **i18n module** — Novo módulo `src/i18n/` com `CapraTranslations` interface, `DEFAULT_TRANSLATIONS` (pt-BR), `useCapraI18n()` composable, e `CAPRA_I18N_KEY` injection key
+- **Plugin** — `createCapraPlugin()` aceita `i18n?: Partial<CapraTranslations>` para override de labels do framework
+- **Exports** — `useCapraI18n`, `CAPRA_I18N_KEY`, `DEFAULT_TRANSLATIONS`, `CapraTranslations` exportados via barrel
+
+### Alterado (S161) — Componentes adotam i18n
+- **DateRangeFilter** — Presets, labels (De/Até), botões (Aplicar/Cancelar), validação e aria-labels usam `useCapraI18n()`
+- **MultiSelectFilter** — Props defaults (Buscar/Nenhum resultado/Todas/Limpar/selecionada(s)) fallback para i18n
+- **DataTable** — Props defaults (TOTAL/Buscar/Filtrar/Todos/Nenhum dado), paginação, column filter, loading usam i18n
+- **KpiCard** — participationLabel e participationSecondaryLabel fallback para `t.common.ofTotal`
+- **FilterBar** — resetLabel, aria-labels usam i18n
+- **DetailModal** — Close button aria-label e "Anterior:" prefix usam i18n
+
+### Adicionado (S158) — DateRangeFilter customFirst prop
+- **DateRangeFilter.vue** — Nova prop `customFirst: boolean` (default `false`). Quando `true`, renderiza date picker inline no topo com divider + presets abaixo. Inicializa date inputs eagerly. Modo default inalterado.
+
+### Alterado (S157) — CapraComparison types para suportar moving_average
+- **types/query.ts** — `CapraComparisonType` agora aceita `"moving_average"`. `CapraComparison.offset` e `unit` agora opcionais. Novo campo `count?` para MA4.
+
+### Removido (S156) — Task 04: Limpar adapters barrel V1
+
+- **adapters/index.ts** — Removidos exports quebrados: MockAdapter, BIMachineAdapter, BIMachineExternalAdapter, mdx-period helpers, createAdapter factory. Mantidos apenas V2: types, MockAdapterV2, AdapterBridge.
+- **adapters/__tests__/createAdapter.spec.ts** — Deletado (testava factory V1 removida)
+
+### Adicionado (S151) — MockAdapterV2
+
+- **MockAdapterV2** — Adapter V2 mock para desenvolvimento e testes. Implementa `DataAdapterV2`, gera dados procedurais a partir de `CapraQuery` com dimensionValues/measureRanges configuráveis, hash determinístico, filtros, comparison, sort, limit.
+- **mock-v2.spec.ts** — 27 testes unitários cobrindo todos os cenários.
+
+### Adicionado (S141) — Vue Testing Library
+
+- **@testing-library/vue** + **@testing-library/jest-dom** + **@testing-library/user-event** — devDeps adicionadas
+- **vitest.setup.ts** — Setup file para matchers jest-dom (toBeInTheDocument, toBeDisabled, etc.)
+- **vitest.config.ts** — `setupFiles` configurado
+- **BaseButton.spec.ts** — Migrado para VTL: queries semânticas (getByRole, getByText), testes por comportamento, zero assertivas de classes CSS. Cobertura: renderização, variantes, tamanhos, disabled, type, acessibilidade, interação click
+
+### Corrigido (S140) — Specs alinhados com BEM (ADR-019)
+
+- **BaseButton.spec.ts** — 12 testes atualizados: classes Tailwind → BEM (`base-btn`, `base-btn--{variant}`, `base-btn--{size}`). Removidos expects de disabled:*/focus:* (agora via CSS pseudo-classes)
+- **DataTable.spec.ts** — 1 teste atualizado: `text-left`/`text-right` → `dt-align-left`/`dt-align-right`
+- **KpiCard.spec.ts** — 4 testes atualizados: `text-trend-positive`/`negative` → `kpi-card__trend--positive`/`negative`; RF10.1 → `kpi-card__value--default`
+
 ### Adicionado
+
+#### Session 125d: DataTable — auto-chevron + classes utilitárias de grupo (framework-first)
+- **`src/styles/tokens.css`** — +2 tokens: `--data-table-group-chevron-color` e `--data-table-group-chevron-font-size` para personalização do chevron via tema
+- **`src/components/analytics/DataTable.vue`** — slot padrão da primeira coluna de linhas de grupo agora renderiza automaticamente `▶/▼` (`data-table__group-chevron`) quando `collapsibleGroups && isGroupHeader?.(row) && colIndex === 0`; `data-table__cell-content--with-chevron` muda layout para `flex-row`; +classes `.data-table__group-chevron` e `.data-table__group-cell` disponíveis para slots customizados; zero CSS necessário em app pages para o padrão de agrupamento
+
+#### Session 125: Filter bar layout tokens + bottom radius
+- **`src/styles/tokens.css`** — +2 tokens: `--filter-bar-border-radius-bottom: 0.5rem` e `--filter-bar-gap-bottom: 1rem`
+- **`src/components/filters/CollapsibleFilterBar.vue`** — `border-bottom-left-radius` e `border-bottom-right-radius` via `--filter-bar-border-radius-bottom`; `margin-bottom` via `--filter-bar-gap-bottom` (breathing room abaixo da barra)
+- **`src/components/layout/AppShell.vue`** — `app-shell__content` top padding removido (era `var(--spacing-md)`); barra de filtros agora encosta na navbar sem gap; padding horizontal e bottom preservados em todos os breakpoints
+
+#### Session 123: StatusBadge — componente de badge de status genérico
+- **`src/components/ui/StatusBadge.vue`** — novo componente com prop `variant: "info" | "success" | "muted"` (default `"info"`); estilos 100% via tokens CSS (`--color-info-light`, `--color-success-light`, `--color-surface`, `--color-border`); zero hex hardcoded
+- **`src/components/ui/index.ts`** — +export `StatusBadge`
+- **`docs/COMPONENTS.md`** — seção StatusBadge documentada (props, variantes, exemplos de uso)
+
+#### Session 121: DataTable — prop `actionsPosition`
+- **`components/analytics/DataTable.vue`** — +prop `actionsPosition?: "left" | "right"` (default `"right"`, retrocompatível); renderiza `<th>/<td>` de ações antes do `v-for` de colunas quando `"left"`; aplicado em thead, tbody e tfoot
+
+#### Session 120: query.ts — operador `ilike`
+- **`src/types/query.ts`** — +`"ilike"` em `CapraFilterOperator` (case-insensitive LIKE para SQL via Supabase)
+
+#### Session 119: DataTable — group header rows nativos (framework-first)
+- **`src/styles/tokens.css`** — +2 tokens: `--data-table-group-header-bg: #ece4e2` e `--data-table-group-child-indent: 1.25rem`
+- **`components/analytics/DataTable.vue`** — `hoverable` condicional (false em group headers); `clickable` condicional (só se `collapsibleGroups` em group headers); `'data-table__row--group-header'` aplica a qualquer grupo (sem checar `collapsibleGroups`); nova classe `'data-table__row--group-child'` via computed `groupChildRows` (Set de row keys não-header). Guard em `handleRowDblClick` para não disparar em group headers. CSS framework-first: seletor duplo para vencer striped, `cursor: default`, sem hover; indentação `padding-left` nas células filhas. Remove CSS app-side `.subtotal-row`.
+
+#### Session 118: DataTable — collapsible row groups
+- **`components/analytics/DataTable.vue`** — +2 props: `collapsibleGroups?: boolean` e `isGroupHeader?: (row) => boolean`. Estado interno `collapsedGroups` (Set). Computed `groupVisibleData` filtra linhas de grupos colapsados antes da paginação. `handleRowClick` intercepta cliques em group headers para toggle de colapso (sem emitir `row-click`). Slot `cell-{key}` ganha prop `isGroupCollapsed` (boolean | undefined) para o app renderizar o indicador visual. CSS `.data-table__row--group-header` com `user-select: none`.
+
+#### Session 117: ADR-019/AP-15 — Zerar violações remanescentes
+- **`src/styles/tokens.css`** — +8 tokens `--color-kpi-{sales-count|loss|items|indoor|expense|evening|promo-active|payment}` para cobrir todas as cores usadas nas 4 páginas de análise.
+- **`components/analytics/DataTable.vue`** — +4 regras CSS scoped para `.data-table__row.subtotal-row` (bg, sticky, hover, hover-sticky). Customizáveis via `--data-table-subtotal-bg` e `--data-table-subtotal-bg-hover` no container pai. Elimina necessidade de `:deep(.subtotal-row)` no app (AP-16 fix framework-first).
+
+### Alterado
+
+#### Session 116: ADR-019 — Correção de débitos D1, D2, D4, D5
+- **`components/layout/KpiGrid.vue`** (D5) — Removidos blocos `:deep([data-testid="kpi-card"])` (3 breakpoints). CSS vars movidas diretamente para `.capra-kpi-grid` (herança natural). `.capra-kpi-grid > :deep(*)` substituído por `.capra-kpi-grid > :slotted(*)` (Vue 3 correto para slotted children).
+- **`components/analytics/DataTable.vue`** (D2) — `getAlignClass()` agora retorna `dt-align-{left|center|right}` (BEM, não Tailwind-like). CSS classes renomeadas em toda a folha de estilo (`.text-left/center/right` → `.dt-align-*`, incluindo header content alignment e cell-content alignment). Adicionado `--data-table-stripe-bg` com fallback em `.data-table--striped` para customização por CSS var inheritance.
+- **`components/analytics/KpiCard.vue`** (D1 + D4) — Classes `text-gray-500`, `text-brand-secondary`, `text-trend-positive`, `text-trend-negative` renomeadas para BEM: `kpi-card__trend--neutral`, `kpi-card__value--default`, `kpi-card__trend--positive`, `kpi-card__trend--negative`. `.kpi-card__header` ganha `padding-left/right` via `--kpi-header-padding-left/right` (defaults 0).
+- **`components/analytics/KpiCardWrapper.vue`** (D4) — `:deep(.kpi-card__header)` substituído por CSS var cascade: `.capra-kpi-wrapper { --kpi-header-padding-right: 3.5rem }` e `.capra-kpi-wrapper--draggable { --kpi-header-padding-left: 2rem }`.
+
+### Adicionado
+
+#### Session 115g: tokens.css — brand tokens neutros (migração para app)
+- **`src/styles/tokens.css`** — `--color-brand-*` substituídos por valores neutros genéricos (slate/blue). Framework desacoplado da identidade visual do Bode do Nô. Apps customizam via `theme.css` sobrescrevendo `:root { --color-brand-* }`. `--color-brand-primary-hover` atualizado para `#e2e8f0` (slate-200 neutro).
+
+#### Session 115f: ADR-019 — Design System Contract documentado
+- **`docs/adr/ADR-019.md`** — Contrato formal: framework define toda estrutura visual dos componentes; app customiza SOMENTE via `theme.css` (tokens de cor), props/variants e slots de conteúdo. Zero CSS override de componentes do framework no app (AP-16). Inclui: por que Tailwind não processa node_modules, como implementar componentes com scoped CSS, como customizar cores via theme.css.
+- **`docs/adr/INDEX.md`** — ADR-019 adicionada.
+
+#### Session 115e: BaseButton — reescrito em CSS puro (zero Tailwind)
+- **`components/ui/BaseButton.vue`** — Reescrito completamente em `<style scoped>` puro, zero Tailwind. Causa raiz: Tailwind v4 não processa `node_modules`, então NENHUMA classe utilitária (incluindo `rounded-md`, `px-3`, `h-8`) era gerada para a library. Fix definitivo: tudo em CSS nativo com `var(--color-brand-*)` para cores e valores explícitos para estrutura. Classes BEM: `.base-btn`, `.base-btn--{variant}`, `.base-btn--{size}`. `border: 1px solid transparent` no base garante que outline e accent adicionem borda sem layout shift.
+
+#### Session 115d: BaseButton — cores migradas para scoped CSS (fix lib content scan)
+- **`components/ui/BaseButton.vue`** — Removidas classes Tailwind de cor (`bg-brand-*`, `text-brand-*`, `hover:bg-brand-*`). Substituídas por `<style scoped>` com `.btn--{variant}` + CSS variables `var(--color-brand-*)`. Fix definitivo: classes Tailwind de cor não são geradas pelo content scan do Tailwind v4 para arquivos de library em node_modules. Estrutura/layout/sizing continuam em Tailwind. Todos os 5 variants preservados com mesmo visual.
+
+#### Session 115c: BaseButton — accent com borda visível
+- **`components/ui/BaseButton.vue`** — variant `accent`: adicionado `border border-brand-tertiary` (borda âmbar escura sobre fundo laranja) + `hover:border-brand-secondary` no hover marrom. Sem `active:brightness-90` (incompatível com Tailwind v4 modifier stack).
+
+#### Session 115b: BaseButton — variant accent + gap global + hover tokens
+- **`components/ui/BaseButton.vue`** — Novo variant `accent`: laranja (`--color-brand-highlight`) com texto marrom escuro, hover para `brand-tertiary` + texto bege. Todos os variants passam a usar tokens `--color-brand-*` no hover (removido `hover:bg-gray-*` hardcoded — AP-15). `gap-1.5` adicionado ao `baseClasses` para ícone+texto sempre alinhados sem depender de `mr-*` no filho.
+
+#### Session 115: RecordCard + RecordCardList — primitivos de lista de registros
+- **`components/ui/RecordCard.vue`** — Card genérico estrutural (header/body/footer via slots). Sem props, sem domínio. CSS com tokens var(--color-*).
+- **`components/containers/RecordCardList.vue`** — Container scrollável com loading/empty states. Props: `loading`, `isEmpty`, `emptyMessage`, `maxHeight`.
+- **`components/ui/index.ts`** — Exporta `RecordCard`
+- **`components/containers/index.ts`** — Exporta `RecordCardList`
+- **`src/index.ts`** — Re-exporta `RecordCard` (UI) e `RecordCardList` (Containers) no barrel principal
+- **`components/ui/__tests__/RecordCard.spec.ts`** — 5 casos de teste: body slot, header condicional, footer condicional
+- **`components/containers/__tests__/RecordCardList.spec.ts`** — 4 casos de teste: loading state, empty state, slot content, maxHeight
+- **`docs/COMPONENTS.md`** — Seções RecordCard (UI) e RecordCardList (Containers) com props, slots e exemplos
+
+#### Session 114: Tokens novos + ADR-018 atualizado (AP-15 zerado)
+- **`src/styles/tokens.css`** — 10 novos tokens: `--color-surface-stripe`, `--color-brand-primary-hover`, `--color-info`, `--color-info-light`, `--color-success-badge`, `--color-success-dark`, `--color-error-dark`, `--color-heatmap-soft-medium-bg`, `--color-heatmap-soft-high-bg`, `--color-heatmap-soft-very-high-bg`
+- **`docs/adr/ADR-018.md`** — Atualizado: `KPI_CHART_PRESETS` adicionado como segunda exceção aceita (paleta de séries ECharts em array readonly)
+
+#### Session 113: Collapsible + tokens KPI/heatmap + ADR-018
+- **`src/styles/tokens.css`** — Novos tokens `--color-kpi-*` (9 categorias: revenue, discount, cancellation, promo, coupon, manager, delivery, consumer, neutral) e `--color-heatmap-*` (4 níveis: low, medium, high, very-high, cada um com bg e text)
+- **`components/ui/Collapsible.vue`** — Novo primitivo genérico de colapso. Animação via CSS grid trick (sem cálculo de altura). Props: `defaultOpen`, `disabled`, `animate`, `modelValue` (v-model). Slots: `#header({ isOpen, toggle })`, `default`, `#footer`. Emits: `update:modelValue`, `toggle`. Acessibilidade: `aria-expanded`, `role=button`, keyboard (Enter/Space).
+- **`components/ui/__tests__/Collapsible.spec.ts`** — 13 casos de teste: estado inicial, toggle, v-model, disabled, slots, acessibilidade
+- **`components/ui/index.ts`** — Exporta `Collapsible`
+- **`src/index.ts`** — Re-exporta `Collapsible` do barrel principal
+- **`docs/adr/ADR-018.md`** — Design Token Enforcement: zero hex hardcoded em templates, zero inline styles em páginas; exceção única para `CHART_COLORS` em formatters de chart
+- **`docs/adr/INDEX.md`** — Registrado ADR-018
+- **`docs/COMPONENTS.md`** — Documentação do `Collapsible` com tabela de props, slots, exemplos e comparação vs `CollapsibleFilterBar`
+
+#### Session 112: CollapsibleFilterBar + Framework-First docs
+- **`components/filters/CollapsibleFilterBar.vue`** — Novo componente container de filtros colapsável. Linha primária sempre visível + painel secundário expansível. Slots: `#primary`, `#active-badges`, `#secondary`, default. Props: `expanded` (v-model), `hasActiveSecondary`, `expandLabel`, `sticky`, `stickyTop`. Suporta qualquer combinação de `FilterTrigger + FilterDropdown + DateRangeFilter/MultiSelectFilter/SelectFilter`.
+- **`components/filters/index.ts`** — Exporta `CollapsibleFilterBar` e `CollapsibleFilterBarProps`
+- **`src/index.ts`** — Exporta `CollapsibleFilterBar` + adiciona `DateRangeValue, DateRangeFilterProps` ao barrel de tipos
+- **`docs/COMPONENTS.md`** — Nova documentação de referência de componentes (filtros, analytics, layout, composables). Consultar ANTES de implementar UI (Regra 5).
+- **`docs/adr/ADR-017-endpoint-schema-discovery.md`** — ADR proposta: sistema de descoberta automática de schema via endpoint REST + painel de confirmação em ConfigPage
+
+#### Session 110: DataTable totalsFilter prop
+- **`components/analytics/DataTable.vue`** — Nova prop `totalsFilter?: (row: DataRow) => boolean` — permite excluir linhas específicas (ex: subtotais) do cálculo do total. Usado em `columnTotals` antes de mapear os valores de cada coluna. Útil para tabelas agrupadas onde linhas de subtotal seriam contabilizadas duas vezes.
 
 #### Session 94: Capra v2 Core Abstractions (Phase 1)
 - **[CROSS-PROJECT] types/query.ts** — Novos tipos genericos CapraQuery, CapraMeasure, CapraDimension, CapraFilter, CapraComparison, CapraSort que substituem MDX strings. Adapter-agnostic.

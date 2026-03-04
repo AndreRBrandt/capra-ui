@@ -37,6 +37,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/vue": "^8.1.0",
     "@vue/test-utils": "^2.4.6",
     "husky": "^9.1.7",
     "jsdom": "^27.4.0"

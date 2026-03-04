@@ -22,12 +22,13 @@
 
 :root {
   /* -----------------------------------------
-   * CORES DA MARCA
+   * CORES DA MARCA — valores neutros/padrão do framework
+   * Sobrescreva em theme.css da app consumidora
    * ----------------------------------------- */
-  --color-brand-primary: #e8dddb;
-  --color-brand-secondary: #3a1906;
-  --color-brand-tertiary: #8f3f00;
-  --color-brand-highlight: #e5a22f;
+  --color-brand-primary:   #f0f4f8;   /* slate-100 — superfície clara genérica */
+  --color-brand-secondary: #1e293b;   /* slate-900 — escuro genérico */
+  --color-brand-tertiary:  #475569;   /* slate-600 — médio genérico */
+  --color-brand-highlight: #2563eb;   /* blue-600  — ação/CTA genérico */
 
   /* -----------------------------------------
    * CORES DE TENDÊNCIA (KPIs)
@@ -63,6 +64,82 @@
   --color-success-light: #f0fdf4; /* green-50 */
   --color-warning: #d97706; /* amber-600 */
   --color-warning-light: #fffbeb; /* amber-50 */
+
+  /* -----------------------------------------
+   * KPI ANALYTICS — cor semântica por categoria
+   * Usar em accent-color de KpiCards via KPI_COLORS
+   * ----------------------------------------- */
+  --color-kpi-revenue:       #2d6a4f;
+  --color-kpi-discount:      #9b2c2c;
+  --color-kpi-cancellation:  #c2410c;
+  --color-kpi-promo:         #16a34a;
+  --color-kpi-coupon:        #7c3aed;
+  --color-kpi-manager:       #ec4899;
+  --color-kpi-delivery:      #ef4444;
+  --color-kpi-consumer:      #0891b2;
+  --color-kpi-neutral:       var(--color-text-muted);
+  --color-kpi-sales-count:  #2563eb;
+  --color-kpi-loss:         #dc2626;
+  --color-kpi-items:        #f59e0b;
+  --color-kpi-indoor:       #059669;
+  --color-kpi-expense:      #eab308;
+  --color-kpi-evening:      #6366f1;
+  --color-kpi-promo-active: #22c55e;
+  --color-kpi-payment:      #f97316;
+
+  /* DataTable group (subtotal) rows */
+  --data-table-group-header-bg:    #ece4e2;  /* neutro quente — sobrescrito por theme.css */
+  --data-table-group-child-indent: 1.25rem;
+
+  /* Filter bar layout */
+  --filter-bar-border-radius-bottom: 0.5rem;  /* arredondamento das bordas inferiores */
+  --filter-bar-gap-bottom:           1rem;    /* espaço abaixo da barra antes do conteúdo */
+
+  /* DataTable collapsible group chevron */
+  --data-table-group-chevron-color:     var(--color-text-muted);
+  --data-table-group-chevron-font-size: 0.6rem;
+
+  /* -----------------------------------------
+   * HEATMAP — escala de 4 níveis de intensidade
+   * ----------------------------------------- */
+  --color-heatmap-low-bg:         #fef3c7;
+  --color-heatmap-low-text:       #92400e;
+  --color-heatmap-medium-bg:      #fcd34d;
+  --color-heatmap-medium-text:    #78350f;
+  --color-heatmap-high-bg:        #fb923c;
+  --color-heatmap-high-text:      #ffffff;
+  --color-heatmap-very-high-bg:   #ef4444;
+  --color-heatmap-very-high-text: #ffffff;
+
+  /* -----------------------------------------
+   * SURFACE UTILITÁRIA
+   * ----------------------------------------- */
+  --color-surface-stripe:       #f1f3f7;   /* zebra em tabelas */
+  --color-brand-primary-hover:  #e2e8f0;   /* slate-200 — hover em linhas brand-primary */
+
+  /* -----------------------------------------
+   * INFO
+   * ----------------------------------------- */
+  --color-info:                 #2563eb;   /* blue-600 */
+  --color-info-light:           #eff6ff;   /* blue-50 */
+
+  /* -----------------------------------------
+   * SUCCESS extended
+   * ----------------------------------------- */
+  --color-success-badge:        #dcfce7;   /* green-100 — badge bg variação positiva */
+  --color-success-dark:         #166534;   /* green-800 — insight melhor dia */
+
+  /* -----------------------------------------
+   * ERROR extended
+   * ----------------------------------------- */
+  --color-error-dark:           #991b1b;   /* red-800 — insight pior dia */
+
+  /* -----------------------------------------
+   * HEATMAP SOFT — escala pastel para calendário dia/hora
+   * ----------------------------------------- */
+  --color-heatmap-soft-medium-bg:    #fde68a;  /* amber-300 */
+  --color-heatmap-soft-high-bg:      #fdba74;  /* orange-300 */
+  --color-heatmap-soft-very-high-bg: #fca5a5;  /* red-300 */
 }
 
 /* Regras globais */

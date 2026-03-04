@@ -89,7 +89,7 @@ export interface CapraDimension {
 // =============================================================================
 
 /** Filter operators */
-export type CapraFilterOperator = "eq" | "neq" | "in" | "not_in" | "between" | "gte" | "lte" | "gt" | "lt" | "like";
+export type CapraFilterOperator = "eq" | "neq" | "in" | "not_in" | "between" | "gte" | "lte" | "gt" | "lt" | "like" | "ilike";
 
 /**
  * A filter condition.
@@ -115,7 +115,7 @@ export interface CapraFilter {
 // =============================================================================
 
 /** Temporal comparison types */
-export type CapraComparisonType = "period";
+export type CapraComparisonType = "period" | "moving_average";
 
 /** Time units for period offset */
 export type CapraTimeUnit = "day" | "week" | "month" | "year";
@@ -138,10 +138,12 @@ export interface CapraComparison {
   type: CapraComparisonType;
   /** Date dimension to apply offset to */
   dimension: string;
-  /** Number of units to go back */
-  offset: number;
-  /** Time unit */
-  unit: CapraTimeUnit;
+  /** Number of units to go back (for type "period") */
+  offset?: number;
+  /** Time unit (for type "period") */
+  unit?: CapraTimeUnit;
+  /** Number of occurrences to average (for type "moving_average", e.g., 4 = last 4 same-weekday dates) */
+  count?: number;
 }
 
 // =============================================================================

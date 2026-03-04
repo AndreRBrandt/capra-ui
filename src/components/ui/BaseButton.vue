@@ -1,53 +1,107 @@
 <script setup lang="ts">
-import { computed } from "vue";
-
-// Definindo as propriedades que o botão aceita
 interface Props {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "accent";
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
 }
 
-// Valores padrão (se não passar nada, assume isso)
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   variant: "primary",
   size: "md",
   type: "button",
   disabled: false,
-});
-
-// Lógica de estilos baseados nas props
-const baseClasses =
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
-
-const variantClasses = computed(() => {
-  const variants = {
-    primary: "bg-brand-primary text-brand-secondary hover:bg-opacity-90",
-    secondary: "bg-brand-secondary text-brand-primary hover:bg-opacity-90",
-    outline:
-      "border border-brand-secondary text-brand-secondary hover:bg-gray-50",
-    ghost: "text-brand-secondary hover:bg-gray-100",
-  };
-  return variants[props.variant];
-});
-
-const sizeClasses = computed(() => {
-  const sizes = {
-    sm: "h-8 px-3 text-xs",
-    md: "h-10 px-4 text-sm",
-    lg: "h-12 px-8 text-base",
-  };
-  return sizes[props.size];
 });
 </script>
 
 <template>
   <button
     :type="type"
-    :class="[baseClasses, variantClasses, sizeClasses]"
+    :class="['base-btn', `base-btn--${variant}`, `base-btn--${size}`]"
     :disabled="disabled"
   >
     <slot />
   </button>
 </template>
+
+<style scoped>
+/* Base — estrutura completa em CSS puro (não Tailwind: library não é processada pelo content scan) */
+.base-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-family: inherit;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.base-btn:focus-visible {
+  outline: 2px solid var(--color-brand-highlight);
+  outline-offset: 2px;
+}
+
+.base-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Tamanhos */
+.base-btn--sm { height: 2rem;   padding: 0 0.75rem; font-size: 0.75rem;  }
+.base-btn--md { height: 2.5rem; padding: 0 1rem;    font-size: 0.875rem; }
+.base-btn--lg { height: 3rem;   padding: 0 2rem;    font-size: 1rem;     }
+
+/* Variants — cores via CSS variables (resolvidas pelo app consumidor) */
+.base-btn--primary {
+  background: var(--color-brand-primary);
+  color: var(--color-brand-secondary);
+  border-color: transparent;
+}
+.base-btn--primary:hover:not(:disabled) {
+  background: var(--color-brand-primary-hover);
+}
+
+.base-btn--secondary {
+  background: var(--color-brand-secondary);
+  color: var(--color-brand-primary);
+  border-color: transparent;
+}
+.base-btn--secondary:hover:not(:disabled) {
+  background: var(--color-brand-tertiary);
+}
+
+.base-btn--outline {
+  background: transparent;
+  color: var(--color-brand-secondary);
+  border-color: var(--color-brand-secondary);
+}
+.base-btn--outline:hover:not(:disabled) {
+  background: var(--color-brand-primary);
+}
+
+.base-btn--ghost {
+  background: transparent;
+  color: var(--color-brand-secondary);
+  border-color: transparent;
+}
+.base-btn--ghost:hover:not(:disabled) {
+  background: var(--color-brand-primary);
+}
+
+/* CTA — laranja com borda âmbar escura */
+.base-btn--accent {
+  background: var(--color-brand-highlight);
+  color: var(--color-brand-secondary);
+  border-color: var(--color-brand-tertiary);
+}
+.base-btn--accent:hover:not(:disabled) {
+  background: var(--color-brand-tertiary);
+  color: var(--color-brand-primary);
+  border-color: var(--color-brand-secondary);
+}
+</style>

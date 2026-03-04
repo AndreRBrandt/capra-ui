@@ -20,6 +20,10 @@
  * ```
  */
 
+import { useCapraI18n } from "../../i18n";
+
+const { t } = useCapraI18n();
+
 withDefaults(
   defineProps<{
     show: boolean;
@@ -62,7 +66,7 @@ function close() {
               <h3 class="capra-detail__title">{{ title }}</h3>
               <p v-if="subtitle" class="capra-detail__subtitle">{{ subtitle }}</p>
             </div>
-            <button type="button" class="capra-detail__close" @click="close" aria-label="Fechar">
+            <button type="button" class="capra-detail__close" @click="close" :aria-label="t.common.close">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
                 <path d="M18 6 6 18M6 6l12 12" />
               </svg>
@@ -83,7 +87,7 @@ function close() {
               <span>{{ periodLabel }}</span>
             </div>
             <div v-if="previousPeriodLabel" class="capra-detail__period capra-detail__period--prev">
-              <span>Anterior: {{ previousPeriodLabel }}</span>
+              <span>{{ t.common.previous }} {{ previousPeriodLabel }}</span>
             </div>
           </div>
 

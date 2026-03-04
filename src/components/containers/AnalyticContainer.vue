@@ -142,11 +142,19 @@ const formattedDate = computed(() => {
   });
 });
 
-// Collapse
-const isExpanded = computed(() => !props.collapsed);
+// Collapse — estado interno (uncontrolled), sincronizado com prop quando fornecida
+const internalCollapsed = ref(props.collapsed ?? false);
+
+watch(
+  () => props.collapsed,
+  (val) => { if (val !== undefined) internalCollapsed.value = val; }
+);
+
+const isExpanded = computed(() => !internalCollapsed.value);
 
 function toggleCollapse() {
-  emit("update:collapsed", !props.collapsed);
+  internalCollapsed.value = !internalCollapsed.value;
+  emit("update:collapsed", internalCollapsed.value);
 }
 
 // Classes do container
@@ -157,7 +165,7 @@ const containerClasses = computed(() => [
     "analytic-container--loading": props.loading,
     "analytic-container--error": !!props.error,
     "analytic-container--empty": props.empty,
-    "analytic-container--collapsed": props.collapsed,
+    "analytic-container--collapsed": internalCollapsed.value,
   },
 ]);
 
@@ -207,7 +215,7 @@ function handleRetry() {
           <!-- Collapse chevron inline with title -->
           <component
             v-if="collapsible"
-            :is="collapsed ? ChevronDown : ChevronUp"
+            :is="internalCollapsed ? ChevronDown : ChevronUp"
             class="analytic-container__collapse-indicator"
             :size="18"
           />
@@ -297,7 +305,7 @@ function handleRetry() {
     </Modal>
 
     <!-- Content Area -->
-    <div v-if="!collapsed" :class="contentClasses">
+    <div v-if="!internalCollapsed" :class="contentClasses">
       <!-- Error State -->
       <div
         v-if="!loading && error"
@@ -350,12 +358,12 @@ function handleRetry() {
     </div>
 
     <!-- Legend -->
-    <div v-if="$slots.legend && !collapsed" class="analytic-container__legend">
+    <div v-if="$slots.legend && !internalCollapsed" class="analytic-container__legend">
       <slot name="legend" />
     </div>
 
     <!-- Footer -->
-    <div v-if="showFooter && !collapsed" class="analytic-container__footer">
+    <div v-if="showFooter && !internalCollapsed" class="analytic-container__footer">
       <slot name="footer" :source="source" :lastUpdated="lastUpdated">
         <span v-if="source" class="analytic-container__source">
           Fonte: {{ source }}
@@ -377,6 +385,7 @@ function handleRetry() {
   flex-direction: column;
   width: 100%;
   max-width: 100%;
+  margin-bottom: var(--spacing-md, 1rem);
 }
 
 /* Variantes */

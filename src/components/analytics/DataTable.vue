@@ -37,8 +37,10 @@ import { ref, computed, watch, reactive } from "vue";
 import { ChevronUp, ChevronDown, ChevronsUpDown, Eye, Search, ChevronDown as ChevronDownIcon, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from "lucide-vue-next";
 import type { InteractEvent } from "@/composables/useInteraction";
 import { useMeasureEngine } from "@/composables/useMeasureEngine";
+import { useCapraI18n } from "../../i18n";
 
 const { engine: _engine } = useMeasureEngine();
+const { t: _t } = useCapraI18n();
 
 // =============================================================================
 // Types
@@ -131,6 +133,8 @@ const props = withDefaults(
     selectedRow?: string | number | null;
     /** Mostra coluna de ações */
     showActions?: boolean;
+    /** Posição da coluna de ações: "left" renderiza antes das colunas de dados */
+    actionsPosition?: "left" | "right";
     /** Estado de loading */
     loading?: boolean;
     /** Mensagem quando vazio */
@@ -183,6 +187,12 @@ const props = withDefaults(
     showPageSizeSelector?: boolean;
     /** Função para aplicar classes CSS customizadas em linhas */
     rowClass?: (row: DataRow, index: number) => string | Record<string, boolean> | undefined;
+    /** Filtro para excluir linhas do cálculo de totais (ex: linhas de subtotal) */
+    totalsFilter?: (row: DataRow) => boolean;
+    /** Habilita colapso de grupos de linhas ao clicar no cabeçalho do grupo */
+    collapsibleGroups?: boolean;
+    /** Identifica linhas que são cabeçalhos de grupo colapsáveis */
+    isGroupHeader?: (row: DataRow) => boolean;
   }>(),
   {
     rowKey: "id",
@@ -192,25 +202,26 @@ const props = withDefaults(
     selectable: true,
     selectedRow: null,
     showActions: false,
+    actionsPosition: "right",
     loading: false,
-    emptyMessage: "Nenhum dado encontrado",
+    emptyMessage: undefined,
     stickyFirstColumn: false,
     striped: true,
     compact: false,
     maxHeight: undefined,
     searchable: true,
-    searchPlaceholder: "Buscar...",
+    searchPlaceholder: undefined,
     searchKeys: undefined,
     filterOptions: undefined,
     filterKey: undefined,
-    filterLabel: "Filtrar",
-    filterPlaceholder: "Todos",
+    filterLabel: undefined,
+    filterPlaceholder: undefined,
     title: undefined,
     titleIcon: undefined,
     reorderable: true,
     showTotals: true,
     totalsConfig: undefined,
-    totalsLabel: "TOTAL",
+    totalsLabel: undefined,
     columnFilterable: true,
     columnFilterSearchable: true,
     paginated: true,
@@ -218,6 +229,8 @@ const props = withDefaults(
     pageSizeOptions: () => [10, 15, 25, 50],
     showPageSizeSelector: true,
     rowClass: undefined,
+    collapsibleGroups: false,
+    isGroupHeader: undefined,
   }
 );
 
@@ -240,6 +253,13 @@ const emit = defineEmits<{
   "column-filter": [payload: { key: string; values: string[] }];
 }>();
 
+// i18n-aware prop fallbacks
+const resolvedEmptyMessage = computed(() => props.emptyMessage ?? _t.table.noData);
+const resolvedSearchPlaceholder = computed(() => props.searchPlaceholder ?? _t.table.search);
+const resolvedFilterLabel = computed(() => props.filterLabel ?? _t.table.filter);
+const resolvedFilterPlaceholder = computed(() => props.filterPlaceholder ?? _t.table.all);
+const resolvedTotalsLabel = computed(() => props.totalsLabel ?? _t.table.total);
+
 // =============================================================================
 // State
 // =============================================================================
@@ -257,6 +277,9 @@ const currentPageSize = ref(props.pageSize);
 const columnFilters = reactive(new Map<string, Set<string>>());
 const openColumnFilter = ref<string | null>(null);
 const columnFilterSearch = ref("");
+
+// Collapsible groups state
+const collapsedGroups = ref<Set<string>>(new Set());
 
 // Drag-and-drop state
 const columnOrder = ref<string[]>([]);
@@ -357,7 +380,7 @@ const sortedData = computed(() => {
 
 /** Label do filtro selecionado */
 const selectedFilterLabel = computed(() => {
-  if (selectedFilter.value === "all") return props.filterPlaceholder;
+  if (selectedFilter.value === "all") return resolvedFilterPlaceholder.value;
   const option = props.filterOptions?.find((o) => o.value === selectedFilter.value);
   return option?.label || selectedFilter.value;
 });
@@ -425,14 +448,17 @@ const columnTotals = computed(() => {
   }
 
   const totals = new Map<string, unknown>();
+  const dataForTotals = props.totalsFilter
+    ? sortedData.value.filter(props.totalsFilter)
+    : sortedData.value;
 
   orderedColumns.value.forEach((column, index) => {
     const config = props.totalsConfig?.[column.key];
-    const values = sortedData.value.map((row) => row[column.key]);
+    const values = dataForTotals.map((row) => row[column.key]);
 
     // Primeira coluna: label de total
     if (index === 0) {
-      totals.set(column.key, config?.label ?? props.totalsLabel);
+      totals.set(column.key, config?.label ?? resolvedTotalsLabel.value);
       return;
     }
 
@@ -444,7 +470,7 @@ const columnTotals = computed(() => {
 
     // Função customizada
     if (config?.type === "custom" && config.customFn) {
-      totals.set(column.key, config.customFn(values, sortedData.value));
+      totals.set(column.key, config.customFn(values, dataForTotals));
       return;
     }
 
@@ -485,19 +511,69 @@ const columnTotals = computed(() => {
 });
 
 // =============================================================================
+// Collapsible Groups
+// =============================================================================
+
+/** Filtra as linhas ocultadas por grupos colapsados */
+const groupVisibleData = computed(() => {
+  if (!props.collapsibleGroups || !props.isGroupHeader) return sortedData.value;
+
+  const result: DataRow[] = [];
+  let currentGroupCollapsed = false;
+
+  for (const row of sortedData.value) {
+    if (props.isGroupHeader(row)) {
+      const key = String(row[props.rowKey] ?? "");
+      currentGroupCollapsed = collapsedGroups.value.has(key);
+      result.push(row);
+    } else {
+      if (!currentGroupCollapsed) result.push(row);
+    }
+  }
+  return result;
+});
+
+function toggleGroupCollapse(row: DataRow) {
+  const key = String(row[props.rowKey] ?? "");
+  const next = new Set(collapsedGroups.value);
+  if (next.has(key)) next.delete(key);
+  else next.add(key);
+  collapsedGroups.value = next;
+}
+
+function isGroupCollapsedFor(row: DataRow): boolean | undefined {
+  if (!props.collapsibleGroups || !props.isGroupHeader?.(row)) return undefined;
+  return collapsedGroups.value.has(String(row[props.rowKey] ?? ""));
+}
+
+const groupChildRows = computed(() => {
+  if (!props.isGroupHeader) return new Set<string>();
+  const childKeys = new Set<string>();
+  let inGroup = false;
+  for (const row of props.data) {
+    if (props.isGroupHeader(row)) {
+      inGroup = true;
+    } else if (inGroup) {
+      childKeys.add(String(row[props.rowKey] ?? ""));
+    }
+  }
+  return childKeys;
+});
+
+// =============================================================================
 // Pagination Computeds
 // =============================================================================
 
 const totalPages = computed(() => {
   if (!props.paginated || currentPageSize.value <= 0) return 1;
-  return Math.max(1, Math.ceil(sortedData.value.length / currentPageSize.value));
+  return Math.max(1, Math.ceil(groupVisibleData.value.length / currentPageSize.value));
 });
 
 const paginatedData = computed(() => {
-  if (!props.paginated || totalPages.value <= 1) return sortedData.value;
+  if (!props.paginated || totalPages.value <= 1) return groupVisibleData.value;
   const start = (currentPage.value - 1) * currentPageSize.value;
   const end = start + currentPageSize.value;
-  return sortedData.value.slice(start, end);
+  return groupVisibleData.value.slice(start, end);
 });
 
 const showPagination = computed(() => {
@@ -665,6 +741,10 @@ function formatTrendValue(value: number, decimals = 1): string {
 }
 
 function handleRowClick(row: DataRow, index: number) {
+  if (props.collapsibleGroups && props.isGroupHeader?.(row)) {
+    toggleGroupCollapse(row);
+    return;
+  }
   if (!props.clickable) return;
 
   emit("row-click", { row, index });
@@ -699,6 +779,7 @@ function handleRowClick(row: DataRow, index: number) {
 }
 
 function handleRowDblClick(row: DataRow, index: number) {
+  if (props.isGroupHeader?.(row)) return;
   if (!props.clickable) return;
 
   emit("row-dblclick", { row, index });
@@ -763,11 +844,11 @@ function getColumnsCount(): number {
 function getAlignClass(align?: string): string {
   switch (align) {
     case "center":
-      return "text-center";
+      return "dt-align-center";
     case "right":
-      return "text-right";
+      return "dt-align-right";
     default:
-      return "text-left";
+      return "dt-align-left";
   }
 }
 
@@ -1000,7 +1081,7 @@ function getTotalValue(column: Column, index: number): string {
 
   // Primeira coluna: label
   if (index === 0) {
-    return String(value ?? props.totalsLabel);
+    return String(value ?? resolvedTotalsLabel.value);
   }
 
   // Sem valor
@@ -1064,7 +1145,7 @@ defineExpose({
           <input
             v-model="searchQuery"
             type="text"
-            :placeholder="searchPlaceholder"
+            :placeholder="resolvedSearchPlaceholder"
             class="data-table__search-input"
           />
           <button
@@ -1085,7 +1166,7 @@ defineExpose({
             :class="{ 'data-table__filter-btn--active': selectedFilter !== 'all' }"
             @click="toggleFilterDropdown"
           >
-            <span class="data-table__filter-label">{{ filterLabel }}:</span>
+            <span class="data-table__filter-label">{{ resolvedFilterLabel }}:</span>
             <span class="data-table__filter-value">{{ selectedFilterLabel }}</span>
             <ChevronDownIcon :size="16" class="data-table__filter-chevron" />
           </button>
@@ -1098,7 +1179,7 @@ defineExpose({
               :class="{ 'data-table__filter-option--selected': selectedFilter === 'all' }"
               @click="selectFilterOption('all')"
             >
-              {{ filterPlaceholder }}
+              {{ resolvedFilterPlaceholder }}
             </button>
             <button
               v-for="option in filterOptions"
@@ -1143,7 +1224,7 @@ defineExpose({
       <!-- Loading -->
       <div v-if="loading" data-testid="loading" class="data-table__loading">
         <slot name="loading">
-          <span>Carregando...</span>
+          <span>{{ _t.table.loading }}</span>
         </slot>
       </div>
 
@@ -1160,6 +1241,14 @@ defineExpose({
       >
       <thead>
         <tr>
+          <!-- Ações à ESQUERDA -->
+          <th
+            v-if="showActions && actionsPosition === 'left'"
+            scope="col"
+            class="data-table__header data-table__header--actions dt-align-center"
+          >
+            <span class="sr-only">Ações</span>
+          </th>
           <th
             v-for="(column, colIndex) in orderedColumns"
             :key="column.key"
@@ -1216,8 +1305,8 @@ defineExpose({
                   {{ allColumnFilterValues.length }} valores
                 </span>
                 <div class="data-table__col-filter-actions">
-                  <button type="button" class="data-table__col-filter-action-btn" @click="selectAllColumnFilterValues">Todas</button>
-                  <button type="button" class="data-table__col-filter-action-btn" @click="clearAllColumnFilterValues">Limpar</button>
+                  <button type="button" class="data-table__col-filter-action-btn" @click="selectAllColumnFilterValues">{{ _t.filters.selectAll }}</button>
+                  <button type="button" class="data-table__col-filter-action-btn" @click="clearAllColumnFilterValues">{{ _t.filters.clearAll }}</button>
                 </div>
               </div>
               <div v-if="columnFilterSearchable" class="data-table__col-filter-search">
@@ -1226,7 +1315,7 @@ defineExpose({
                   v-model="columnFilterSearch"
                   type="text"
                   class="data-table__col-filter-search-input"
-                  placeholder="Buscar..."
+                  :placeholder="_t.table.search"
                 />
               </div>
               <div class="data-table__col-filter-list">
@@ -1241,19 +1330,19 @@ defineExpose({
                     :checked="isColumnFilterValueSelected(val)"
                     @change="toggleColumnFilterValue(val)"
                   />
-                  <span class="data-table__col-filter-label">{{ val || '(vazio)' }}</span>
+                  <span class="data-table__col-filter-label">{{ val || _t.table.empty }}</span>
                 </label>
                 <div v-if="columnFilterValues.length === 0" class="data-table__col-filter-empty">
-                  Nenhum resultado
+                  {{ _t.filters.noResults }}
                 </div>
               </div>
             </div>
           </th>
-          <!-- Coluna de ações -->
+          <!-- Ações à DIREITA (default) -->
           <th
-            v-if="showActions"
+            v-if="showActions && actionsPosition !== 'left'"
             scope="col"
-            class="data-table__header data-table__header--actions text-center"
+            class="data-table__header data-table__header--actions dt-align-center"
           >
             <span class="sr-only">Ações</span>
           </th>
@@ -1265,7 +1354,7 @@ defineExpose({
         <tr v-if="paginatedData.length === 0">
           <td :colspan="getColumnsCount()" class="data-table__empty">
             <slot name="empty">
-              {{ emptyMessage }}
+              {{ resolvedEmptyMessage }}
             </slot>
           </td>
         </tr>
@@ -1277,15 +1366,34 @@ defineExpose({
           :class="[
             'data-table__row',
             {
-              hoverable,
-              clickable,
+              hoverable: hoverable && !isGroupHeader?.(row),
+              clickable: isGroupHeader?.(row) ? !!collapsibleGroups : clickable,
               selected: isRowSelected(row),
+              'data-table__row--group-header': !!isGroupHeader?.(row),
+              'data-table__row--group-child': groupChildRows.has(String(row[rowKey] ?? '')),
             },
             rowClass?.(row, index),
           ]"
+          :data-collapsed="isGroupCollapsedFor(row)"
           @click="handleRowClick(row, index)"
           @dblclick="handleRowDblClick(row, index)"
         >
+          <!-- Ações à ESQUERDA -->
+          <td
+            v-if="showActions && actionsPosition === 'left'"
+            class="data-table__cell data-table__cell--actions"
+          >
+            <slot name="actions" :row="row" :index="index">
+              <button
+                type="button"
+                class="data-table__action-btn"
+                :title="_t.table.viewDetails"
+                @click="handleActionClick(row, index, $event)"
+              >
+                <Eye :size="18" />
+              </button>
+            </slot>
+          </td>
           <td
             v-for="(column, colIndex) in orderedColumns"
             :key="column.key"
@@ -1300,8 +1408,18 @@ defineExpose({
               :value="row[column.key]"
               :row="row"
               :column="column"
+              :is-group-collapsed="isGroupCollapsedFor(row)"
             >
-              <div class="data-table__cell-content">
+              <div
+                class="data-table__cell-content"
+                :class="{ 'data-table__cell-content--with-chevron': collapsibleGroups && isGroupHeader?.(row) && colIndex === 0 }"
+              >
+                <!-- Auto-chevron para a primeira coluna de linhas de grupo colapsável -->
+                <span
+                  v-if="collapsibleGroups && isGroupHeader?.(row) && colIndex === 0"
+                  class="data-table__group-chevron"
+                  aria-hidden="true"
+                >{{ isGroupCollapsedFor(row) ? '▶' : '▼' }}</span>
                 <span v-if="column.html" v-html="getCellValue(row, column)" />
                 <span v-else>{{ getCellValue(row, column) }}</span>
 
@@ -1317,16 +1435,16 @@ defineExpose({
               </div>
             </slot>
           </td>
-          <!-- Célula de ações -->
+          <!-- Ações à DIREITA (default) -->
           <td
-            v-if="showActions"
+            v-if="showActions && actionsPosition !== 'left'"
             class="data-table__cell data-table__cell--actions"
           >
             <slot name="actions" :row="row" :index="index">
               <button
                 type="button"
                 class="data-table__action-btn"
-                title="Ver detalhes"
+                :title="_t.table.viewDetails"
                 @click="handleActionClick(row, index, $event)"
               >
                 <Eye :size="18" />
@@ -1339,6 +1457,11 @@ defineExpose({
       <!-- Footer com totais -->
       <tfoot v-if="showTotals && filteredData.length > 0" class="data-table__tfoot">
         <tr class="data-table__totals-row">
+          <!-- Ações à ESQUERDA -->
+          <td
+            v-if="showActions && actionsPosition === 'left'"
+            class="data-table__cell data-table__cell--total data-table__cell--actions"
+          />
           <td
             v-for="(column, colIndex) in orderedColumns"
             :key="`total-${column.key}`"
@@ -1354,8 +1477,9 @@ defineExpose({
           >
             <strong>{{ getTotalValue(column, colIndex) }}</strong>
           </td>
+          <!-- Ações à DIREITA (default) -->
           <td
-            v-if="showActions"
+            v-if="showActions && actionsPosition !== 'left'"
             class="data-table__cell data-table__cell--total data-table__cell--actions"
           />
         </tr>
@@ -1391,7 +1515,7 @@ defineExpose({
             type="button"
             class="data-table__page-btn"
             :disabled="isFirstPage"
-            title="Primeira página"
+            :title="_t.table.firstPage"
             @click="goToFirstPage"
           >
             <ChevronsLeft :size="16" />
@@ -1400,7 +1524,7 @@ defineExpose({
             type="button"
             class="data-table__page-btn"
             :disabled="isFirstPage"
-            title="Página anterior"
+            :title="_t.table.previousPage"
             @click="goToPrevPage"
           >
             <ChevronLeft :size="16" />
@@ -1419,7 +1543,7 @@ defineExpose({
             type="button"
             class="data-table__page-btn"
             :disabled="isLastPage"
-            title="Próxima página"
+            :title="_t.table.nextPage"
             @click="goToNextPage"
           >
             <ChevronRight :size="16" />
@@ -1428,7 +1552,7 @@ defineExpose({
             type="button"
             class="data-table__page-btn"
             :disabled="isLastPage"
-            title="Última página"
+            :title="_t.table.lastPage"
             @click="goToLastPage"
           >
             <ChevronsRight :size="16" />
@@ -1809,11 +1933,11 @@ defineExpose({
   gap: var(--spacing-sm);
 }
 
-.data-table__header.text-right .data-table__header-content {
+.data-table__header.dt-align-right .data-table__header-content {
   justify-content: flex-end;
 }
 
-.data-table__header.text-center .data-table__header-content {
+.data-table__header.dt-align-center .data-table__header-content {
   justify-content: center;
 }
 
@@ -1878,15 +2002,15 @@ defineExpose({
    Alignment
    ============================================================================= */
 
-.text-left {
+.dt-align-left {
   text-align: left;
 }
 
-.text-center {
+.dt-align-center {
   text-align: center;
 }
 
-.text-right {
+.dt-align-right {
   text-align: right;
 }
 
@@ -2002,11 +2126,11 @@ defineExpose({
    ============================================================================= */
 
 .data-table--striped .data-table__row:nth-child(odd) {
-  background-color: var(--color-surface-alt);
+  background-color: var(--data-table-stripe-bg, var(--color-surface-alt));
 }
 
 .data-table--striped .data-table__row:nth-child(odd) .data-table__cell--sticky {
-  background-color: var(--color-surface-alt);
+  background-color: var(--data-table-stripe-bg, var(--color-surface-alt));
 }
 
 .data-table--striped .data-table__row:nth-child(even) .data-table__cell--sticky {
@@ -2019,6 +2143,26 @@ defineExpose({
 
 .data-table--striped .data-table__row.hoverable:hover .data-table__cell--sticky {
   background-color: var(--color-hover);
+}
+
+/* Group header rows — built-in visual (framework-first, framework owns the style) */
+/* Double selector wins over .data-table--striped :nth-child (0-3-0 specificity match) */
+.data-table--striped .data-table__row.data-table__row--group-header,
+.data-table__row.data-table__row--group-header {
+  background-color: var(--data-table-group-header-bg, #ece4e2);
+  font-weight: 700;
+  user-select: none;
+  cursor: default;
+}
+.data-table--striped .data-table__row.data-table__row--group-header .data-table__cell--sticky,
+.data-table__row.data-table__row--group-header .data-table__cell--sticky {
+  background-color: var(--data-table-group-header-bg, #ece4e2);
+}
+
+/* Group child rows — indent to show hierarchy */
+.data-table__row.data-table__row--group-child .data-table__cell:first-child,
+.data-table__row.data-table__row--group-child .data-table__cell--sticky:first-child {
+  padding-left: calc(var(--spacing-sm, 0.75rem) + var(--data-table-group-child-indent, 1.25rem));
 }
 
 /* =============================================================================
@@ -2045,6 +2189,31 @@ defineExpose({
   gap: 1px;
 }
 
+/* Primeira célula de grupo colapsável — layout em linha para chevron + label */
+.data-table__cell-content--with-chevron {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Chevron de grupo — usado pelo slot padrão E por slots customizados via classe */
+.data-table__group-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  font-size: var(--data-table-group-chevron-font-size, 0.6rem);
+  color: var(--data-table-group-chevron-color, var(--color-text-muted));
+}
+
+/* Classe utilitária para slots customizados que precisam de layout linha com chevron */
+.data-table__group-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
 .data-table__trend {
   display: inline-flex;
   align-items: center;
@@ -2056,11 +2225,11 @@ defineExpose({
 }
 
 /* Alinhamentos com trend */
-.text-right .data-table__cell-content {
+.dt-align-right .data-table__cell-content {
   align-items: flex-end;
 }
 
-.text-center .data-table__cell-content {
+.dt-align-center .data-table__cell-content {
   align-items: center;
 }
 

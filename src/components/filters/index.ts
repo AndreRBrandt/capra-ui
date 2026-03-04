@@ -18,3 +18,6 @@ export type { FilterBarProps } from "./FilterBar.vue";
 
 export { default as AnalyticsFilterBar } from "./AnalyticsFilterBar.vue";
 export type { AnalyticsFilterBarProps } from "./AnalyticsFilterBar.vue";
+
+export { default as CollapsibleFilterBar } from "./CollapsibleFilterBar.vue";
+export type { CollapsibleFilterBarProps } from "./CollapsibleFilterBar.vue";

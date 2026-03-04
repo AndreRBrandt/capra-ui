@@ -194,12 +194,12 @@ defineEmits<{
 }
 
 /* Draggable state - reserve space for drag handle */
-.capra-kpi-wrapper--draggable :deep(.kpi-card__header) {
-  padding-left: 2rem;
+.capra-kpi-wrapper--draggable {
+  --kpi-header-padding-left: 2rem;
 }
 
 /* Reserve space in KpiCard header for action buttons */
-.capra-kpi-wrapper :deep(.kpi-card__header) {
-  padding-right: 3.5rem;
+.capra-kpi-wrapper {
+  --kpi-header-padding-right: 3.5rem;
 }
 </style>
