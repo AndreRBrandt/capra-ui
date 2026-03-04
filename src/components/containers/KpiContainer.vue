@@ -98,6 +98,8 @@ interface Props {
   draggable?: boolean;
   /** Highlight header with subtle background */
   highlightHeader?: boolean;
+  /** Label for the trend comparison (e.g. "vs mesmo dia do ano anterior") */
+  trendLabel?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -482,7 +484,7 @@ const trendChartOption = computed(() => {
                 :secondary-value="kpis[kpiKey]?.previousValue"
                 :format="schemaMap.get(kpiKey)?.format || 'number'"
                 :decimals="schemaMap.get(kpiKey)?.decimals"
-                trend-label="vs período anterior"
+                :trend-label="trendLabel || ''"
                 :show-trend-value="true"
                 :invert-trend="schemaMap.get(kpiKey)?.invertTrend"
                 :participation="kpis[kpiKey]?.participation"
