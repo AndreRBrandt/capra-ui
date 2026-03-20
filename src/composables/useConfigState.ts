@@ -21,7 +21,7 @@
  * ```
  */
 
-import { ref, computed, watch, onScopeDispose, type Ref, type ComputedRef } from "vue";
+import { ref, computed, watch, onScopeDispose, getCurrentScope, type Ref, type ComputedRef } from "vue";
 import { debounce, deepClone } from "@/utils";
 
 // =============================================================================
@@ -206,10 +206,12 @@ export function useConfigState<T extends object>(
   );
 
   // Cleanup on scope dispose to prevent memory leaks
-  onScopeDispose(() => {
-    debouncedSave.cancel();
-    stopWatch();
-  });
+  if (getCurrentScope()) {
+    onScopeDispose(() => {
+      debouncedSave.cancel();
+      stopWatch();
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Return

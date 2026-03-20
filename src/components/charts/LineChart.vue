@@ -27,6 +27,7 @@
 
 import { computed } from "vue";
 import BaseChart from "./BaseChart.vue";
+import { resolveCssColor } from "./css-utils";
 import type { EChartsOption } from "echarts";
 import type { InteractEvent } from "@/composables/useInteraction";
 import { useMeasureEngine } from "@/composables/useMeasureEngine";
@@ -151,6 +152,10 @@ const previousValues = computed(() => {
 
 /** Opções do ECharts */
 const chartOption = computed<EChartsOption>(() => {
+  // Resolve CSS vars to hex — ECharts canvas cannot parse var()
+  const mainColor = resolveCssColor(props.color);
+  const prevColor = resolveCssColor(props.previousColor);
+
   const areaStyle = props.area
     ? {
         opacity: 0.3,
@@ -161,7 +166,7 @@ const chartOption = computed<EChartsOption>(() => {
           x2: 0,
           y2: 1,
           colorStops: [
-            { offset: 0, color: props.color },
+            { offset: 0, color: mainColor },
             { offset: 1, color: "transparent" },
           ],
         },
@@ -178,7 +183,7 @@ const chartOption = computed<EChartsOption>(() => {
           x2: 0,
           y2: 1,
           colorStops: [
-            { offset: 0, color: props.previousColor },
+            { offset: 0, color: prevColor },
             { offset: 1, color: "transparent" },
           ],
         },
@@ -194,11 +199,11 @@ const chartOption = computed<EChartsOption>(() => {
       showSymbol: props.showSymbol,
       symbolSize: 6,
       lineStyle: {
-        color: props.color,
+        color: mainColor,
         width: 2,
       },
       itemStyle: {
-        color: props.color,
+        color: mainColor,
         borderColor: "#fff",
         borderWidth: 2,
       },
@@ -223,12 +228,12 @@ const chartOption = computed<EChartsOption>(() => {
       showSymbol: props.showSymbol,
       symbolSize: 4,
       lineStyle: {
-        color: props.previousColor,
+        color: prevColor,
         width: 1.5,
         type: "dashed",
       },
       itemStyle: {
-        color: props.previousColor,
+        color: prevColor,
       },
       areaStyle: previousAreaStyle,
       emphasis: {
@@ -250,7 +255,7 @@ const chartOption = computed<EChartsOption>(() => {
       axisPointer: {
         type: "cross",
         label: {
-          backgroundColor: "var(--color-brand-secondary, #5c4a3d)",
+          backgroundColor: resolveCssColor("var(--color-brand-secondary, #5c4a3d)"),
         },
       },
       formatter: (params: any) => {
@@ -273,7 +278,7 @@ const chartOption = computed<EChartsOption>(() => {
           top: 0,
           right: 0,
           textStyle: {
-            color: "var(--color-text-secondary, #4b5563)",
+            color: resolveCssColor("var(--color-text-secondary, #4b5563)"),
             fontSize: 11,
           },
         }
@@ -285,12 +290,12 @@ const chartOption = computed<EChartsOption>(() => {
       axisLine: {
         show: true,
         lineStyle: {
-          color: "var(--color-border, #e5e7eb)",
+          color: resolveCssColor("var(--color-border, #e5e7eb)"),
         },
       },
       axisTick: { show: false },
       axisLabel: {
-        color: "var(--color-text-secondary, #4b5563)",
+        color: resolveCssColor("var(--color-text-secondary, #4b5563)"),
         fontSize: 11,
       },
     },
@@ -301,12 +306,12 @@ const chartOption = computed<EChartsOption>(() => {
       splitLine: {
         show: props.showGrid,
         lineStyle: {
-          color: "var(--color-border, #e5e7eb)",
+          color: resolveCssColor("var(--color-border, #e5e7eb)"),
           type: "dashed",
         },
       },
       axisLabel: {
-        color: "var(--color-text-muted, #9ca3af)",
+        color: resolveCssColor("var(--color-text-muted, #9ca3af)"),
         fontSize: 10,
         formatter: (value: number) => {
           if (props.format === "currency") {

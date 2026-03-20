@@ -490,7 +490,8 @@ const columnTotals = computed(() => {
     }
 
     // Calcular baseado no tipo
-    const type = config?.type ?? "sum";
+    // Smart default: percent columns use "avg" (summing percentages is meaningless)
+    const type = config?.type ?? (column.type === "percent" ? "avg" : "sum");
 
     switch (type) {
       case "sum":

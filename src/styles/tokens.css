@@ -69,8 +69,8 @@
    * KPI ANALYTICS — cor semântica por categoria
    * Usar em accent-color de KpiCards via KPI_COLORS
    * ----------------------------------------- */
-  --color-kpi-revenue:       #2d6a4f;
-  --color-kpi-discount:      #9b2c2c;
+  --color-kpi-revenue:       #059669;  /* emerald-600 — vivid on light bg */
+  --color-kpi-discount:      #dc2626;  /* red-600 — clearer on light bg */
   --color-kpi-cancellation:  #c2410c;
   --color-kpi-promo:         #16a34a;
   --color-kpi-coupon:        #7c3aed;
@@ -86,6 +86,12 @@
   --color-kpi-evening:      #6366f1;
   --color-kpi-promo-active: #22c55e;
   --color-kpi-payment:      #f97316;
+
+  /* RH — KPIs de gestão de pessoas */
+  --color-kpi-employee:     #2563eb;   /* azul — headcount */
+  --color-kpi-overtime:     #dc2626;   /* vermelho — horas extras */
+  --color-kpi-balance:      #059669;   /* verde — banco de horas */
+  --color-kpi-absence:      #d97706;   /* âmbar — faltas/afastamentos */
 
   /* DataTable group (subtotal) rows */
   --data-table-group-header-bg:    #ece4e2;  /* neutro quente — sobrescrito por theme.css */

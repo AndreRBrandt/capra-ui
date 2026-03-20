@@ -216,3 +216,12 @@ export {
   DIMENSION_DISCOVERY_KEY,
   type UseDimensionDiscoveryReturn,
 } from "./useDimensionDiscovery";
+
+// Theme V2 Composable (dual-color system)
+export {
+  useThemeV2,
+  hexToHsl,
+  THEME_PALETTE,
+  type ThemeColor,
+  type ThemeV2State,
+} from "./useThemeV2";

@@ -118,7 +118,7 @@ export interface CapraFilter {
 export type CapraComparisonType = "period" | "moving_average";
 
 /** Time units for period offset */
-export type CapraTimeUnit = "day" | "week" | "month" | "year";
+export type CapraTimeUnit = "day" | "week" | "month" | "year" | "year_weekday";
 
 /**
  * Period comparison — replaces MDX ParallelPeriod.
@@ -132,6 +132,9 @@ export type CapraTimeUnit = "day" | "week" | "month" | "year";
  * { type: "period", dimension: "DATA_REF", offset: 7, unit: "day" }
  * // Compare with previous month
  * { type: "period", dimension: "DATA_REF", offset: 1, unit: "month" }
+ * // Compare with same weekday occurrence in same month, previous year
+ * // (e.g., 3rd Monday of March 2026 → 3rd Monday of March 2025)
+ * { type: "period", dimension: "DATA_REF", offset: 1, unit: "year_weekday" }
  * ```
  */
 export interface CapraComparison {

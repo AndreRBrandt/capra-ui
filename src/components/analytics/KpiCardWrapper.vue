@@ -116,18 +116,21 @@ defineEmits<{
 </template>
 
 <style scoped>
+/* ===========================================================================
+   KpiCardWrapper — V2: minimal, no heavy padding reserves
+   =========================================================================== */
 .capra-kpi-wrapper {
   position: relative;
   height: 100%;
 }
 
+/* --- V2: wrapper buttons hidden — KpiCard has built-in overflow (⋮) --- */
 .capra-kpi-wrapper__buttons {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  gap: 0.25rem;
-  z-index: 5;
+  display: none;
+}
+
+.capra-kpi-wrapper:hover .capra-kpi-wrapper__buttons {
+  opacity: 1;
 }
 
 .capra-kpi-wrapper__btn {
@@ -137,48 +140,26 @@ defineEmits<{
   width: 24px;
   height: 24px;
   padding: 0;
-  color: var(--capra-text-tertiary, #9ca3af);
-  background-color: transparent;
+  color: var(--color-text-subtle, #9ca3af);
+  background: none;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  opacity: 0.6;
-}
-
-.capra-kpi-wrapper:hover .capra-kpi-wrapper__btn {
-  opacity: 1;
+  transition: background 0.15s, color 0.15s;
 }
 
 .capra-kpi-wrapper__btn:hover {
-  color: var(--capra-brand-tertiary, #8f3f00);
-  background-color: var(--capra-brand-highlight-light, #fef3e2);
+  background: var(--color-surface-alt, #f3f4f6);
+  color: var(--color-text, #111827);
 }
 
-/* Built-in buttons (info/detail) always semi-visible */
 .capra-kpi-wrapper__btn--builtin {
-  opacity: 0.5;
+  /* Same style as custom — no special treatment in v2 */
 }
 
-.capra-kpi-wrapper:hover .capra-kpi-wrapper__btn--builtin {
-  opacity: 1;
-}
-
-/* Drag handle */
+/* --- V2: drag handle hidden — no drag in v2 layout --- */
 .capra-kpi-wrapper__drag-handle {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: var(--capra-text-tertiary, #9ca3af);
-  cursor: grab;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-  z-index: 5;
+  display: none;
 }
 
 .capra-kpi-wrapper:hover .capra-kpi-wrapper__drag-handle {
@@ -193,13 +174,12 @@ defineEmits<{
   cursor: grabbing;
 }
 
-/* Draggable state - reserve space for drag handle */
+/* --- No padding reserves in v2 — buttons overlay on hover --- */
 .capra-kpi-wrapper--draggable {
-  --kpi-header-padding-left: 2rem;
+  --kpi-header-padding-left: 0;
 }
 
-/* Reserve space in KpiCard header for action buttons */
 .capra-kpi-wrapper {
-  --kpi-header-padding-right: 3.5rem;
+  --kpi-header-padding-right: 0;
 }
 </style>

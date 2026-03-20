@@ -29,6 +29,7 @@ import { useKpiLayout, type KpiLayoutItem } from "../../composables/useKpiLayout
 import { useKpiTheme } from "../../composables/useKpiTheme";
 import { useDragReorder } from "../../composables/useDragReorder";
 import { useMeasureEngine } from "../../composables/useMeasureEngine";
+import { resolveCssColor } from "../charts/css-utils";
 import AnalyticContainer from "./AnalyticContainer.vue";
 import KpiGrid from "../layout/KpiGrid.vue";
 import KpiCard from "../analytics/KpiCard.vue";
@@ -100,6 +101,8 @@ interface Props {
   highlightHeader?: boolean;
   /** Label for the trend comparison (e.g. "vs mesmo dia do ano anterior") */
   trendLabel?: string;
+  /** When true, detail button only emits kpi-detail without opening the internal modal */
+  externalDetail?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -121,6 +124,7 @@ const props = withDefaults(defineProps<Props>(), {
   showDetailButton: true,
   draggable: true,
   highlightHeader: true,
+  externalDetail: false,
 });
 
 // =============================================================================
@@ -301,7 +305,9 @@ function handleInfo(key: string): void {
 
 function handleDetail(key: string): void {
   selectedKpiKey.value = key;
-  showDetailModalState.value = true;
+  if (!props.externalDetail) {
+    showDetailModalState.value = true;
+  }
   emit("kpi-detail", key);
 }
 
@@ -341,7 +347,8 @@ const trendChartOption = computed(() => {
   const history = selectedKpiData.value?.history;
   if (!history?.length) return null;
 
-  const accent = selectedAccentColor.value || "#e5a22f";
+  // Resolve CSS var to hex — ECharts canvas cannot parse var()
+  const accent = resolveCssColor(selectedAccentColor.value || "#e5a22f");
   const format = selectedSchema.value?.format || "number";
   const decimals = selectedSchema.value?.decimals;
 
@@ -484,6 +491,7 @@ const trendChartOption = computed(() => {
                 :secondary-value="kpis[kpiKey]?.previousValue"
                 :format="schemaMap.get(kpiKey)?.format || 'number'"
                 :decimals="schemaMap.get(kpiKey)?.decimals"
+                :suffix="schemaMap.get(kpiKey)?.suffix"
                 :trend-label="trendLabel || ''"
                 :show-trend-value="true"
                 :invert-trend="schemaMap.get(kpiKey)?.invertTrend"

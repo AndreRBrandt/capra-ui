@@ -1,0 +1,169 @@
+/* ============================================
+   Design Tokens V2 — Capra UI
+   Dual-color theme system (HSL-based).
+   Base (brand) + Highlight (accent) → layout completo.
+   ============================================ */
+
+:root {
+  /* === LAYOUT — Sidebar dimensions === */
+  --sidebar-rail: 60px;
+  --sidebar-expanded: 220px;
+
+  /* === BASE COLOR (sidebar, headers, primary elements) === */
+  --brand-h: 239;
+  --brand-s: 84%;
+  --brand-l: 67%;
+
+  /* === HIGHLIGHT COLOR (charts, badges, CTAs, active states) === */
+  --hi-h: 25;
+  --hi-s: 95%;
+  --hi-l: 53%;
+
+  /* === DERIVED — Brand scale === */
+  --color-brand:       hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-brand-hover: hsl(var(--brand-h), var(--brand-s), calc(var(--brand-l) - 8%));
+  --color-brand-soft:  hsl(var(--brand-h), calc(var(--brand-s) - 30%), calc(var(--brand-l) + 25%));
+  --color-brand-subtle:hsl(var(--brand-h), calc(var(--brand-s) - 50%), calc(var(--brand-l) + 30%));
+
+  /* === DERIVED — Highlight scale === */
+  --color-hi:          hsl(var(--hi-h), var(--hi-s), var(--hi-l));
+  --color-hi-hover:    hsl(var(--hi-h), var(--hi-s), calc(var(--hi-l) - 8%));
+  --color-hi-soft:     hsl(var(--hi-h), calc(var(--hi-s) - 20%), calc(var(--hi-l) + 28%));
+  --color-hi-subtle:   hsl(var(--hi-h), calc(var(--hi-s) - 40%), calc(var(--hi-l) + 35%));
+
+  /* === Surfaces === */
+  --color-bg:          hsl(var(--brand-h), 8%, 95%);
+  --color-surface:     #ffffff;
+  --color-surface-alt: hsl(var(--brand-h), 6%, 97%);
+
+  /* === Text === */
+  --color-text:        hsl(var(--brand-h), 20%, 15%);
+  --color-text-muted:  hsl(var(--brand-h), 8%, 42%);
+  --color-text-subtle: hsl(var(--brand-h), 6%, 62%);
+
+  /* === Borders === */
+  --color-border:      hsl(var(--brand-h), 8%, 90%);
+  --color-border-hover:hsl(var(--brand-h), 12%, 82%);
+
+  /* === Icon accents (3 shades from brand) === */
+  --color-accent-1:    hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-accent-1-bg: hsl(var(--brand-h), calc(var(--brand-s) - 40%), 93%);
+  --color-accent-2:    hsl(var(--brand-h), calc(var(--brand-s) - 15%), calc(var(--brand-l) - 10%));
+  --color-accent-2-bg: hsl(var(--brand-h), calc(var(--brand-s) - 45%), 91%);
+  --color-accent-3:    hsl(var(--brand-h), calc(var(--brand-s) - 30%), calc(var(--brand-l) + 5%));
+  --color-accent-3-bg: hsl(var(--brand-h), calc(var(--brand-s) - 55%), 94%);
+
+  /* === Chart palette (brand → highlight gradient, 6 stops) === */
+  --color-chart-1:     hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-chart-2:     hsl(var(--hi-h), var(--hi-s), var(--hi-l));
+  --color-chart-3:     hsl(var(--brand-h), calc(var(--brand-s) - 15%), calc(var(--brand-l) - 10%));
+  --color-chart-4:     hsl(var(--hi-h), calc(var(--hi-s) - 15%), calc(var(--hi-l) - 10%));
+  --color-chart-5:     hsl(var(--brand-h), calc(var(--brand-s) - 30%), calc(var(--brand-l) + 10%));
+  --color-chart-6:     hsl(var(--hi-h), calc(var(--hi-s) - 30%), calc(var(--hi-l) + 10%));
+
+  /* === Semantic (derived from palette) === */
+  --color-positive:    hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-negative:    hsl(var(--hi-h), var(--hi-s), var(--hi-l));
+  --color-positive-soft: hsl(var(--brand-h), calc(var(--brand-s) - 20%), calc(var(--brand-l) + 20%));
+  --color-negative-soft: hsl(var(--hi-h), calc(var(--hi-s) - 20%), calc(var(--hi-l) + 20%));
+
+  /* Fallback semantic (for truly semantic use like form errors) */
+  --color-success:     hsl(142, 60%, 45%);
+  --color-warning:     hsl(38, 92%, 50%);
+  --color-danger:      hsl(0, 70%, 55%);
+
+  /* === Active/selected state === */
+  --color-active-bg:   hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-active-text: #ffffff;
+
+  /* === Typography === */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* === Spacing === */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* === Radius === */
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* === Shadows === */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* === V1 → V2 Compatibility Aliases ===
+     Maps old V1 token names to V2 equivalents so all 17+ app files
+     that reference V1 names automatically get V2 colors.
+     ============================================ */
+  --color-brand-primary:   var(--color-brand-soft);
+  --color-brand-secondary: var(--color-brand);
+  --color-brand-tertiary:  var(--color-brand-hover);
+  --color-brand-highlight: var(--color-hi);
+
+  /* Nav/shell aliases (used by AppShell v1 CSS fallbacks) */
+  --capra-nav-bg:          var(--color-surface);
+  --capra-nav-bg-active:   var(--color-brand-soft);
+  --capra-nav-text:        var(--color-text-muted);
+  --capra-nav-text-active: var(--color-text);
+  --capra-text-tertiary:   var(--color-text-subtle);
+  --capra-brand-tertiary:  var(--color-brand-hover);
+  --capra-brand-highlight-light: var(--color-hi-soft);
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+[data-theme="dark"] {
+  --color-bg:          hsl(var(--brand-h), 12%, 10%);
+  --color-surface:     hsl(var(--brand-h), 10%, 15%);
+  --color-surface-alt: hsl(var(--brand-h), 10%, 13%);
+
+  --color-text:        hsl(var(--brand-h), 10%, 92%);
+  --color-text-muted:  hsl(var(--brand-h), 8%, 62%);
+  --color-text-subtle: hsl(var(--brand-h), 6%, 45%);
+
+  --color-border:      hsl(var(--brand-h), 8%, 22%);
+  --color-border-hover:hsl(var(--brand-h), 10%, 30%);
+
+  --color-brand-soft:  hsl(var(--brand-h), calc(var(--brand-s) - 30%), 25%);
+  --color-brand-subtle:hsl(var(--brand-h), calc(var(--brand-s) - 50%), 20%);
+
+  --color-hi-soft:     hsl(var(--hi-h), calc(var(--hi-s) - 20%), 22%);
+  --color-hi-subtle:   hsl(var(--hi-h), calc(var(--hi-s) - 40%), 18%);
+
+  --color-accent-1-bg: hsl(var(--brand-h), calc(var(--brand-s) - 40%), 18%);
+  --color-accent-2-bg: hsl(var(--brand-h), calc(var(--brand-s) - 45%), 16%);
+  --color-accent-3-bg: hsl(var(--brand-h), calc(var(--brand-s) - 55%), 20%);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   PRESET THEMES — Dual Color (base + highlight)
+   ============================================ */
+
+/* Mono presets (highlight = brand shifted) */
+[data-color="indigo"]  { --brand-h: 239; --brand-s: 84%; --brand-l: 67%; --hi-h: 239; --hi-s: 70%; --hi-l: 55%; }
+[data-color="blue"]    { --brand-h: 217; --brand-s: 91%; --brand-l: 60%; --hi-h: 217; --hi-s: 80%; --hi-l: 50%; }
+[data-color="cyan"]    { --brand-h: 190; --brand-s: 80%; --brand-l: 45%; --hi-h: 190; --hi-s: 70%; --hi-l: 40%; }
+[data-color="teal"]    { --brand-h: 168; --brand-s: 75%; --brand-l: 42%; --hi-h: 168; --hi-s: 65%; --hi-l: 38%; }
+[data-color="green"]   { --brand-h: 142; --brand-s: 70%; --brand-l: 45%; --hi-h: 142; --hi-s: 60%; --hi-l: 40%; }
+[data-color="emerald"] { --brand-h: 160; --brand-s: 84%; --brand-l: 39%; --hi-h: 160; --hi-s: 70%; --hi-l: 35%; }
+[data-color="orange"]  { --brand-h: 25;  --brand-s: 95%; --brand-l: 53%; --hi-h: 25;  --hi-s: 85%; --hi-l: 48%; }
+[data-color="amber"]   { --brand-h: 38;  --brand-s: 92%; --brand-l: 50%; --hi-h: 38;  --hi-s: 82%; --hi-l: 45%; }
+[data-color="red"]     { --brand-h: 0;   --brand-s: 84%; --brand-l: 60%; --hi-h: 0;   --hi-s: 74%; --hi-l: 52%; }
+[data-color="rose"]    { --brand-h: 350; --brand-s: 80%; --brand-l: 60%; --hi-h: 350; --hi-s: 70%; --hi-l: 52%; }
+[data-color="pink"]    { --brand-h: 330; --brand-s: 80%; --brand-l: 60%; --hi-h: 330; --hi-s: 70%; --hi-l: 52%; }
+[data-color="purple"]  { --brand-h: 270; --brand-s: 76%; --brand-l: 60%; --hi-h: 270; --hi-s: 66%; --hi-l: 52%; }
+
+/* Dual-color presets (contrasting brand + highlight) */
+[data-color="indigo-orange"]  { --brand-h: 239; --brand-s: 84%; --brand-l: 67%; --hi-h: 25;  --hi-s: 95%; --hi-l: 53%; }
+[data-color="blue-amber"]     { --brand-h: 217; --brand-s: 91%; --brand-l: 60%; --hi-h: 38;  --hi-s: 92%; --hi-l: 50%; }
+[data-color="teal-rose"]      { --brand-h: 168; --brand-s: 75%; --brand-l: 42%; --hi-h: 350; --hi-s: 80%; --hi-l: 60%; }
+[data-color="purple-amber"]   { --brand-h: 270; --brand-s: 76%; --brand-l: 60%; --hi-h: 38;  --hi-s: 92%; --hi-l: 50%; }
+[data-color="emerald-orange"] { --brand-h: 160; --brand-s: 84%; --brand-l: 39%; --hi-h: 25;  --hi-s: 95%; --hi-l: 53%; }
+[data-color="blue-rose"]      { --brand-h: 217; --brand-s: 91%; --brand-l: 60%; --hi-h: 350; --hi-s: 80%; --hi-l: 60%; }

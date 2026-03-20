@@ -9,6 +9,40 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Adicionado (S202) — year_weekday comparison unit
+- **types/query.ts** — `CapraTimeUnit` agora inclui `"year_weekday"` para comparação YoY alinhada por dia da semana. Ex: 3ª segunda-feira de março 2026 compara com 3ª segunda-feira de março 2025 (evita comparar segunda com domingo)
+
+### Corrigido (S196) — ECharts CSS var crash em LineChart + KpiContainer
+- **LineChart.vue** — Todas as cores (series, gradients areaStyle, tooltip, axis, legend) agora passam por `resolveCssColor()`. Corrige crash `addColorStop()` quando `area=true` com props default (`var(--color-brand-primary)`)
+- **KpiContainer.vue** — Trend chart no detail modal agora resolve accent color via `resolveCssColor()` antes de usar em gradient. Corrige crash quando accent é `var(--color-kpi-expense)` etc.
+
+### Adicionado (S195) — PieChart + StackedBarChart
+- **PieChart.vue** — Novo componente pie/donut chart seguindo padrão BarChart/LineChart. Props: data, nameKey, valueKey, format, donut, colors, showLegend, showLabels, height. Emits: slice-click, interact
+- **StackedBarChart.vue** — Novo componente N-series stacked bar chart. Props: data, categoryKey, series[]{key,name,color}, format, horizontal, height. Stack total com tooltip compartilhado. Emits: bar-click, interact
+
+### Alterado (S192) — DateRangeFilter: calendar range picker
+- **DateRangeFilter.vue** — Substituídos dois `<input type="date">` por calendar range picker visual. Seleção por dois cliques (início → fim), hover preview, navegação mês anterior/próximo, auto-ordenação de datas. Melhor UX em mobile e desktop
+- **DateRangeFilter.spec.ts** — Testes reescritos para calendar picker (RF10-RF21: grid, seleção, auto-order, apply, minDate/maxDate, navegação)
+
+### Corrigido (S175) — ECharts CSS var() resolution
+- **css-utils.ts** — Novo utilitário `resolveCssColor()` que lê `getComputedStyle()` para resolver `var(--name, fallback)` em hex antes de passar ao ECharts (canvas não interpreta CSS custom properties)
+- **BarChart.vue** — Todas as cores (series, emphasis, labels, grid, legend) agora passam por `resolveCssColor()`. Corrige barras pretas e desaparecimento no hover
+- **BaseChart.vue** — `defaultTheme` convertido para `computed` com cores resolvidas. Afeta todos os tipos de gráfico
+
+### Adicionado (S173) — ChipGroup component
+- **ChipGroup.vue** — Novo componente genérico de seleção por chips (pill-shaped toggle buttons). Single-select via `v-model`, props `items` (array `{value, label}`), `size` ("sm"/"md"). ARIA radiogroup. Scoped CSS com tokens `var(--color-*)`
+- **index.ts** — Exporta `ChipGroup` + tipo `ChipGroupItem`
+
+### Adicionado (S172) — KpiSchemaItem suffix + externalDetail
+- **KpiSchemaItem** — Nova propriedade opcional `suffix?: string` para sufixo após valor formatado (e.g., "h", "kg")
+- **KpiContainer** — Passa `suffix` do schema para `KpiCard` ao renderizar cards
+- **KpiContainer** — Nova prop `externalDetail?: boolean` — quando `true`, o botão Eye (detail) apenas emite `kpi-detail` sem abrir o modal interno do framework. Permite que o consumidor controle o drill-down externamente
+
+### Corrigido (S170) — Console warnings
+- **useConfigState** — `onScopeDispose()` guardado com `getCurrentScope()` para evitar warning quando chamado fora de effect scope (plugin install)
+- **useTheme** — Mesmo guard `getCurrentScope()` no listener de media query
+- **Modal** — `defineOptions({ inheritAttrs: false })` + `v-bind="$attrs"` no dialog root para evitar warning de attrs em fragment (Teleport+Transition+v-if)
+
 ### Adicionado (S161) — i18n: Sistema de traduções tipado
 - **i18n module** — Novo módulo `src/i18n/` com `CapraTranslations` interface, `DEFAULT_TRANSLATIONS` (pt-BR), `useCapraI18n()` composable, e `CAPRA_I18N_KEY` injection key
 - **Plugin** — `createCapraPlugin()` aceita `i18n?: Partial<CapraTranslations>` para override de labels do framework

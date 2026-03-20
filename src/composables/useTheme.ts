@@ -28,6 +28,7 @@ import {
   watch,
   inject,
   onScopeDispose,
+  getCurrentScope,
   type Ref,
   type ComputedRef,
   type InjectionKey,
@@ -98,9 +99,11 @@ function createTheme(): UseThemeReturn {
       systemPreference.value = e.matches ? "dark" : "light";
     };
     mql.addEventListener("change", handler);
-    onScopeDispose(() => {
-      mql.removeEventListener("change", handler);
-    });
+    if (getCurrentScope()) {
+      onScopeDispose(() => {
+        mql.removeEventListener("change", handler);
+      });
+    }
   }
 
   const resolvedMode = computed<"light" | "dark">(() => {

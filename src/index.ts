@@ -130,6 +130,8 @@ export {
   BarChart,
   HeatmapChart,
   LineChart,
+  PieChart,
+  StackedBarChart,
   // Containers
   AnalyticContainer,
   FilterContainer,
@@ -138,6 +140,9 @@ export {
   RecordCardList,
   // Layout
   AppShell,
+  AppShellV2,
+  SidebarV2,
+  TopBarV2,
   AnalyticsPage,
   KpiGrid,
   SectionHeader,
@@ -155,9 +160,11 @@ export {
   ColorGroupManager,
   KpiConfigPanel,
   SegmentedControl,
+  ChipGroup,
   Collapsible,
   RecordCard,
   StatusBadge,
+  ThemePickerV2,
   // Filters (components only, types come from composables)
   FilterTrigger,
   FilterDropdown,
@@ -183,4 +190,7 @@ export type { SettingsSection } from "./components/layout/SettingsLayout.vue";
 export type { ExtraPreset } from "./components/ui/ThemeConfigPanel.vue";
 export type { KpiConfigItem } from "./components/ui/KpiConfigPanel.vue";
 export type { SegmentedOption } from "./components/ui/SegmentedControl.vue";
+export type { ChipGroupItem } from "./components/ui/ChipGroup.vue";
 export type { ListContainerProps, ListContainerGroup } from "./components/containers/ListContainer.vue";
+export type { NavItemV2, SectionItemV2 } from "./components/layout/AppShellV2.vue";
+export type { SidebarNavItem } from "./components/layout/SidebarV2.vue";

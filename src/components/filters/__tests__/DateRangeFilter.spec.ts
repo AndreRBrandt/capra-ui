@@ -165,10 +165,10 @@ describe("DateRangeFilter", () => {
   });
 
   // ==========================================================================
-  // Custom Date Picker
+  // Custom Calendar Picker
   // ==========================================================================
-  describe("Custom Date Picker", () => {
-    it("RF09: exibe date picker ao selecionar custom", async () => {
+  describe("Custom Calendar Picker", () => {
+    it("RF09: exibe calendar picker ao selecionar custom", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -181,27 +181,10 @@ describe("DateRangeFilter", () => {
       await nextTick();
 
       expect(wrapper.find(".date-range-filter__custom-picker").exists()).toBe(true);
+      expect(wrapper.find(".drf-cal").exists()).toBe(true);
     });
 
-    it("RF10: renderiza campos De e Ate", async () => {
-      const wrapper = mount(DateRangeFilter, {
-        props: {
-          presets: mockPresets,
-          modelValue: { type: "custom", startDate: new Date("2025-01-10"), endDate: new Date("2025-01-15") },
-          showCustom: true,
-        },
-      });
-
-      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
-      await nextTick();
-
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      expect(inputs.length).toBe(2);
-      expect(wrapper.text()).toContain("De:");
-      expect(wrapper.text()).toContain("Até:");
-    });
-
-    it("RF11: valida startDate <= endDate", async () => {
+    it("RF10: renderiza calendar grid com dias do mes", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -213,14 +196,15 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      await inputs[0].setValue("2025-01-20"); // De: 20
-      await inputs[1].setValue("2025-01-15"); // Ate: 15 (invalido)
+      // Calendar should have weekday headers and day buttons
+      const weekdays = wrapper.findAll(".drf-cal__weekday");
+      expect(weekdays.length).toBe(7);
 
-      expect(wrapper.find(".date-range-filter__error").exists()).toBe(true);
+      const days = wrapper.findAll(".drf-cal__day");
+      expect(days.length).toBe(42); // 6 rows × 7 days
     });
 
-    it("RF12: exibe erro quando validacao falha", async () => {
+    it("RF11: seleciona range clicando dois dias", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -232,15 +216,22 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      await inputs[0].setValue("2025-01-20");
-      await inputs[1].setValue("2025-01-10");
+      // Find day 10 and day 15 in current month (January 2025)
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
 
-      const errorMsg = wrapper.find(".date-range-filter__error");
-      expect(errorMsg.exists()).toBe(true);
+      // Click day 10 (index 9 in current month days)
+      await currentMonthDays[9].trigger("click");
+      await nextTick();
+      expect(currentMonthDays[9].classes()).toContain("drf-cal__day--start");
+
+      // Click day 15 (index 14)
+      await currentMonthDays[14].trigger("click");
+      await nextTick();
+      expect(currentMonthDays[14].classes()).toContain("drf-cal__day--end");
     });
 
-    it("RF13: Botao Aplicar emite evento apply", async () => {
+    it("RF12: auto-ordena range quando fim < inicio", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -252,14 +243,49 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      await inputs[0].setValue("2025-01-10");
-      await inputs[1].setValue("2025-01-15");
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
+
+      // Click day 15 first, then day 10 → should auto-swap
+      await currentMonthDays[14].trigger("click");
+      await nextTick();
+      await currentMonthDays[9].trigger("click");
+      await nextTick();
+
+      // Day 10 should be start, day 15 should be end
+      expect(currentMonthDays[9].classes()).toContain("drf-cal__day--start");
+      expect(currentMonthDays[14].classes()).toContain("drf-cal__day--end");
+    });
+
+    it("RF13: Botao Aplicar emite evento apply com range", async () => {
+      const wrapper = mount(DateRangeFilter, {
+        props: {
+          presets: mockPresets,
+          modelValue: { type: "preset", preset: "lastday" },
+          showCustom: true,
+        },
+      });
+
+      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
+      await nextTick();
+
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
+
+      // Select range: day 10 → day 15
+      await currentMonthDays[9].trigger("click");
+      await nextTick();
+      await currentMonthDays[14].trigger("click");
+      await nextTick();
 
       const applyBtn = wrapper.find(".date-range-filter__custom-btn--primary");
       await applyBtn.trigger("click");
 
       expect(wrapper.emitted("apply")).toBeTruthy();
+      const emitted = wrapper.emitted("apply")![0][0] as DateRangeValue;
+      expect(emitted.type).toBe("custom");
+      expect(emitted.startDate?.getDate()).toBe(10);
+      expect(emitted.endDate?.getDate()).toBe(15);
     });
 
     it("RF14: Botao Cancelar volta para presets", async () => {
@@ -284,7 +310,7 @@ describe("DateRangeFilter", () => {
       expect(wrapper.emitted("cancel")).toBeTruthy();
     });
 
-    it("RF15: Botao Aplicar disabled quando invalido", async () => {
+    it("RF15: Botao Aplicar disabled quando nenhum range selecionado", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -296,10 +322,7 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      await inputs[0].setValue("2025-01-20");
-      await inputs[1].setValue("2025-01-10");
-
+      // No days clicked yet → Apply should be disabled
       const applyBtn = wrapper.find(".date-range-filter__custom-btn--primary");
       expect(applyBtn.attributes("disabled")).toBeDefined();
     });
@@ -309,25 +332,28 @@ describe("DateRangeFilter", () => {
   // Limites de Data
   // ==========================================================================
   describe("Limites de Data", () => {
-    it("RF16: respeita minDate nos inputs", async () => {
+    it("RF16: dias fora do minDate ficam disabled no calendar", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
           modelValue: { type: "preset", preset: "lastday" },
           showCustom: true,
-          minDate: "2025-01-05",
+          minDate: "2025-01-10",
         },
       });
 
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      expect(inputs[0].attributes("min")).toBe("2025-01-05");
-      expect(inputs[1].attributes("min")).toBe("2025-01-05");
+      // Day 5 (Jan 5) should be disabled, Day 10 should not
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
+
+      expect(currentMonthDays[4].classes()).toContain("drf-cal__day--disabled"); // Jan 5
+      expect(currentMonthDays[9].classes()).not.toContain("drf-cal__day--disabled"); // Jan 10
     });
 
-    it("RF17: respeita maxDate nos inputs", async () => {
+    it("RF17: dias apos maxDate ficam disabled no calendar", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -340,9 +366,11 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      expect(inputs[0].attributes("max")).toBe("2025-01-20");
-      expect(inputs[1].attributes("max")).toBe("2025-01-20");
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
+
+      expect(currentMonthDays[19].classes()).not.toContain("drf-cal__day--disabled"); // Jan 20
+      expect(currentMonthDays[20].classes()).toContain("drf-cal__day--disabled"); // Jan 21
     });
 
     it("RF18: presets fora do range ficam disabled", () => {
@@ -362,42 +390,74 @@ describe("DateRangeFilter", () => {
   });
 
   // ==========================================================================
-  // Formatacao
+  // Calendar Navigation
   // ==========================================================================
-  describe("Formatacao", () => {
-    it("RF19: formata datas conforme locale", () => {
+  describe("Calendar Navigation", () => {
+    it("RF19: navega para mes anterior", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
-          modelValue: {
-            type: "custom",
-            startDate: new Date("2025-01-15"),
-            endDate: new Date("2025-01-22"),
-          },
-          locale: "pt-BR",
+          modelValue: { type: "preset", preset: "lastday" },
+          showCustom: true,
         },
       });
 
-      // O componente deve exibir as datas formatadas
-      // Este teste verifica que o formato brasileiro é usado
-      expect(wrapper.vm).toBeDefined();
+      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
+      await nextTick();
+
+      // Should show January 2025 initially
+      expect(wrapper.find(".drf-cal__title").text()).toContain("Janeiro");
+
+      // Click prev month
+      const navButtons = wrapper.findAll(".drf-cal__nav");
+      await navButtons[0].trigger("click");
+      await nextTick();
+
+      expect(wrapper.find(".drf-cal__title").text()).toContain("Dezembro");
     });
 
-    it("RF20: exibe range formatado para custom", () => {
+    it("RF20: navega para proximo mes", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
-          modelValue: {
-            type: "custom",
-            startDate: new Date("2025-01-15"),
-            endDate: new Date("2025-01-22"),
-          },
+          modelValue: { type: "preset", preset: "lastday" },
+          showCustom: true,
         },
       });
 
-      // Verifica que o trigger de custom mostra que está selecionado
-      const customTrigger = wrapper.find(".date-range-filter__custom-trigger");
-      expect(customTrigger.classes()).toContain("date-range-filter__custom-trigger--active");
+      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
+      await nextTick();
+
+      const navButtons = wrapper.findAll(".drf-cal__nav");
+      await navButtons[1].trigger("click");
+      await nextTick();
+
+      expect(wrapper.find(".drf-cal__title").text()).toContain("Fevereiro");
+    });
+
+    it("RF21: mostra range display ao selecionar datas", async () => {
+      const wrapper = mount(DateRangeFilter, {
+        props: {
+          presets: mockPresets,
+          modelValue: { type: "preset", preset: "lastday" },
+          showCustom: true,
+        },
+      });
+
+      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
+      await nextTick();
+
+      const days = wrapper.findAll(".drf-cal__day");
+      const currentMonthDays = days.filter(d => !d.classes().includes("drf-cal__day--other"));
+
+      // Click day 10
+      await currentMonthDays[9].trigger("click");
+      await nextTick();
+
+      // Should show partial range (start only)
+      const display = wrapper.find(".drf-cal__range-display");
+      expect(display.exists()).toBe(true);
+      expect(display.text()).toContain("10/01/2025");
     });
   });
 
@@ -405,7 +465,7 @@ describe("DateRangeFilter", () => {
   // Slots
   // ==========================================================================
   describe("Slots", () => {
-    it("RF21: renderiza slot preset customizado", () => {
+    it("RF22: renderiza slot preset customizado", () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -421,7 +481,7 @@ describe("DateRangeFilter", () => {
       expect(wrapper.text()).toContain("Custom: Ontem");
     });
 
-    it("RF22: renderiza slot custom-header", async () => {
+    it("RF23: renderiza slot custom-header", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -439,7 +499,7 @@ describe("DateRangeFilter", () => {
       expect(wrapper.find(".custom-header").exists()).toBe(true);
     });
 
-    it("RF23: renderiza slot custom-footer", async () => {
+    it("RF24: renderiza slot custom-footer", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -462,7 +522,7 @@ describe("DateRangeFilter", () => {
   // Acessibilidade
   // ==========================================================================
   describe("Acessibilidade", () => {
-    it("RF24: presets possuem role='radio'", () => {
+    it("RF25: presets possuem role='radio'", () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -476,7 +536,7 @@ describe("DateRangeFilter", () => {
       });
     });
 
-    it("RF25: container possui role='radiogroup'", () => {
+    it("RF26: container possui role='radiogroup'", () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -487,7 +547,7 @@ describe("DateRangeFilter", () => {
       expect(wrapper.find(".date-range-filter__presets").attributes("role")).toBe("radiogroup");
     });
 
-    it("RF26: inputs de data sao type='date'", async () => {
+    it("RF27: calendar days sao buttons clicaveis", async () => {
       const wrapper = mount(DateRangeFilter, {
         props: {
           presets: mockPresets,
@@ -499,31 +559,9 @@ describe("DateRangeFilter", () => {
       await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
       await nextTick();
 
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-      inputs.forEach((input) => {
-        expect(input.attributes("type")).toBe("date");
-      });
-    });
-
-    it("RF27: labels associados aos inputs", async () => {
-      const wrapper = mount(DateRangeFilter, {
-        props: {
-          presets: mockPresets,
-          modelValue: { type: "preset", preset: "lastday" },
-          showCustom: true,
-        },
-      });
-
-      await wrapper.find(".date-range-filter__custom-trigger").trigger("click");
-      await nextTick();
-
-      const labels = wrapper.findAll(".date-range-filter__custom-label");
-      const inputs = wrapper.findAll(".date-range-filter__custom-input");
-
-      labels.forEach((label, index) => {
-        const input = inputs[index];
-        const inputId = input.attributes("id");
-        expect(label.attributes("for")).toBe(inputId);
+      const days = wrapper.findAll(".drf-cal__day");
+      days.forEach((day) => {
+        expect(day.element.tagName).toBe("BUTTON");
       });
     });
   });

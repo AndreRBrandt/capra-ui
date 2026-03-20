@@ -3,7 +3,8 @@
  * DateRangeFilter
  * ===============
  * Componente de selecao de periodo para filtros.
- * Oferece opcoes pre-definidas e permite selecionar um intervalo customizado.
+ * Oferece opcoes pre-definidas e permite selecionar um intervalo customizado
+ * com calendar range picker (clique primeiro no inicio, depois no fim).
  *
  * @example
  * ```vue
@@ -16,7 +17,7 @@
  */
 
 import { computed, ref, watch } from "vue";
-import { Check, Calendar } from "lucide-vue-next";
+import { Check, Calendar, ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { useCapraI18n } from "../../i18n";
 
 const { t } = useCapraI18n();
@@ -176,49 +177,213 @@ const emit = defineEmits<{
 // ==========================================================================
 
 const showCustomPicker = ref(false);
-const customStartDate = ref("");
-const customEndDate = ref("");
 const validationError = ref("");
+
+// Calendar state
+const calendarMonth = ref(new Date().getMonth());
+const calendarYear = ref(new Date().getFullYear());
+const rangeStart = ref<Date | null>(null);
+const rangeEnd = ref<Date | null>(null);
+const hoverDate = ref<Date | null>(null);
 
 // ==========================================================================
 // Computed
 // ==========================================================================
 
-const minDateString = computed(() => {
-  if (!props.minDate) return undefined;
-  if (typeof props.minDate === "string") return props.minDate;
-  return formatDateForInput(props.minDate);
-});
-
-const maxDateString = computed(() => {
-  if (!props.maxDate) return undefined;
-  if (typeof props.maxDate === "string") return props.maxDate;
-  return formatDateForInput(props.maxDate);
-});
-
 const isCustomSelected = computed(() => props.modelValue?.type === "custom");
 
 const isApplyDisabled = computed(() => {
-  if (!customStartDate.value || !customEndDate.value) return true;
-  if (validationError.value) return true;
-  return false;
+  return !rangeStart.value || !rangeEnd.value;
+});
+
+const WEEKDAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
+const MONTH_NAMES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+const monthYearLabel = computed(() =>
+  `${MONTH_NAMES[calendarMonth.value]} ${calendarYear.value}`
+);
+
+interface CalendarDay {
+  date: Date;
+  label: number;
+  currentMonth: boolean;
+  isToday: boolean;
+  disabled: boolean;
+}
+
+const calendarDays = computed<CalendarDay[]>(() => {
+  const year = calendarYear.value;
+  const month = calendarMonth.value;
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  // Monday=0, Sunday=6
+  let startWeekday = firstDay.getDay() - 1;
+  if (startWeekday < 0) startWeekday = 6;
+
+  const days: CalendarDay[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Previous month fill
+  for (let i = startWeekday - 1; i >= 0; i--) {
+    const d = new Date(year, month, -i);
+    days.push({
+      date: d,
+      label: d.getDate(),
+      currentMonth: false,
+      isToday: false,
+      disabled: isDayDisabled(d),
+    });
+  }
+
+  // Current month
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(year, month, d);
+    days.push({
+      date,
+      label: d,
+      currentMonth: true,
+      isToday: date.getTime() === today.getTime(),
+      disabled: isDayDisabled(date),
+    });
+  }
+
+  // Next month fill (complete to 42 = 6 rows)
+  const remaining = 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
+    const d = new Date(year, month + 1, i);
+    days.push({
+      date: d,
+      label: d.getDate(),
+      currentMonth: false,
+      isToday: false,
+      disabled: isDayDisabled(d),
+    });
+  }
+
+  return days;
+});
+
+/** Summary of selected range for display above calendar */
+const rangeDisplayText = computed(() => {
+  const fmt = (d: Date) =>
+    `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+
+  if (rangeStart.value && rangeEnd.value) {
+    return `${fmt(rangeStart.value)} — ${fmt(rangeEnd.value)}`;
+  }
+  if (rangeStart.value) {
+    return `${fmt(rangeStart.value)} — ...`;
+  }
+  return "";
 });
 
 // ==========================================================================
 // Methods
 // ==========================================================================
 
-function formatDateForInput(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function isDayDisabled(date: Date): boolean {
+  if (props.minDate) {
+    const min = typeof props.minDate === "string" ? new Date(props.minDate + "T00:00:00") : props.minDate;
+    if (date < min) return true;
+  }
+  if (props.maxDate) {
+    const max = typeof props.maxDate === "string" ? new Date(props.maxDate + "T00:00:00") : props.maxDate;
+    if (date > max) return true;
+  }
+  return false;
 }
 
-function parseDateFromInput(value: string): Date | undefined {
-  if (!value) return undefined;
-  const date = new Date(value + "T00:00:00");
-  return isNaN(date.getTime()) ? undefined : date;
+function sameDay(a: Date | null, b: Date | null): boolean {
+  if (!a || !b) return false;
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+function isInRange(date: Date): boolean {
+  const start = rangeStart.value;
+  const end = rangeEnd.value ?? hoverDate.value;
+  if (!start || !end) return false;
+
+  const [lo, hi] = start <= end ? [start, end] : [end, start];
+  return date > lo && date < hi;
+}
+
+function isRangeStart(date: Date): boolean {
+  return sameDay(date, rangeStart.value);
+}
+
+function isRangeEnd(date: Date): boolean {
+  if (rangeEnd.value) return sameDay(date, rangeEnd.value);
+  if (rangeStart.value && hoverDate.value) return sameDay(date, hoverDate.value);
+  return false;
+}
+
+function getDayClasses(day: CalendarDay) {
+  return [
+    "drf-cal__day",
+    {
+      "drf-cal__day--other": !day.currentMonth,
+      "drf-cal__day--today": day.isToday,
+      "drf-cal__day--disabled": day.disabled,
+      "drf-cal__day--start": isRangeStart(day.date),
+      "drf-cal__day--end": isRangeEnd(day.date),
+      "drf-cal__day--in-range": isInRange(day.date),
+      "drf-cal__day--single": isRangeStart(day.date) && isRangeEnd(day.date),
+    },
+  ];
+}
+
+function selectDay(date: Date) {
+  if (isDayDisabled(date)) return;
+
+  if (!rangeStart.value || rangeEnd.value) {
+    // Start new selection
+    rangeStart.value = new Date(date);
+    rangeEnd.value = null;
+    hoverDate.value = null;
+  } else {
+    // Complete selection
+    if (date < rangeStart.value) {
+      rangeEnd.value = new Date(rangeStart.value);
+      rangeStart.value = new Date(date);
+    } else {
+      rangeEnd.value = new Date(date);
+    }
+    hoverDate.value = null;
+  }
+  validationError.value = "";
+}
+
+function onDayHover(date: Date) {
+  if (rangeStart.value && !rangeEnd.value) {
+    hoverDate.value = new Date(date);
+  }
+}
+
+function prevMonth() {
+  if (calendarMonth.value === 0) {
+    calendarMonth.value = 11;
+    calendarYear.value--;
+  } else {
+    calendarMonth.value--;
+  }
+}
+
+function nextMonth() {
+  if (calendarMonth.value === 11) {
+    calendarMonth.value = 0;
+    calendarYear.value++;
+  } else {
+    calendarMonth.value++;
+  }
 }
 
 function isPresetSelected(preset: DatePreset): boolean {
@@ -262,58 +427,37 @@ function selectPreset(preset: DatePreset) {
   emit("update:modelValue", value);
   emit("select", value);
   showCustomPicker.value = false;
+  rangeStart.value = null;
+  rangeEnd.value = null;
 }
 
 function openCustomPicker() {
   showCustomPicker.value = true;
 
-  // Inicializa com valores atuais ou defaults
+  // Initialize calendar to current selection or today
   if (props.modelValue?.type === "custom" && props.modelValue.startDate && props.modelValue.endDate) {
-    customStartDate.value = formatDateForInput(props.modelValue.startDate);
-    customEndDate.value = formatDateForInput(props.modelValue.endDate);
+    rangeStart.value = new Date(props.modelValue.startDate);
+    rangeEnd.value = new Date(props.modelValue.endDate);
+    calendarMonth.value = props.modelValue.startDate.getMonth();
+    calendarYear.value = props.modelValue.startDate.getFullYear();
   } else {
-    // Default: primeiro dia do mês até hoje
+    rangeStart.value = null;
+    rangeEnd.value = null;
     const today = new Date();
-    customEndDate.value = formatDateForInput(today);
-    customStartDate.value = formatDateForInput(startOfMonth(today));
+    calendarMonth.value = today.getMonth();
+    calendarYear.value = today.getFullYear();
   }
 
   validationError.value = "";
-}
-
-function validateDates() {
-  validationError.value = "";
-
-  if (!customStartDate.value || !customEndDate.value) {
-    return;
-  }
-
-  const start = parseDateFromInput(customStartDate.value);
-  const end = parseDateFromInput(customEndDate.value);
-
-  if (!start || !end) {
-    validationError.value = t.filters.invalidDates;
-    return;
-  }
-
-  if (start > end) {
-    validationError.value = t.filters.startBeforeEnd;
-  }
 }
 
 function handleApply() {
-  validateDates();
-  if (validationError.value) return;
-
-  const start = parseDateFromInput(customStartDate.value);
-  const end = parseDateFromInput(customEndDate.value);
-
-  if (!start || !end) return;
+  if (!rangeStart.value || !rangeEnd.value) return;
 
   const value: DateRangeValue = {
     type: "custom",
-    startDate: start,
-    endDate: end,
+    startDate: rangeStart.value,
+    endDate: rangeEnd.value,
   };
 
   emit("update:modelValue", value);
@@ -337,58 +481,60 @@ function getPresetClasses(preset: DatePreset) {
   ];
 }
 
-// Watch for date changes to validate
-watch([customStartDate, customEndDate], validateDates);
-
-// Generate unique IDs for accessibility
-const startDateId = `date-range-start-${Math.random().toString(36).slice(2, 9)}`;
-const endDateId = `date-range-end-${Math.random().toString(36).slice(2, 9)}`;
-
-// Eagerly initialize custom date fields when customFirst is enabled
+// Eagerly initialize for customFirst mode
 if (props.customFirst) {
   if (props.modelValue?.type === "custom" && props.modelValue.startDate && props.modelValue.endDate) {
-    customStartDate.value = formatDateForInput(props.modelValue.startDate);
-    customEndDate.value = formatDateForInput(props.modelValue.endDate);
-  } else {
-    const today = new Date();
-    customEndDate.value = formatDateForInput(today);
-    customStartDate.value = formatDateForInput(startOfMonth(today));
+    rangeStart.value = new Date(props.modelValue.startDate);
+    rangeEnd.value = new Date(props.modelValue.endDate);
+    calendarMonth.value = props.modelValue.startDate.getMonth();
+    calendarYear.value = props.modelValue.startDate.getFullYear();
   }
 }
 </script>
 
 <template>
   <div class="date-range-filter">
-    <!-- Custom inline picker (customFirst mode — always visible at top) -->
+    <!-- Custom inline calendar (customFirst mode — always visible at top) -->
     <div v-if="customFirst" class="date-range-filter__custom-inline">
       <div class="date-range-filter__custom-inline-header">
         <Calendar class="date-range-filter__custom-icon" :size="16" />
         <span class="date-range-filter__preset-label">{{ customLabel }}</span>
       </div>
-      <div class="date-range-filter__custom-fields">
-        <div class="date-range-filter__custom-field">
-          <label :for="startDateId" class="date-range-filter__custom-label">{{ t.filters.from }}</label>
-          <input
-            :id="startDateId"
-            v-model="customStartDate"
-            type="date"
-            class="date-range-filter__custom-input"
-            :min="minDateString"
-            :max="maxDateString"
-          />
+
+      <!-- Range display -->
+      <div v-if="rangeDisplayText" class="drf-cal__range-display">
+        {{ rangeDisplayText }}
+      </div>
+
+      <!-- Calendar -->
+      <div class="drf-cal">
+        <div class="drf-cal__header">
+          <button type="button" class="drf-cal__nav" @click="prevMonth">
+            <ChevronLeft :size="16" />
+          </button>
+          <span class="drf-cal__title">{{ monthYearLabel }}</span>
+          <button type="button" class="drf-cal__nav" @click="nextMonth">
+            <ChevronRight :size="16" />
+          </button>
         </div>
-        <div class="date-range-filter__custom-field">
-          <label :for="endDateId" class="date-range-filter__custom-label">{{ t.filters.to }}</label>
-          <input
-            :id="endDateId"
-            v-model="customEndDate"
-            type="date"
-            class="date-range-filter__custom-input"
-            :min="minDateString"
-            :max="maxDateString"
-          />
+        <div class="drf-cal__weekdays">
+          <span v-for="d in WEEKDAYS" :key="d" class="drf-cal__weekday">{{ d }}</span>
+        </div>
+        <div class="drf-cal__grid">
+          <button
+            v-for="(day, i) in calendarDays"
+            :key="i"
+            type="button"
+            :class="getDayClasses(day)"
+            :disabled="day.disabled"
+            @click="selectDay(day.date)"
+            @mouseenter="onDayHover(day.date)"
+          >
+            {{ day.label }}
+          </button>
         </div>
       </div>
+
       <div v-if="validationError" class="date-range-filter__error">{{ validationError }}</div>
       <div class="date-range-filter__custom-inline-footer">
         <button
@@ -456,7 +602,7 @@ if (props.customFirst) {
       </div>
     </div>
 
-    <!-- Custom Date Picker (default mode only) -->
+    <!-- Custom Calendar Picker (default mode only) -->
     <div v-if="!customFirst && showCustomPicker" class="date-range-filter__custom-picker">
       <!-- Header -->
       <div class="date-range-filter__custom-header">
@@ -465,40 +611,40 @@ if (props.customFirst) {
         </slot>
       </div>
 
-      <!-- Date Fields -->
-      <div class="date-range-filter__custom-fields">
-        <div class="date-range-filter__custom-field">
-          <label
-            :for="startDateId"
-            class="date-range-filter__custom-label"
-          >
-            {{ t.filters.from }}
-          </label>
-          <input
-            :id="startDateId"
-            v-model="customStartDate"
-            type="date"
-            class="date-range-filter__custom-input"
-            :min="minDateString"
-            :max="maxDateString"
-          />
-        </div>
+      <!-- Range display -->
+      <div v-if="rangeDisplayText" class="drf-cal__range-display">
+        {{ rangeDisplayText }}
+      </div>
+      <div v-else class="drf-cal__range-hint">
+        Clique na data inicial
+      </div>
 
-        <div class="date-range-filter__custom-field">
-          <label
-            :for="endDateId"
-            class="date-range-filter__custom-label"
+      <!-- Calendar -->
+      <div class="drf-cal">
+        <div class="drf-cal__header">
+          <button type="button" class="drf-cal__nav" @click="prevMonth">
+            <ChevronLeft :size="16" />
+          </button>
+          <span class="drf-cal__title">{{ monthYearLabel }}</span>
+          <button type="button" class="drf-cal__nav" @click="nextMonth">
+            <ChevronRight :size="16" />
+          </button>
+        </div>
+        <div class="drf-cal__weekdays">
+          <span v-for="d in WEEKDAYS" :key="d" class="drf-cal__weekday">{{ d }}</span>
+        </div>
+        <div class="drf-cal__grid">
+          <button
+            v-for="(day, i) in calendarDays"
+            :key="i"
+            type="button"
+            :class="getDayClasses(day)"
+            :disabled="day.disabled"
+            @click="selectDay(day.date)"
+            @mouseenter="onDayHover(day.date)"
           >
-            {{ t.filters.to }}
-          </label>
-          <input
-            :id="endDateId"
-            v-model="customEndDate"
-            type="date"
-            class="date-range-filter__custom-input"
-            :min="minDateString"
-            :max="maxDateString"
-          />
+            {{ day.label }}
+          </button>
         </div>
       </div>
 
@@ -626,40 +772,6 @@ if (props.customFirst) {
   border-bottom: 1px solid var(--color-border, #e5e7eb);
 }
 
-.date-range-filter__custom-fields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md, 0.75rem);
-  padding: var(--spacing-md, 0.75rem);
-}
-
-.date-range-filter__custom-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs, 0.25rem);
-}
-
-.date-range-filter__custom-label {
-  font-size: var(--font-size-small, 0.8125rem);
-  font-weight: 500;
-  color: var(--color-text-muted, #6b7280);
-}
-
-.date-range-filter__custom-input {
-  padding: var(--spacing-sm, 0.5rem);
-  font-size: var(--font-size-body, 0.875rem);
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: var(--radius-sm, 0.25rem);
-  color: var(--color-text, #374151);
-  transition: var(--transition-fast, all 0.15s ease);
-}
-
-.date-range-filter__custom-input:focus {
-  outline: none;
-  border-color: var(--color-brand-highlight, #e5a22f);
-  box-shadow: 0 0 0 2px rgba(229, 162, 47, 0.2);
-}
-
 /* Error */
 .date-range-filter__error {
   padding: 0 var(--spacing-md, 0.75rem);
@@ -735,5 +847,143 @@ if (props.customFirst) {
 
 .date-range-filter__divider {
   border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+/* ==========================================================================
+   Calendar Range Picker
+   ========================================================================== */
+
+.drf-cal {
+  padding: 0.5rem 0.75rem;
+  user-select: none;
+}
+
+.drf-cal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.drf-cal__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text, #374151);
+}
+
+.drf-cal__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm, 0.25rem);
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.drf-cal__nav:hover {
+  background: var(--color-hover, #f3f4f6);
+  color: var(--color-text, #374151);
+}
+
+.drf-cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+}
+
+.drf-cal__weekday {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted, #9ca3af);
+  padding: 0.25rem 0;
+}
+
+.drf-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px 0;
+}
+
+.drf-cal__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  font-size: 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text, #374151);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  position: relative;
+  border-radius: 0;
+}
+
+.drf-cal__day:hover:not(:disabled):not(.drf-cal__day--start):not(.drf-cal__day--end) {
+  background: var(--color-hover, #f3f4f6);
+  border-radius: var(--radius-sm, 0.25rem);
+}
+
+.drf-cal__day--other {
+  color: var(--color-text-muted, #d1d5db);
+}
+
+.drf-cal__day--today {
+  font-weight: 700;
+  color: var(--color-brand-tertiary, #8f3f00);
+}
+
+.drf-cal__day--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Range start & end: circle highlight */
+.drf-cal__day--start,
+.drf-cal__day--end {
+  background: var(--color-brand-highlight, #e5a22f);
+  color: var(--color-brand-secondary, #4a2c00);
+  font-weight: 700;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Single day selection */
+.drf-cal__day--single {
+  border-radius: 50%;
+}
+
+/* In-range days: light background band */
+.drf-cal__day--in-range {
+  background: color-mix(in srgb, var(--color-brand-highlight, #e5a22f) 15%, transparent);
+  color: var(--color-text, #374151);
+}
+
+/* Range display above calendar */
+.drf-cal__range-display {
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-brand-tertiary, #8f3f00);
+  padding: 0.375rem 0.75rem;
+  background: color-mix(in srgb, var(--color-brand-highlight, #e5a22f) 10%, transparent);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.drf-cal__range-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #9ca3af);
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
 }
 </style>

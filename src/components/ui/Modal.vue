@@ -12,8 +12,10 @@
  * ```
  */
 
-import { computed, watch, onMounted, onUnmounted } from "vue";
+import { computed, watch, onMounted, onUnmounted, useAttrs } from "vue";
 import { X } from "lucide-vue-next";
+
+defineOptions({ inheritAttrs: false });
 
 // =============================================================================
 // Types
@@ -135,6 +137,7 @@ onUnmounted(() => {
     <Transition name="modal">
       <div
         v-if="open"
+        v-bind="$attrs"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="title ? titleId : undefined"

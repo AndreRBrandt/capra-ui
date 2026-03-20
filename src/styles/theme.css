@@ -23,11 +23,12 @@
    * Default: Professional blue/gray palette
    * Override in app theme.css for custom branding
    * ----------------------------------------- */
-  --capra-brand-primary: #e8dddb;
-  --capra-brand-secondary: #3a1906;
-  --capra-brand-tertiary: #8f3f00;
-  --capra-brand-highlight: #e5a22f;
-  --capra-brand-highlight-light: #fef3e2;
+  /* V2: derived from dual-color system (tokens-v2.css) */
+  --capra-brand-primary: var(--color-brand-soft);
+  --capra-brand-secondary: var(--color-brand);
+  --capra-brand-tertiary: var(--color-brand-hover);
+  --capra-brand-highlight: var(--color-hi);
+  --capra-brand-highlight-light: var(--color-hi-soft);
 
   /* -----------------------------------------
    * 2. SEMANTIC COLORS
@@ -83,7 +84,7 @@
 
   /* Search Input */
   --capra-search-focus-color: var(--capra-brand-highlight);
-  --capra-search-focus-ring: rgba(229, 162, 47, 0.2);
+  --capra-search-focus-ring: var(--color-hi-subtle);
 
   /* Loading Spinner */
   --capra-spinner-color: var(--capra-brand-tertiary);

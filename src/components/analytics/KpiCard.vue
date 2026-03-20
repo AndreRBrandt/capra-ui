@@ -1,5 +1,16 @@
 <script setup lang="ts">
+/**
+ * KpiCard — V2
+ * ============
+ * Matches the validated prototype layout:
+ * - Header: icon-in-colored-bg + label + overflow (⋮)
+ * - Value: large, always dark
+ * - Footer: trend pill badge + compare text
+ * - Accent bar via ::before (always visible when color set)
+ * - Participation below footer
+ */
 import { computed, type Component } from "vue";
+import { MoreVertical } from "lucide-vue-next";
 import { useMeasureEngine } from "../../composables/useMeasureEngine";
 import { useCapraI18n } from "../../i18n";
 
@@ -10,7 +21,6 @@ const { t } = useCapraI18n();
 // Types
 // ===========================================================================
 
-/** Variantes de cor para a barra lateral */
 export type KpiVariant =
   | "default"
   | "success"
@@ -35,23 +45,16 @@ interface Props {
   showTrendValue?: boolean;
   trendLabel?: string;
   invertTrend?: boolean;
-  /** Participacao percentual primaria (0-100) */
   participation?: number;
-  /** Label para participacao primaria */
   participationLabel?: string;
-  /** Participacao percentual secundaria (0-100) */
   participationSecondary?: number;
-  /** Label para participacao secundaria */
   participationSecondaryLabel?: string;
-  /** Icone a exibir no card */
   icon?: Component;
-  /** Variante de cor para a barra lateral */
   variant?: KpiVariant;
-  /** Cor customizada para a barra lateral (sobrescreve variant) */
   accentColor?: string;
-  /** Aplica a cor de tendencia ao valor principal */
+  /** @deprecated V2 ignores this — value is always dark */
   trendAffectsValue?: boolean;
-  /** Exibe a barra lateral colorida */
+  /** @deprecated V2 always shows accent when accentColor is set */
   showAccent?: boolean;
 }
 
@@ -81,358 +84,303 @@ const props = withDefaults(defineProps<Props>(), {
 // ===========================================================================
 const emit = defineEmits<{
   click: [];
+  overflow: [];
 }>();
 
-// i18n-aware fallbacks
+// i18n
 const resolvedParticipationLabel = computed(() => props.participationLabel ?? t.common.ofTotal);
 const resolvedParticipationSecondaryLabel = computed(() => props.participationSecondaryLabel ?? t.common.ofTotal);
 
 // ===========================================================================
-// Computed: Formatação do valor principal
+// Formatting
 // ===========================================================================
 const formattedValue = computed(() => {
   const num = props.value;
-
-  if (props.format === "currency") {
-    return engine.formatCurrency(num, { decimals: props.decimals });
-  }
-
-  if (props.format === "percent") {
-    return engine.formatPercent(num, { decimals: props.decimals });
-  }
-
-  // Format number with optional prefix/suffix
+  if (props.format === "currency") return engine.formatCurrency(num, { decimals: props.decimals });
+  if (props.format === "percent") return engine.formatPercent(num, { decimals: props.decimals });
   const formatted = engine.formatNumber(num, { decimals: props.decimals });
   let result = formatted;
-  if (props.prefix) {
-    result = `${props.prefix} ${result}`;
-  }
-  if (props.suffix) {
-    result = `${result} ${props.suffix}`;
-  }
-
+  if (props.prefix) result = `${props.prefix} ${result}`;
+  if (props.suffix) result = `${result} ${props.suffix}`;
   return result;
 });
 
 // ===========================================================================
-// Computed: Cálculo da tendência
+// Trend
 // ===========================================================================
-const hasTrend = computed(() => {
-  return props.secondaryValue !== undefined && props.showTrend;
-});
+const hasTrend = computed(() => props.secondaryValue !== undefined && props.showTrend);
 
-const trendPercent = computed(() => {
-  const v = engine.variation(props.value, props.secondaryValue);
-  return v ?? 0;
-});
+const trendPercent = computed(() => engine.variation(props.value, props.secondaryValue) ?? 0);
 
 const isPositiveTrend = computed(() => {
   const isUp = trendPercent.value > 0;
-  // Se invertTrend, queda é positivo
   return props.invertTrend ? !isUp : isUp;
 });
 
-const trendArrow = computed(() => {
-  return trendPercent.value >= 0 ? "▲" : "▼";
-});
+/** Direction for SVG arrow in template */
+const trendDirection = computed(() => (trendPercent.value >= 0 ? "up" : "down"));
 
 const trendColorClass = computed(() => {
-  if (trendPercent.value === 0) {
-    return "kpi-card__trend--neutral";
-  }
-  return isPositiveTrend.value ? "kpi-card__trend--positive" : "kpi-card__trend--negative";
+  if (trendPercent.value === 0) return "kpi-trend--neutral";
+  return isPositiveTrend.value ? "kpi-trend--up" : "kpi-trend--down";
 });
 
-const formattedTrendPercent = computed(() => {
-  return engine.formatVariation(trendPercent.value, { decimals: 2 });
-});
+const formattedTrendPercent = computed(() => engine.formatVariation(trendPercent.value, { decimals: 2 }));
 
 // ===========================================================================
-// Computed: Cor da barra lateral
+// Accent
 // ===========================================================================
 const variantColors: Record<KpiVariant, string> = {
   default: "var(--color-border, #e5e7eb)",
-  success: "var(--color-success, #22c55e)",
-  warning: "var(--color-warning, #f59e0b)",
-  danger: "var(--color-danger, #ef4444)",
-  info: "var(--color-info, #3b82f6)",
-  primary: "var(--color-brand-highlight, #e5a22f)",
-  secondary: "var(--color-brand-tertiary, #8f3f00)",
+  success: "var(--color-success, hsl(142, 60%, 45%))",
+  warning: "var(--color-warning, hsl(38, 92%, 50%))",
+  danger: "var(--color-danger, hsl(0, 70%, 55%))",
+  info: "var(--color-brand, #6366f1)",
+  primary: "var(--color-brand, #6366f1)",
+  secondary: "var(--color-hi, #f97316)",
 };
 
-const accentStyle = computed(() => {
-  if (!props.showAccent && !props.accentColor) return {};
+const hasAccent = computed(() => !!props.accentColor || props.showAccent || props.variant !== "default");
+
+const cardStyle = computed(() => {
+  if (!props.accentColor && props.variant === "default") return {};
   const color = props.accentColor || variantColors[props.variant];
-  return {
-    "--kpi-accent-color": color,
-  };
+  return { "--kpi-accent": color };
 });
 
 // ===========================================================================
-// Computed: Cor do label (baseada na cor do card, mais escura)
+// Participation
 // ===========================================================================
-const labelStyle = computed(() => {
-  if (!props.accentColor) return {};
-  // Usa a mesma cor do acento, mas como filter para escurecer
-  return {
-    "--kpi-label-color": props.accentColor,
-  };
-});
-
-// ===========================================================================
-// Computed: Cor do valor baseada na tendencia
-// ===========================================================================
-const valueColorClass = computed(() => {
-  if (!props.trendAffectsValue || !hasTrend.value || trendPercent.value === 0) {
-    return "kpi-card__value--default";
-  }
-  return isPositiveTrend.value ? "kpi-card__trend--positive" : "kpi-card__trend--negative";
-});
-
-// ===========================================================================
-// Computed: Classes do card
-// ===========================================================================
-const cardClasses = computed(() => [
-  "kpi-card",
-  {
-    "kpi-card--with-accent": props.showAccent,
-    "kpi-card--with-icon": !!props.icon,
-  },
-]);
-
-// ===========================================================================
-// Computed: Participacao
-// ===========================================================================
-const hasParticipation = computed(() => {
-  return props.participation !== undefined && props.participation > 0;
-});
-
+const hasParticipation = computed(() => props.participation !== undefined && props.participation > 0);
 const formattedParticipation = computed(() => {
   if (!props.participation || props.participation <= 0) return "";
   return engine.formatNumber(props.participation, { decimals: 1 });
 });
-
-// Participacao secundaria
-const hasParticipationSecondary = computed(() => {
-  return props.participationSecondary !== undefined && props.participationSecondary > 0;
-});
-
+const hasParticipationSecondary = computed(() => props.participationSecondary !== undefined && props.participationSecondary > 0);
 const formattedParticipationSecondary = computed(() => {
   if (!props.participationSecondary || props.participationSecondary <= 0) return "";
   return engine.formatNumber(props.participationSecondary, { decimals: 2 });
 });
-
-// ===========================================================================
-// Handlers
-// ===========================================================================
-const handleClick = () => {
-  emit("click");
-};
 </script>
 
 <template>
   <div
     data-testid="kpi-card"
-    :class="cardClasses"
-    :style="[accentStyle, labelStyle]"
-    @click="handleClick"
+    :class="['kpi-card', { 'kpi-card--accented': hasAccent }]"
+    :style="cardStyle"
+    @click="emit('click')"
   >
-    <!-- Barra lateral de acento -->
-    <div v-if="showAccent" class="kpi-card__accent" data-testid="kpi-accent" />
-
-    <!-- Conteudo principal -->
-    <div class="kpi-card__content">
-      <!-- Header com icone e label -->
-      <div class="kpi-card__header">
-        <span v-if="icon" class="kpi-card__icon" data-testid="kpi-icon">
-          <component :is="icon" :size="16" />
-        </span>
-        <p data-testid="kpi-label" class="kpi-card__label">
-          {{ label }}
-        </p>
+    <!-- ── Header: icon-bg + label + overflow ── -->
+    <div class="kpi-header">
+      <span v-if="icon" class="kpi-icon" data-testid="kpi-icon">
+        <component :is="icon" :size="15" />
+      </span>
+      <span data-testid="kpi-label" class="kpi-label">{{ label }}</span>
+      <div class="kpi-overflow" @click.stop>
+        <slot name="overflow">
+          <button
+            type="button"
+            class="kpi-overflow__btn"
+            title="Ações"
+            @click.stop="emit('overflow')"
+          >
+            <MoreVertical :size="16" />
+          </button>
+        </slot>
       </div>
+    </div>
 
-      <!-- Valor Principal -->
-      <p data-testid="kpi-value" class="kpi-card__value" :class="valueColorClass">
-        {{ formattedValue }}
-      </p>
+    <!-- ── Value ── -->
+    <div data-testid="kpi-value" class="kpi-value">{{ formattedValue }}</div>
 
-      <!-- Indicador de Tendência -->
-      <div
+    <!-- ── Footer: trend pill + compare text ── -->
+    <div class="kpi-footer">
+      <span
         v-if="hasTrend"
         data-testid="trend-indicator"
-        class="kpi-card__trend"
+        class="kpi-trend"
         :class="trendColorClass"
       >
-        <span>{{ trendArrow }}</span>
+        <!-- SVG wavy trend arrow (matches prototype) -->
+        <svg class="kpi-trend__arrow" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path v-if="trendDirection === 'up'" d="M1 8 Q4 4 6 6 Q8 8 11 4" />
+          <path v-else d="M1 4 Q4 8 6 6 Q8 4 11 8" />
+        </svg>
         <span v-if="showTrendValue">{{ formattedTrendPercent }}</span>
-        <span v-if="trendLabel" class="kpi-card__trend-label">{{ trendLabel }}</span>
-      </div>
-
-      <!-- Indicador de Participacao Primaria -->
-      <div
-        v-if="hasParticipation"
-        data-testid="participation-indicator"
-        class="kpi-card__participation"
-      >
+      </span>
+      <span v-if="hasTrend && trendLabel" class="kpi-compare">{{ trendLabel }}</span>
+      <span v-if="hasParticipation" data-testid="participation-indicator" class="kpi-compare">
         {{ formattedParticipation }}% {{ resolvedParticipationLabel }}
-      </div>
-
-      <!-- Indicador de Participacao Secundaria -->
-      <div
+      </span>
+      <span
         v-if="hasParticipationSecondary"
         data-testid="participation-secondary-indicator"
-        class="kpi-card__participation kpi-card__participation--secondary"
+        class="kpi-compare"
       >
         {{ formattedParticipationSecondary }}% {{ resolvedParticipationSecondaryLabel }}
-      </div>
-
-      <!-- Slot para conteúdo customizado -->
-      <slot name="icon" />
+      </span>
     </div>
+
+    <!-- Slot for custom content (charts, progress bars, etc.) -->
+    <slot />
   </div>
 </template>
 
 <style scoped>
 /* ===========================================================================
-   KPI Card Base
+   KPI Card — V2 (matches validated prototype)
    =========================================================================== */
 .kpi-card {
   position: relative;
   display: flex;
-  height: 100%; /* Fill wrapper/grid cell so all cards in a row match height */
-  min-width: 0; /* Allow grid to control sizing */
-  padding: var(--kpi-card-padding, var(--spacing-sm, 0.75rem));
-  background-color: var(--color-surface, #fff);
-  border-radius: var(--radius-md, 0.5rem);
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  background: var(--color-bg, #f9fafb);
+  border-radius: var(--radius-md, 12px);
   border: 1px solid var(--color-border, #e5e7eb);
-  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.15s, box-shadow 0.15s;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .kpi-card:hover {
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  border-color: var(--color-border-hover, #d1d5db);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* ===========================================================================
-   Com Barra de Acento
-   =========================================================================== */
-.kpi-card--with-accent {
-  padding-left: calc(var(--spacing-sm, 0.75rem) + 4px);
+/* ── Accent bar (::before) ── */
+.kpi-card--accented {
+  padding-left: calc(16px + 3px);
 }
 
-.kpi-card__accent {
+.kpi-card--accented::before {
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
-  background-color: var(--kpi-accent-color, var(--color-brand-highlight, #e5a22f));
-  border-radius: var(--radius-md, 0.5rem) 0 0 var(--radius-md, 0.5rem);
+  width: 3px;
+  background: var(--kpi-accent, var(--color-brand, #6366f1));
+  border-radius: 3px 0 0 3px;
 }
 
-/* ===========================================================================
-   Conteudo
-   =========================================================================== */
-.kpi-card__content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.kpi-card__header {
+/* ── Header ── */
+.kpi-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.25rem);
-  margin-bottom: var(--spacing-xs, 0.25rem);
-  padding-left: var(--kpi-header-padding-left, 0);
-  padding-right: var(--kpi-header-padding-right, 0);
+  gap: 8px;
 }
 
-.kpi-card__label {
-  font-size: var(--kpi-label-size, 0.75rem);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-  /* Usa cor do acento com filter para escurecer, ou fallback para muted */
-  color: var(--kpi-label-color, var(--color-text-muted, #6b7280));
-  filter: brightness(0.7) saturate(1.2);
-  margin: 0;
-  line-height: 1.3;
-}
-
-/* Quando não tem cor customizada, não aplica filter */
-.kpi-card:not([style*="--kpi-label-color"]) .kpi-card__label {
-  filter: none;
-}
-
-.kpi-card__icon {
+/* Icon — 28x28 colored background (container-icon pattern) */
+.kpi-icon {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--kpi-accent-color, var(--color-text-muted, #6b7280));
-  opacity: 0.9;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--kpi-accent, var(--color-brand, #6366f1)) 12%, transparent);
+  color: var(--kpi-accent, var(--color-brand, #6366f1));
 }
 
-.kpi-card__value {
-  font-size: var(--kpi-value-size, 1.25rem);
-  font-weight: 700;
+.kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted, #6b7280);
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
-/* ===========================================================================
-   Tendencia
-   =========================================================================== */
-.kpi-card__trend {
+/* Overflow (⋮) — right side of header */
+.kpi-overflow {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.kpi-overflow__btn {
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs, 0.25rem);
-  margin-top: auto; /* Empurra para baixo */
-  padding-top: var(--spacing-xs, 0.25rem);
-  font-size: var(--kpi-trend-size, 0.7rem);
-  font-weight: 500;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--color-text-subtle, #9ca3af);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  opacity: 0.4;
 }
 
-.kpi-card__trend-label {
-  color: var(--color-text-muted, #6b7280);
+.kpi-card:hover .kpi-overflow__btn {
+  opacity: 1;
 }
 
-/* ===========================================================================
-   Participacao
-   =========================================================================== */
-.kpi-card__participation {
-  margin-top: 0.125rem;
-  font-size: calc(var(--kpi-trend-size, 0.7rem) - 0.05rem);
-  color: var(--color-text-muted, #6b7280);
+.kpi-overflow__btn:hover {
+  background: var(--color-surface-alt, #f3f4f6);
+  color: var(--color-text, #111827);
 }
 
-.kpi-card__participation--secondary {
-  margin-top: 0;
-  opacity: 0.85;
+/* ── Value ── */
+.kpi-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-/* ===========================================================================
-   Cores de Tendencia / Valor
-   =========================================================================== */
-.kpi-card__trend--positive {
-  color: var(--color-success, #22c55e);
+/* ── Footer ── */
+.kpi-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.kpi-card__trend--negative {
-  color: var(--color-danger, #ef4444);
+/* Trend badge — pill with background */
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-full, 9999px);
 }
 
-.kpi-card__trend--neutral {
-  color: var(--color-text-muted, #6b7280);
+.kpi-trend__arrow {
+  width: 12px;
+  height: 12px;
 }
 
-.kpi-card__value--default {
-  color: var(--color-brand-secondary, #4a2c00);
+.kpi-trend--up {
+  color: hsl(142, 70%, 35%);
+  background: hsl(142, 70%, 95%);
+}
+
+.kpi-trend--down {
+  color: hsl(0, 70%, 45%);
+  background: hsl(0, 70%, 95%);
+}
+
+.kpi-trend--neutral {
+  color: var(--color-text-subtle, #9ca3af);
+  background: var(--color-surface-alt, #f9fafb);
+}
+
+/* Compare / participation text */
+.kpi-compare {
+  font-size: 11px;
+  color: var(--color-text-subtle, #9ca3af);
 }
 </style>

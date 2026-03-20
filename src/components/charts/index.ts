@@ -13,6 +13,8 @@ export { default as BaseChart } from "./BaseChart.vue";
 export { default as BarChart } from "./BarChart.vue";
 export { default as LineChart } from "./LineChart.vue";
 export { default as HeatmapChart } from "./HeatmapChart.vue";
+export { default as PieChart } from "./PieChart.vue";
+export { default as StackedBarChart } from "./StackedBarChart.vue";
 
 // Types
 export type { ChartTheme } from "./BaseChart.vue";
@@ -24,3 +26,5 @@ export type {
   HeatmapGridItem,
   HeatmapCalendarItem,
 } from "./HeatmapChart.vue";
+export type { ValueFormat as PieChartValueFormat, PieChartDataItem } from "./PieChart.vue";
+export type { ValueFormat as StackedBarValueFormat, StackedBarSeriesConfig, StackedBarDataItem } from "./StackedBarChart.vue";

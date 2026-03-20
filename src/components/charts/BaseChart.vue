@@ -22,6 +22,7 @@
  */
 
 import { ref, computed, onMounted } from "vue";
+import { resolveCssColor } from "./css-utils";
 import { use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 import {
@@ -129,35 +130,35 @@ const chartRef = ref<InstanceType<typeof VChart> | null>(null);
 // Computed
 // =============================================================================
 
-/** Tema padrão baseado no design system */
-const defaultTheme: ChartTheme = {
+/** Tema padrão baseado no design system (cores resolvidas para ECharts) */
+const defaultTheme = computed<ChartTheme>(() => ({
   colors: [
-    "var(--color-brand-primary, #e5a22f)",
-    "var(--color-brand-secondary, #5c4a3d)",
-    "var(--color-brand-tertiary, #8f3f00)",
-    "var(--color-success, #22c55e)",
-    "var(--color-info, #3b82f6)",
-    "var(--color-warning, #f59e0b)",
-    "var(--color-danger, #ef4444)",
+    resolveCssColor("var(--color-brand-primary, #e5a22f)"),
+    resolveCssColor("var(--color-brand-secondary, #5c4a3d)"),
+    resolveCssColor("var(--color-brand-tertiary, #8f3f00)"),
+    resolveCssColor("var(--color-success, #22c55e)"),
+    resolveCssColor("var(--color-info, #3b82f6)"),
+    resolveCssColor("var(--color-warning, #f59e0b)"),
+    resolveCssColor("var(--color-danger, #ef4444)"),
   ],
   backgroundColor: "transparent",
   textStyle: {
-    color: "var(--color-text, #1f1f1f)",
+    color: resolveCssColor("var(--color-text, #1f1f1f)"),
     fontSize: 12,
     fontFamily: "inherit",
   },
   tooltip: {
     backgroundColor: "rgba(50, 40, 30, 0.95)",
-    borderColor: "var(--color-brand-primary, #e5a22f)",
+    borderColor: resolveCssColor("var(--color-brand-primary, #e5a22f)"),
     textStyle: {
       color: "#f5f0e8",
     },
   },
-};
+}));
 
 /** Opções mescladas com tema */
 const mergedOption = computed(() => {
-  const theme = props.theme || defaultTheme;
+  const theme = props.theme || defaultTheme.value;
   const opt = props.option as Record<string, unknown>;
 
   return {

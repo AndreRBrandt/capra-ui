@@ -25,6 +25,8 @@ export { default as SegmentedControl } from "./SegmentedControl.vue";
 export { default as Collapsible } from "./Collapsible.vue";
 export { default as RecordCard } from "./RecordCard.vue";
 export { default as StatusBadge } from "./StatusBadge.vue";
+export { default as ChipGroup } from "./ChipGroup.vue";
+export { default as ThemePickerV2 } from "./ThemePickerV2.vue";
 
 // Types
 export type { LoadingSize } from "./LoadingState.vue";

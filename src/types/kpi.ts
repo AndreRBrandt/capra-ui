@@ -43,6 +43,8 @@ export interface KpiSchemaItem {
   format: "currency" | "number" | "percent";
   /** Decimal places (default: 2 for currency/percent, 0 for number) */
   decimals?: number;
+  /** Suffix appended to the formatted value (e.g. "h", "%") */
+  suffix?: string;
   /** Invert trend color (e.g. discount going up = bad) */
   invertTrend?: boolean;
   /** Which fields to show on the card (default: all available) */

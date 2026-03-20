@@ -1,25 +1,26 @@
 <script setup lang="ts">
 /**
- * BarChart
- * ========
- * Componente de gráfico de barras com API simplificada.
+ * StackedBarChart
+ * ===============
+ * Componente de gráfico de barras empilhadas com N séries.
  *
  * Features:
- * - Barras horizontais ou verticais
- * - Série de comparação (período anterior)
+ * - N séries empilhadas (stack: 'total')
+ * - Horizontal ou vertical
  * - Formatadores built-in (currency, number, percent)
- * - Labels customizáveis
- * - Cores por categoria
+ * - Tooltip compartilhado
+ * - Cores por série
  *
  * @example
  * ```vue
- * <BarChart
- *   :data="salesData"
- *   category-key="name"
- *   value-key="value"
- *   :previous-key="previousValue"
+ * <StackedBarChart
+ *   :data="dailyData"
+ *   category-key="dia"
+ *   :series="[
+ *     { key: 'filial1', name: 'Filial 1', color: '#4C9AFF' },
+ *     { key: 'filial2', name: 'Filial 2', color: '#A78BFA' },
+ *   ]"
  *   format="currency"
- *   horizontal
  *   @bar-click="handleClick"
  * />
  * ```
@@ -41,7 +42,16 @@ const { engine } = useMeasureEngine();
 
 export type ValueFormat = "currency" | "number" | "percent" | "none";
 
-export interface BarChartDataItem {
+export interface StackedBarSeriesConfig {
+  /** Chave no objeto de dados */
+  key: string;
+  /** Nome exibido na legenda/tooltip */
+  name: string;
+  /** Cor (hex ou CSS var) */
+  color?: string;
+}
+
+export interface StackedBarDataItem {
   [key: string]: unknown;
 }
 
@@ -52,64 +62,47 @@ export interface BarChartDataItem {
 const props = withDefaults(
   defineProps<{
     /** Dados do gráfico */
-    data: BarChartDataItem[];
+    data: StackedBarDataItem[];
     /** Chave para a categoria (eixo X/Y) */
-    categoryKey: string;
-    /** Chave para o valor principal */
-    valueKey: string;
-    /** Chave para valor de comparação (opcional) */
-    previousKey?: string;
-    /** Label da série principal */
-    seriesLabel?: string;
-    /** Label da série de comparação */
-    previousLabel?: string;
+    categoryKey?: string;
+    /** Definição das séries */
+    series: StackedBarSeriesConfig[];
     /** Formato do valor */
     format?: ValueFormat;
     /** Casas decimais */
     decimals?: number;
-    /** Prefixo do valor (ex: "R$ ") */
+    /** Prefixo do valor */
     prefix?: string;
-    /** Sufixo do valor (ex: "%") */
+    /** Sufixo do valor */
     suffix?: string;
     /** Orientação horizontal */
     horizontal?: boolean;
     /** Altura do gráfico */
     height?: string;
-    /** Mostrar labels nas barras */
-    showLabels?: boolean;
-    /** Cor da série principal */
-    color?: string;
-    /** Cor da série de comparação */
-    previousColor?: string;
-    /** Estado de loading */
-    loading?: boolean;
     /** Mostrar legenda */
     showLegend?: boolean;
     /** Mostrar grid */
     showGrid?: boolean;
+    /** Estado de loading */
+    loading?: boolean;
   }>(),
   {
-    previousKey: undefined,
-    seriesLabel: "Atual",
-    previousLabel: "Anterior",
-    format: "none",
+    categoryKey: "category",
+    format: "currency",
     decimals: 0,
     prefix: "",
     suffix: "",
     horizontal: false,
     height: "300px",
-    showLabels: false,
-    color: "var(--color-brand-primary, #e5a22f)",
-    previousColor: "var(--color-text-muted, #9ca3af)",
-    loading: false,
     showLegend: true,
     showGrid: true,
+    loading: false,
   }
 );
 
 const emit = defineEmits<{
   /** Clique em barra */
-  "bar-click": [item: BarChartDataItem, index: number];
+  "bar-click": [item: StackedBarDataItem, seriesKey: string, index: number];
   /** Evento padronizado para useInteraction */
   interact: [event: InteractEvent];
 }>();
@@ -137,70 +130,44 @@ const categories = computed(() =>
   props.data.map((item) => String(item[props.categoryKey] || ""))
 );
 
-/** Valores da série principal */
-const values = computed(() =>
-  props.data.map((item) => Number(item[props.valueKey] || 0))
-);
-
-/** Valores da série de comparação */
-const previousValues = computed(() => {
-  if (!props.previousKey) return null;
-  return props.data.map((item) => Number(item[props.previousKey!] || 0));
-});
-
 /** Opções do ECharts */
 const chartOption = computed<EChartsOption>(() => {
-  // Resolve CSS var() to hex — ECharts can't parse CSS custom properties
-  const mainColor = resolveCssColor(props.color);
-  const prevColor = resolveCssColor(props.previousColor);
-
-  const series: any[] = [
-    {
-      name: props.seriesLabel,
-      type: "bar",
-      data: values.value,
-      itemStyle: {
-        color: mainColor,
-        borderRadius: props.horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0],
-      },
-      label: props.showLabels
-        ? {
-            show: true,
-            position: props.horizontal ? "right" : "top",
-            formatter: (params: any) => formatValue(params.value),
-            fontSize: 11,
-            color: resolveCssColor("var(--color-text-secondary, #4b5563)"),
-          }
-        : { show: false },
-      emphasis: {
-        itemStyle: {
-          color: mainColor,
-          shadowBlur: 10,
-          shadowColor: "rgba(0, 0, 0, 0.2)",
-        },
-      },
-    },
+  // Default palette from BaseChart theme
+  const defaultPalette = [
+    "#4C9AFF", "#A78BFA", "#36B37E", "#FFAB00",
+    "#FF5630", "#00C7E6", "#F472B6", "#FF8B00", "#57D9A3",
   ];
 
-  // Adicionar série de comparação se existir
-  if (previousValues.value) {
-    series.push({
-      name: props.previousLabel,
+  const echartsSeries: any[] = props.series.map((s, i) => {
+    const color = s.color
+      ? resolveCssColor(s.color)
+      : defaultPalette[i % defaultPalette.length];
+
+    return {
+      name: s.name,
       type: "bar",
-      data: previousValues.value,
+      stack: "total",
+      data: props.data.map((item) => Number(item[s.key] || 0)),
       itemStyle: {
-        color: prevColor,
-        borderRadius: props.horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0],
+        color,
+        borderRadius: 0,
       },
-      label: { show: false },
       emphasis: {
         itemStyle: {
-          color: prevColor,
+          color,
           shadowBlur: 10,
           shadowColor: "rgba(0, 0, 0, 0.2)",
         },
       },
-    });
+    };
+  });
+
+  // Add borderRadius to top series segments
+  if (echartsSeries.length > 0) {
+    const lastSeries = echartsSeries[echartsSeries.length - 1];
+    lastSeries.itemStyle.borderRadius = props.horizontal
+      ? [0, 4, 4, 0]
+      : [4, 4, 0, 0];
   }
 
   const categoryAxis = {
@@ -256,23 +223,32 @@ const chartOption = computed<EChartsOption>(() => {
       },
       formatter: (params: any) => {
         const items = Array.isArray(params) ? params : [params];
+        let total = 0;
         let html = `<strong>${items[0].name}</strong><br/>`;
 
         items.forEach((item: any) => {
-          const color = item.color;
-          const value = formatValue(item.value);
-          html += `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;"></span>`;
-          html += `${item.seriesName}: <strong>${value}</strong><br/>`;
+          if (item.value > 0) {
+            const color = item.color;
+            const value = formatValue(item.value);
+            html += `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-right:5px;"></span>`;
+            html += `${item.seriesName}: <strong>${value}</strong><br/>`;
+            total += item.value;
+          }
         });
+
+        if (total > 0) {
+          html += `<br/><strong>Total: ${formatValue(total)}</strong>`;
+        }
 
         return html;
       },
     },
-    legend: props.showLegend && previousValues.value
+    legend: props.showLegend
       ? {
           show: true,
           top: 0,
           right: 0,
+          type: "scroll" as const,
           textStyle: {
             color: resolveCssColor("var(--color-text-secondary, #4b5563)"),
             fontSize: 11,
@@ -281,7 +257,7 @@ const chartOption = computed<EChartsOption>(() => {
       : { show: false },
     xAxis: props.horizontal ? valueAxis : categoryAxis,
     yAxis: props.horizontal ? categoryAxis : valueAxis,
-    series,
+    series: echartsSeries,
   };
 });
 
@@ -291,10 +267,12 @@ const chartOption = computed<EChartsOption>(() => {
 
 function handleInteract(event: InteractEvent) {
   const index = event.meta?.dataIndex as number;
+  const seriesIndex = event.meta?.seriesIndex as number;
   const item = props.data[index];
+  const seriesKey = props.series[seriesIndex]?.key || "";
 
   if (item) {
-    emit("bar-click", item, index);
+    emit("bar-click", item, seriesKey, index);
   }
 
   emit("interact", event);
