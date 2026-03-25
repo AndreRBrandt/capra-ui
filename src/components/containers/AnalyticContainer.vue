@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<AnalyticContainerProps>(), {
   collapsible: false,
   collapsed: false,
   // Header highlight
-  highlightHeader: true,
+  highlightHeader: false,
 });
 
 const emit = defineEmits<{

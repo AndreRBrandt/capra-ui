@@ -39,6 +39,8 @@ import BaseChart from "../charts/BaseChart.vue";
 
 const { engine: _engine } = useMeasureEngine();
 import Modal from "../ui/Modal.vue";
+import Popover from "../ui/Popover.vue";
+import { Info, BarChart3 as DetailIcon, EyeOff, MoreVertical } from "lucide-vue-next";
 import BaseButton from "../ui/BaseButton.vue";
 import type { KpiConfigItem } from "../ui/KpiConfigPanel.vue";
 
@@ -123,7 +125,7 @@ const props = withDefaults(defineProps<Props>(), {
   showInfoButton: true,
   showDetailButton: true,
   draggable: true,
-  highlightHeader: true,
+  highlightHeader: false,
   externalDetail: false,
 });
 
@@ -309,6 +311,10 @@ function handleDetail(key: string): void {
     showDetailModalState.value = true;
   }
   emit("kpi-detail", key);
+}
+
+function hideKpi(key: string): void {
+  layout.toggleVisibility(key);
 }
 
 // =============================================================================
@@ -502,7 +508,46 @@ const trendChartOption = computed(() => {
                 :trend-affects-value="true"
                 :show-accent="true"
                 @click="emit('kpi-click', kpiKey)"
-              />
+              >
+                <template #overflow>
+                  <Popover
+                    placement="bottom-end"
+                    :show-close="false"
+                    width="180px"
+                  >
+                    <template #trigger>
+                      <button type="button" class="kpi-overflow__btn" title="Ações">
+                        <MoreVertical :size="16" />
+                      </button>
+                    </template>
+                    <div class="kpi-actions-menu">
+                      <button
+                        v-if="showInfoButton && schemaMap.get(kpiKey)?.info"
+                        class="kpi-actions-menu__item"
+                        @click="handleInfo(kpiKey)"
+                      >
+                        <Info :size="14" />
+                        <span>Informações</span>
+                      </button>
+                      <button
+                        v-if="showDetailButton"
+                        class="kpi-actions-menu__item"
+                        @click="handleDetail(kpiKey)"
+                      >
+                        <DetailIcon :size="14" />
+                        <span>Detalhar</span>
+                      </button>
+                      <button
+                        class="kpi-actions-menu__item kpi-actions-menu__item--danger"
+                        @click="hideKpi(kpiKey)"
+                      >
+                        <EyeOff :size="14" />
+                        <span>Ocultar</span>
+                      </button>
+                    </div>
+                  </Popover>
+                </template>
+              </KpiCard>
             </KpiCardWrapper>
           </slot>
         </div>
@@ -922,5 +967,40 @@ const trendChartOption = computed(() => {
 .kpi-detail-metric--muted {
   color: var(--color-text-tertiary, #9ca3af);
   font-weight: 400;
+}
+
+/* KPI Actions Menu (Popover ⋮) */
+.kpi-actions-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-actions-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  text-align: left;
+}
+
+.kpi-actions-menu__item:hover {
+  background: var(--color-hover, rgba(0, 0, 0, 0.04));
+}
+
+.kpi-actions-menu__item--danger {
+  color: var(--color-danger, #ef4444);
+}
+
+.kpi-actions-menu__item--danger:hover {
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 8%, transparent);
 }
 </style>

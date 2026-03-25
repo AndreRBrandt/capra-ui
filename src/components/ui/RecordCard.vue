@@ -43,16 +43,16 @@ const slots = defineSlots<{
 
 <style scoped>
 .record-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-md, 0.75rem);
   overflow: hidden;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .record-card:hover {
-  border-color: var(--color-text-placeholder);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-border-hover, #d1d5db);
+  box-shadow: var(--shadow-card);
 }
 
 .record-card__header {
@@ -62,12 +62,14 @@ const slots = defineSlots<{
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: var(--color-surface-alt);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-alt, #f9fafb);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-text, #1f2937);
 }
 
 .record-card__body {
-  /* No padding — let consumer control layout */
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text, #1f2937);
 }
 
 .record-card__footer {
@@ -75,7 +77,8 @@ const slots = defineSlots<{
   flex-direction: column;
   gap: 0.375rem;
   padding: 0.75rem 1rem;
-  background: var(--color-surface-alt);
-  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-alt, #f9fafb);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-text-secondary, #4b5563);
 }
 </style>
