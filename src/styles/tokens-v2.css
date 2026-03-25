@@ -71,6 +71,8 @@
   --color-success:     hsl(142, 60%, 45%);
   --color-warning:     hsl(38, 92%, 50%);
   --color-danger:      hsl(0, 70%, 55%);
+  --color-success-bg:  hsl(142, 70%, 95%);
+  --color-danger-bg:   hsl(0, 70%, 95%);
 
   /* === Active/selected state === */
   --color-active-bg:   hsl(var(--brand-h), var(--brand-s), var(--brand-l));
@@ -91,6 +93,33 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* === Hover / interactive === */
+  --color-hover:       hsl(var(--brand-h), 8%, 95%);
+  --color-surface-hover: hsl(var(--brand-h), 8%, 93%);
+
+  /* === Surface variants === */
+  --color-surface-secondary: hsl(var(--brand-h), 6%, 97%);
+
+  /* === Text variants === */
+  --color-text-secondary:    hsl(var(--brand-h), 8%, 42%);
+  --color-text-placeholder:  hsl(var(--brand-h), 6%, 62%);
+
+  /* === Semantic — extended (light) === */
+  --color-info:              hsl(210, 60%, 50%);
+  --color-info-light:        hsl(210, 80%, 95%);
+  --color-success-light:     hsl(142, 70%, 95%);
+
+  /* === Button primary text — high contrast against brand bg === */
+  --color-btn-primary-text: hsl(var(--brand-h), 30%, 15%);
+
+  /* === Overlay === */
+  --color-overlay:     rgba(0, 0, 0, 0.5);
+
+  /* === Scrollbar === */
+  --color-scrollbar-thumb:       hsl(var(--brand-h), 8%, 82%);
+  --color-scrollbar-thumb-hover: hsl(var(--brand-h), 10%, 72%);
+  --color-scrollbar-track:       hsl(var(--brand-h), 6%, 95%);
 
   /* === Shadows === */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -118,27 +147,92 @@
    DARK MODE
    ============================================ */
 [data-theme="dark"] {
+  /* Surfaces */
   --color-bg:          hsl(var(--brand-h), 12%, 10%);
   --color-surface:     hsl(var(--brand-h), 10%, 15%);
   --color-surface-alt: hsl(var(--brand-h), 10%, 13%);
+  --color-surface-hover: hsl(var(--brand-h), 10%, 18%);
 
+  /* Text */
   --color-text:        hsl(var(--brand-h), 10%, 92%);
   --color-text-muted:  hsl(var(--brand-h), 8%, 62%);
   --color-text-subtle: hsl(var(--brand-h), 6%, 45%);
 
+  /* Borders */
   --color-border:      hsl(var(--brand-h), 8%, 22%);
   --color-border-hover:hsl(var(--brand-h), 10%, 30%);
+  --color-border-light: hsl(var(--brand-h), 8%, 18%);
 
+  /* Brand scales */
   --color-brand-soft:  hsl(var(--brand-h), calc(var(--brand-s) - 30%), 25%);
   --color-brand-subtle:hsl(var(--brand-h), calc(var(--brand-s) - 50%), 20%);
 
   --color-hi-soft:     hsl(var(--hi-h), calc(var(--hi-s) - 20%), 22%);
   --color-hi-subtle:   hsl(var(--hi-h), calc(var(--hi-s) - 40%), 18%);
 
+  /* Accent backgrounds */
   --color-accent-1-bg: hsl(var(--brand-h), calc(var(--brand-s) - 40%), 18%);
   --color-accent-2-bg: hsl(var(--brand-h), calc(var(--brand-s) - 45%), 16%);
   --color-accent-3-bg: hsl(var(--brand-h), calc(var(--brand-s) - 55%), 20%);
 
+  /* Semantic — dark-aware */
+  --color-success:     hsl(142, 70%, 65%);
+  --color-warning:     hsl(38, 80%, 55%);
+  --color-danger:      hsl(0, 70%, 65%);
+  --color-success-bg:  hsl(142, 30%, 15%);
+  --color-danger-bg:   hsl(0, 30%, 15%);
+
+  /* Hover / interactive */
+  --color-hover:       hsl(var(--brand-h), 10%, 18%);
+  --color-active:      hsl(var(--brand-h), 12%, 22%);
+
+  /* Surface variants */
+  --color-surface-secondary: hsl(var(--brand-h), 10%, 14%);
+  --color-bg-secondary:      hsl(var(--brand-h), 10%, 12%);
+
+  /* Brand aliases — used by many components */
+  --color-brand:             hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-brand-primary:     hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+  --color-brand-secondary:   hsl(var(--brand-h), calc(var(--brand-s) - 15%), calc(var(--brand-l) - 10%));
+  --color-brand-tertiary:    hsl(var(--brand-h), calc(var(--brand-s) - 20%), calc(var(--brand-l) + 10%));
+  --color-brand-highlight:   hsla(var(--brand-h), var(--brand-s), var(--brand-l), 0.15);
+  --color-brand-500:         hsl(var(--brand-h), var(--brand-s), 50%);
+  --color-brand-primary-hover: hsl(var(--brand-h), var(--brand-s), calc(var(--brand-l) + 8%));
+  --color-primary:           hsl(var(--brand-h), var(--brand-s), var(--brand-l));
+
+  /* Accent */
+  --color-accent-1:          hsl(var(--brand-h), calc(var(--brand-s) - 20%), 60%);
+  --color-hi:                hsl(var(--hi-h), var(--hi-s), var(--hi-l));
+
+  /* Text variants */
+  --color-text-secondary:    hsl(var(--brand-h), 8%, 62%);
+  --color-text-tertiary:     hsl(var(--brand-h), 8%, 48%);
+  --color-text-placeholder:  hsl(var(--brand-h), 8%, 40%);
+  --color-text-strong:       hsl(var(--brand-h), 10%, 95%);
+
+  /* Button primary text — dark text on brand bg for max contrast */
+  --color-btn-primary-text: hsl(var(--brand-h), 30%, 10%);
+
+  /* Semantic — extended */
+  --color-error:             hsl(0, 70%, 65%);
+  --color-error-light:       hsl(0, 40%, 20%);
+  --color-info:              hsl(210, 70%, 65%);
+  --color-info-light:        hsl(210, 40%, 18%);
+  --color-success-light:     hsl(142, 30%, 18%);
+
+  /* Trends */
+  --color-trend-positive:    hsl(142, 70%, 65%);
+  --color-trend-negative:    hsl(0, 70%, 65%);
+
+  /* Overlay */
+  --color-overlay:     rgba(0, 0, 0, 0.6);
+
+  /* Scrollbar */
+  --color-scrollbar-thumb:       hsl(var(--brand-h), 10%, 25%);
+  --color-scrollbar-thumb-hover: hsl(var(--brand-h), 15%, 35%);
+  --color-scrollbar-track:       hsl(var(--brand-h), 10%, 13%);
+
+  /* Shadow */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 

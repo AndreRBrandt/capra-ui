@@ -127,5 +127,5 @@
 [data-theme="dark"],
 [data-theme="dark"] body,
 [data-theme="dark"] #app {
-  background-color: var(--color-surface-alt);
+  background-color: var(--color-bg);
 }
