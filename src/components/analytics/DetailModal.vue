@@ -58,8 +58,8 @@ function close() {
           <div
             class="capra-detail__header"
             :style="{
-              backgroundColor: headerBg || 'var(--capra-detail-header-bg, #fef3e2)',
-              color: headerColor || 'var(--capra-detail-header-color, #8f3f00)',
+              backgroundColor: headerBg || undefined,
+              color: headerColor || undefined,
             }"
           >
             <div class="capra-detail__header-text">
@@ -115,7 +115,8 @@ function close() {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-overlay, rgba(0, 0, 0, 0.5));
+  backdrop-filter: blur(4px);
 }
 
 .capra-detail {
@@ -123,10 +124,11 @@ function close() {
   flex-direction: column;
   width: 100%;
   max-height: 90vh;
-  background: var(--capra-surface, white);
-  border-radius: 0.75rem;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius-lg, 0.75rem);
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  box-shadow: var(--shadow-card, 0 25px 50px -12px rgb(0 0 0 / 0.25));
 }
 
 .capra-detail--sm { max-width: 480px; }
@@ -140,6 +142,8 @@ function close() {
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.25rem 1.5rem;
+  background: var(--color-surface-secondary, #f9fafb);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
   flex-shrink: 0;
 }
 
@@ -152,12 +156,13 @@ function close() {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
+  color: var(--color-text, #1f2937);
 }
 
 .capra-detail__subtitle {
   margin: 0.25rem 0 0;
   font-size: 0.875rem;
-  opacity: 0.8;
+  color: var(--color-text-muted, #6b7280);
 }
 
 .capra-detail__close {
@@ -167,16 +172,17 @@ function close() {
   width: 32px;
   height: 32px;
   padding: 0;
+  color: var(--color-text-muted, #6b7280);
   background: transparent;
   border: none;
   border-radius: 0.375rem;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.15s;
+  transition: color 0.15s, background-color 0.15s;
 }
 
 .capra-detail__close:hover {
-  opacity: 1;
+  color: var(--color-text, #1f2937);
+  background: var(--color-hover, #f3f4f6);
 }
 
 .capra-detail__metrics {
@@ -189,10 +195,11 @@ function close() {
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
   padding: 0.5rem 1.5rem;
-  background: var(--capra-detail-period-bg, #f9fafb);
-  border-top: 1px solid var(--capra-border, #e5e7eb);
-  border-bottom: 1px solid var(--capra-border, #e5e7eb);
+  background: var(--color-surface-secondary, #f9fafb);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
   font-size: 0.8rem;
+  color: var(--color-text-muted, #6b7280);
   flex-shrink: 0;
 }
 
@@ -200,12 +207,12 @@ function close() {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  color: var(--capra-detail-period-color, #374151);
+  color: var(--color-text-secondary, #374151);
   font-weight: 500;
 }
 
 .capra-detail__period--prev {
-  color: var(--capra-detail-period-prev-color, #6b7280);
+  color: var(--color-text-muted, #6b7280);
   font-weight: 400;
 }
 
@@ -213,6 +220,26 @@ function close() {
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
+  background: var(--color-surface, #ffffff);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb, #d1d5db) var(--color-scrollbar-track, #f9fafb);
+}
+
+.capra-detail__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.capra-detail__content::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, #f9fafb);
+}
+
+.capra-detail__content::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, #d1d5db);
+  border-radius: 3px;
+}
+
+.capra-detail__content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover, #9ca3af);
 }
 
 .capra-detail__footer {
@@ -220,7 +247,8 @@ function close() {
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--capra-border, #e5e7eb);
+  background: var(--color-surface-secondary, #f9fafb);
+  border-top: 1px solid var(--color-border, #e5e7eb);
   flex-shrink: 0;
 }
 

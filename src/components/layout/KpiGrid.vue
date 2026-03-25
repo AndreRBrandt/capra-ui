@@ -5,11 +5,14 @@
  * Responsive grid for KPI cards with 3 breakpoints:
  * - < 400px: 1 column (phone portrait)
  * - 400–639px: 2 columns (phone landscape / small tablet)
- * - ≥ 640px: auto-fit grid with min/max width (desktop)
+ * - ≥ 640px: auto-fit grid with uniform column widths
+ *
+ * All cards share the same width within the grid.
+ * Incomplete rows keep the same column size for visual consistency.
  *
  * @example
  * ```vue
- * <KpiGrid min-card-width="220px" max-card-width="320px" card-height="110px">
+ * <KpiGrid min-card-width="220px" card-height="110px">
  *   <KpiCard v-for="kpi in kpis" :key="kpi.id" v-bind="kpi" />
  * </KpiGrid>
  * ```
@@ -74,9 +77,7 @@ withDefaults(
 
 /* =============================================
    Desktop (≥ 640px): auto-fit grid
-   Cards stretch to fill container.
-   max-width on children prevents excessive
-   stretching in incomplete rows.
+   Cards share uniform width across all rows.
    ============================================= */
 @media (min-width: 640px) {
   .capra-kpi-grid {
@@ -89,7 +90,7 @@ withDefaults(
   }
 }
 
-/* Ensure all children fill the grid cell, cap width if maxCardWidth set */
+/* Ensure all children fill the grid cell */
 .capra-kpi-grid > :slotted(*) {
   height: 100%;
   max-width: var(--kpi-max-width);

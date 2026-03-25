@@ -213,7 +213,8 @@ onUnmounted(() => {
 .modal__backdrop {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--color-overlay, rgba(0, 0, 0, 0.5));
+  backdrop-filter: blur(4px);
 }
 
 /* =============================================================================
@@ -226,9 +227,10 @@ onUnmounted(() => {
   flex-direction: column;
   width: 100%;
   max-height: calc(100vh - var(--spacing-2xl));
-  background-color: var(--color-surface);
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -297,6 +299,26 @@ onUnmounted(() => {
   flex: 1;
   padding: var(--spacing-xl);
   overflow-y: auto;
+  color: var(--color-text, #1f2937);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb, #d1d5db) var(--color-scrollbar-track, #f9fafb);
+}
+
+.modal__body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal__body::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track, #f9fafb);
+}
+
+.modal__body::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb, #d1d5db);
+  border-radius: 3px;
+}
+
+.modal__body::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover, #9ca3af);
 }
 
 /* =============================================================================

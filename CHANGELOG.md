@@ -9,6 +9,15 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Alterado (S219) — Dark mode: framework components use CSS tokens natively
+- **tokens-v2.css** — Added missing light-mode defaults for `--color-hover`, `--color-surface-hover`, `--color-surface-secondary`, `--color-text-secondary`, `--color-text-placeholder`, `--color-info`, `--color-info-light`, `--color-success-light`, `--color-overlay`, `--color-scrollbar-thumb`, `--color-scrollbar-thumb-hover`, `--color-scrollbar-track`. Dark mode block also gets overlay + scrollbar tokens
+- **DetailModal.vue** — Replaced all hardcoded colors (`rgba(0,0,0,0.5)`, `white`, `#fef3e2`, `#8f3f00`, `#f9fafb`, `#e5e7eb`, `#374151`, `#6b7280`) and legacy `--capra-*` tokens with `var(--color-*)` V2 tokens. Added backdrop blur, scrollbar styling, explicit header/footer/content backgrounds
+- **Modal.vue** — Backdrop uses `var(--color-overlay)` + backdrop-filter. Content panel gets border via `var(--color-border)`. Body gets explicit color + scrollbar tokens
+- **RecordCard.vue** — Added explicit `color` to header/body/footer, replaced hover shadow with `var(--shadow-card)`, border-radius uses `var(--radius-md)`
+- **StatusBadge.vue** — Muted variant uses `var(--color-surface-alt)` background instead of `var(--color-surface)`. All variants get explicit fallback values
+- **BaseButton.vue** — Secondary/outline/ghost variants now use `var(--color-text-muted)`, `var(--color-border)`, `var(--color-hover)` for dark-mode compatibility. Accent variant uses `var(--color-hi)` directly with `color: #000` for contrast
+- **RecordCardList.vue** — Added scrollbar styling tokens and `.record-card-list__empty` color
+
 ### Adicionado (S202) — year_weekday comparison unit
 - **types/query.ts** — `CapraTimeUnit` agora inclui `"year_weekday"` para comparação YoY alinhada por dia da semana. Ex: 3ª segunda-feira de março 2026 compara com 3ª segunda-feira de março 2025 (evita comparar segunda com domingo)
 
