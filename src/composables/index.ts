@@ -224,4 +224,5 @@ export {
   THEME_PALETTE,
   type ThemeColor,
   type ThemeV2State,
+  type FontScale,
 } from "./useThemeV2";

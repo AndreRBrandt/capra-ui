@@ -34,6 +34,8 @@ export interface UseListStateConfig<T> {
   searchable?: boolean;
   /** Chaves para busca */
   searchKeys?: string[];
+  /** Função customizada de busca (substitui searchKeys) */
+  searchFn?: (item: T, query: string) => boolean;
   /** Ordenação padrão */
   defaultSort?: { key: string; direction?: SortDirection };
   /** Função de comparação customizada */
@@ -80,6 +82,7 @@ export function useListState<T = Record<string, unknown>>(
     data,
     searchable = true,
     searchKeys,
+    searchFn,
     defaultSort,
     compareFn,
     filters,
@@ -100,6 +103,7 @@ export function useListState<T = Record<string, unknown>>(
   const searchResult = useListSearch<T>({
     data: searchable ? searchInput : searchInput,
     searchKeys,
+    searchFn,
   });
 
   // Step 3: Sort (operates on searched data)

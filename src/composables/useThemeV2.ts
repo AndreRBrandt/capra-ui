@@ -27,11 +27,14 @@ export interface ThemeColor {
 
 export type ThemeMode = "light" | "dark" | "system";
 
+export type FontScale = "normal" | "large" | "xlarge";
+
 export interface ThemeV2State {
   brand: ThemeColor;
   highlight: ThemeColor | null; // null = auto
   autoHighlight: boolean;
   mode: ThemeMode;
+  fontScale?: FontScale;
 }
 
 // ===========================================================================
@@ -126,6 +129,13 @@ export function useThemeV2() {
   const highlight = ref<ThemeColor | null>(null);
   const autoHighlight = ref(true);
   const mode = ref<ThemeMode>("light");
+  const fontScale = ref<FontScale>("normal");
+
+  const FONT_SCALE_MAP: Record<FontScale, string> = {
+    normal: "1",
+    large: "1.15",
+    xlarge: "1.3",
+  };
 
   /** Resolved highlight color (auto or manual) */
   const resolvedHighlight = computed<ThemeColor>(() => {
@@ -164,6 +174,10 @@ export function useThemeV2() {
     } else {
       root.removeAttribute("data-theme");
     }
+
+    // Font scale
+    root.style.setProperty("--font-scale", FONT_SCALE_MAP[fontScale.value] || "1");
+    root.setAttribute("data-font-scale", fontScale.value);
   }
 
   // ── Persistence ──
@@ -174,6 +188,7 @@ export function useThemeV2() {
         highlight: highlight.value,
         autoHighlight: autoHighlight.value,
         mode: mode.value,
+        fontScale: fontScale.value,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
@@ -190,6 +205,7 @@ export function useThemeV2() {
       if (state.highlight) highlight.value = state.highlight;
       if (state.autoHighlight !== undefined) autoHighlight.value = state.autoHighlight;
       if (state.mode) mode.value = state.mode;
+      if (state.fontScale) fontScale.value = state.fontScale;
     } catch {
       // Ignore
     }
@@ -225,8 +241,12 @@ export function useThemeV2() {
     mode.value = m;
   }
 
+  function setFontScale(s: FontScale) {
+    fontScale.value = s;
+  }
+
   // ── Watch & init ──
-  watch([brand, highlight, autoHighlight, mode], () => {
+  watch([brand, highlight, autoHighlight, mode, fontScale], () => {
     applyToDOM();
     save();
   }, { deep: true });
@@ -249,6 +269,7 @@ export function useThemeV2() {
     highlight,
     autoHighlight,
     mode,
+    fontScale,
     resolvedHighlight,
     isDark,
     // Actions
@@ -258,6 +279,7 @@ export function useThemeV2() {
     setHighlightFromHex,
     setAutoHighlight,
     setMode,
+    setFontScale,
     // Palette
     palette: THEME_PALETTE,
   };

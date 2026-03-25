@@ -23,6 +23,8 @@ export interface UseListSearchConfig<T> {
   data: MaybeRefOrGetter<T[]>;
   /** Chaves para busca (se não informado, busca em todos os campos) */
   searchKeys?: string[];
+  /** Função customizada de busca — quando fornecida, substitui a lógica de searchKeys */
+  searchFn?: (item: T, query: string) => boolean;
 }
 
 export interface UseListSearchReturn<T> {
@@ -45,7 +47,7 @@ export interface UseListSearchReturn<T> {
 export function useListSearch<T = Record<string, unknown>>(
   config: UseListSearchConfig<T>
 ): UseListSearchReturn<T> {
-  const { data, searchKeys } = config;
+  const { data, searchKeys, searchFn } = config;
 
   const searchQuery = ref("");
 
@@ -58,6 +60,10 @@ export function useListSearch<T = Record<string, unknown>>(
     const query = searchQuery.value.toLowerCase().trim();
 
     return items.filter((item) => {
+      // Custom search function takes priority
+      if (searchFn) return searchFn(item, query);
+
+      // Default: search by keys
       const record = item as Record<string, unknown>;
       const keys = searchKeys || Object.keys(record);
 
