@@ -57,6 +57,8 @@ export interface TrendConfig {
   invert?: boolean;
   /** Casas decimais da variação */
   decimals?: number;
+  /** Texto exibido quando não há dados de comparação (ex: "—", "N/D") */
+  placeholder?: string;
 }
 
 export interface Column {
@@ -718,7 +720,7 @@ function hasTrend(column: Column): boolean {
 }
 
 /** Obtém os dados de tendência para uma célula */
-function getTrendData(row: DataRow, column: Column): { value: number; isPositive: boolean; icon: string; color: string } | null {
+function getTrendData(row: DataRow, column: Column): { value: number; isPositive: boolean; icon: string; color: string; bg: string } | null {
   if (!column.trend) return null;
 
   const variation = row[column.trend.key] as number | undefined;
@@ -733,6 +735,7 @@ function getTrendData(row: DataRow, column: Column): { value: number; isPositive
     isPositive,
     icon: isUp ? "▲" : "▼",
     color: isPositive ? "var(--color-success, #10b981)" : "var(--color-danger, #ef4444)",
+    bg: isPositive ? "var(--color-success-bg, hsl(142, 70%, 95%))" : "var(--color-danger-bg, hsl(0, 70%, 95%))",
   };
 }
 
@@ -1428,10 +1431,17 @@ defineExpose({
                 <span
                   v-if="hasTrend(column) && getTrendData(row, column)"
                   class="data-table__trend"
-                  :style="{ color: getTrendData(row, column)!.color }"
+                  :style="{ color: getTrendData(row, column)!.color, backgroundColor: getTrendData(row, column)!.bg }"
                 >
                   {{ getTrendData(row, column)!.icon }}
                   {{ formatTrendValue(getTrendData(row, column)!.value, column.trend?.decimals) }}
+                </span>
+                <!-- Placeholder quando não há dados de comparação -->
+                <span
+                  v-else-if="hasTrend(column) && !getTrendData(row, column) && column.trend?.placeholder"
+                  class="data-table__trend-placeholder"
+                >
+                  {{ column.trend.placeholder }}
                 </span>
               </div>
             </slot>
@@ -1476,7 +1486,8 @@ defineExpose({
               },
             ]"
           >
-            <strong>{{ getTotalValue(column, colIndex) }}</strong>
+            <strong v-if="column.html" v-html="getTotalValue(column, colIndex)" />
+            <strong v-else>{{ getTotalValue(column, colIndex) }}</strong>
           </td>
           <!-- Ações à DIREITA (default) -->
           <td
@@ -1910,12 +1921,14 @@ defineExpose({
 
 .data-table__header {
   position: relative;
-  padding: var(--container-padding-sm) var(--container-padding);
+  padding: 8px 12px;
   font-weight: 600;
-  font-size: var(--font-size-caption);
-  color: var(--color-text);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
   background-color: var(--color-surface-alt);
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   white-space: nowrap;
 }
 
@@ -1952,7 +1965,7 @@ defineExpose({
    ============================================================================= */
 
 .data-table__row {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border-light, var(--color-border));
 }
 
 .data-table__row.hoverable:hover {
@@ -1976,7 +1989,8 @@ defineExpose({
    ============================================================================= */
 
 .data-table__cell {
-  padding: var(--container-padding-sm) var(--container-padding);
+  padding: 8px 12px;
+  font-size: 12px;
   color: var(--color-text);
 }
 
@@ -2032,26 +2046,24 @@ defineExpose({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--btn-size-md);
-  height: var(--btn-size-md);
-  padding: 0;
+  padding: 4px 8px;
   color: var(--color-text-muted);
-  background-color: transparent;
+  background-color: var(--color-surface-hover, var(--color-hover, transparent));
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all 0.15s ease;
 }
 
 .data-table__action-btn svg {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
+  width: 16px;
+  height: 16px;
 }
 
 .data-table__action-btn:hover {
-  color: var(--color-brand-secondary);
-  background-color: var(--color-brand-highlight);
-  border-color: var(--color-brand-highlight);
+  color: var(--color-brand);
+  background-color: var(--color-hover);
+  border-color: var(--color-border-hover);
 }
 
 .data-table__action-btn:active {
@@ -2150,14 +2162,14 @@ defineExpose({
 /* Double selector wins over .data-table--striped :nth-child (0-3-0 specificity match) */
 .data-table--striped .data-table__row.data-table__row--group-header,
 .data-table__row.data-table__row--group-header {
-  background-color: var(--data-table-group-header-bg, #ece4e2);
+  background-color: var(--data-table-group-header-bg, var(--color-surface-alt, #ece4e2));
   font-weight: 700;
   user-select: none;
   cursor: default;
 }
 .data-table--striped .data-table__row.data-table__row--group-header .data-table__cell--sticky,
 .data-table__row.data-table__row--group-header .data-table__cell--sticky {
-  background-color: var(--data-table-group-header-bg, #ece4e2);
+  background-color: var(--data-table-group-header-bg, var(--color-surface-alt, #ece4e2));
 }
 
 /* Group child rows — indent to show hierarchy */
@@ -2171,13 +2183,13 @@ defineExpose({
    ============================================================================= */
 
 .data-table--compact .data-table__header {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-small);
+  padding: 6px 8px;
+  font-size: 9px;
 }
 
 .data-table--compact .data-table__cell {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-small);
+  padding: 6px 8px;
+  font-size: 11px;
 }
 
 /* =============================================================================
@@ -2219,10 +2231,19 @@ defineExpose({
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: var(--font-size-caption, 0.75rem);
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 600;
   white-space: nowrap;
-  opacity: 0.85;
+  padding: 1px 6px;
+  border-radius: var(--radius-full, 9999px);
+}
+
+.data-table__trend-placeholder {
+  display: inline-flex;
+  font-size: 10px;
+  color: var(--color-text-muted, #9ca3af);
+  white-space: nowrap;
+  opacity: 0.6;
 }
 
 /* Alinhamentos com trend */
@@ -2447,7 +2468,7 @@ defineExpose({
 
 .data-table__totals-row {
   background-color: var(--color-surface-alt);
-  border-top: 2px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
 }
 
 .data-table__cell--total {

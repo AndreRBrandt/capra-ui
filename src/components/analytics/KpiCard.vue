@@ -364,13 +364,13 @@ const formattedParticipationSecondary = computed(() => {
 }
 
 .kpi-trend--up {
-  color: hsl(142, 70%, 35%);
-  background: hsl(142, 70%, 95%);
+  color: var(--color-success, hsl(142, 70%, 35%));
+  background: var(--color-success-bg, hsl(142, 70%, 95%));
 }
 
 .kpi-trend--down {
-  color: hsl(0, 70%, 45%);
-  background: hsl(0, 70%, 95%);
+  color: var(--color-danger, hsl(0, 70%, 45%));
+  background: var(--color-danger-bg, hsl(0, 70%, 95%));
 }
 
 .kpi-trend--neutral {
