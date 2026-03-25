@@ -99,7 +99,7 @@ function clear() {
   left: 0.75rem;
   width: 16px;
   height: 16px;
-  color: var(--capra-text-muted, #6b7280);
+  color: var(--color-text-muted, var(--capra-text-muted, #6b7280));
   pointer-events: none;
 }
 
@@ -107,21 +107,21 @@ function clear() {
   width: 200px;
   padding: 0.5rem 2rem 0.5rem 2.25rem;
   font-size: 0.875rem;
-  border: 1px solid var(--capra-border, #e5e7eb);
-  border-radius: 0.5rem;
-  background: var(--capra-surface, white);
-  color: var(--capra-text, #1f2937);
+  border: 1px solid var(--color-border, var(--capra-border, #e5e7eb));
+  border-radius: var(--radius-md, 0.5rem);
+  background: var(--color-surface, var(--capra-surface, white));
+  color: var(--color-text, var(--capra-text, #1f2937));
   transition: all 0.15s ease;
 }
 
 .capra-search__input:focus {
   outline: none;
-  border-color: var(--capra-search-focus-color, var(--capra-brand-highlight, #e5a22f));
-  box-shadow: 0 0 0 2px var(--capra-search-focus-ring, rgba(229, 162, 47, 0.2));
+  border-color: var(--color-brand, var(--capra-search-focus-color, #e5a22f));
+  box-shadow: 0 0 0 2px var(--color-brand-highlight, rgba(229, 162, 47, 0.2));
 }
 
 .capra-search__input::placeholder {
-  color: var(--capra-text-tertiary, #9ca3af);
+  color: var(--color-text-placeholder, var(--capra-text-tertiary, #9ca3af));
 }
 
 .capra-search__clear {
@@ -133,7 +133,7 @@ function clear() {
   width: 20px;
   height: 20px;
   padding: 0;
-  color: var(--capra-text-muted, #6b7280);
+  color: var(--color-text-muted, var(--capra-text-muted, #6b7280));
   background: transparent;
   border: none;
   border-radius: 0.25rem;
@@ -142,7 +142,7 @@ function clear() {
 }
 
 .capra-search__clear:hover {
-  color: var(--capra-text, #1f2937);
-  background-color: var(--capra-surface-hover, #f3f4f6);
+  color: var(--color-text, var(--capra-text, #1f2937));
+  background-color: var(--color-hover, var(--capra-surface-hover, #f3f4f6));
 }
 </style>

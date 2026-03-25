@@ -34,18 +34,18 @@ withDefaults(defineProps<Props>(), { variant: "info" });
 }
 
 .status-badge--info {
-  background: var(--color-info-light);
-  color: var(--color-info);
+  background: var(--color-info-light, hsl(210, 80%, 95%));
+  color: var(--color-info, hsl(210, 60%, 50%));
 }
 
 .status-badge--success {
-  background: var(--color-success-light);
-  color: var(--color-success);
+  background: var(--color-success-light, hsl(142, 70%, 95%));
+  color: var(--color-success, hsl(142, 60%, 45%));
 }
 
 .status-badge--muted {
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt, #f9fafb);
+  color: var(--color-text-muted, #6b7280);
+  border: 1px solid var(--color-border, #e5e7eb);
 }
 </style>

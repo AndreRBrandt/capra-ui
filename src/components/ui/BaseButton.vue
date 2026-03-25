@@ -58,50 +58,54 @@ withDefaults(defineProps<Props>(), {
 
 /* Variants — cores via CSS variables (resolvidas pelo app consumidor) */
 .base-btn--primary {
-  background: var(--color-brand-primary);
-  color: var(--color-brand-secondary);
+  background: var(--color-brand);
+  color: var(--color-btn-primary-text, var(--color-bg, #1a1a1a));
   border-color: transparent;
+  font-weight: 600;
 }
 .base-btn--primary:hover:not(:disabled) {
-  background: var(--color-brand-primary-hover);
+  background: var(--color-brand-primary-hover, var(--color-brand-hover));
 }
 
 .base-btn--secondary {
-  background: var(--color-brand-secondary);
-  color: var(--color-brand-primary);
-  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-muted, #6b7280);
+  border-color: var(--color-border, #e5e7eb);
 }
 .base-btn--secondary:hover:not(:disabled) {
-  background: var(--color-brand-tertiary);
+  background: var(--color-hover, #f3f4f6);
+  color: var(--color-text, #1f2937);
+  border-color: var(--color-border-hover, #d1d5db);
 }
 
 .base-btn--outline {
   background: transparent;
-  color: var(--color-brand-secondary);
-  border-color: var(--color-brand-secondary);
+  color: var(--color-brand, currentColor);
+  border-color: var(--color-border, #e5e7eb);
 }
 .base-btn--outline:hover:not(:disabled) {
-  background: var(--color-brand-primary);
+  background: var(--color-hover, #f3f4f6);
+  border-color: var(--color-border-hover, #d1d5db);
 }
 
 .base-btn--ghost {
   background: transparent;
-  color: var(--color-brand-secondary);
+  color: var(--color-text-muted, #6b7280);
   border-color: transparent;
 }
 .base-btn--ghost:hover:not(:disabled) {
-  background: var(--color-brand-primary);
+  background: var(--color-hover, #f3f4f6);
+  color: var(--color-text, #1f2937);
 }
 
-/* CTA — laranja com borda âmbar escura */
+/* CTA — accent color (highlight) */
 .base-btn--accent {
-  background: var(--color-brand-highlight);
-  color: var(--color-brand-secondary);
-  border-color: var(--color-brand-tertiary);
+  background: var(--color-hi, var(--color-brand-highlight));
+  color: #000;
+  border-color: transparent;
+  font-weight: 700;
 }
 .base-btn--accent:hover:not(:disabled) {
-  background: var(--color-brand-tertiary);
-  color: var(--color-brand-primary);
-  border-color: var(--color-brand-secondary);
+  background: var(--color-hi-hover, var(--color-brand-tertiary));
 }
 </style>
