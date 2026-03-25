@@ -1,3 +1,16 @@
+<script lang="ts">
+// ── Singleton module-level: compartilhado entre TODAS as instâncias ──
+// Precisa estar fora do <script setup> para ser verdadeiramente global.
+let _activePopoverClose: (() => void) | null = null;
+
+export function closeActivePopover() {
+  if (_activePopoverClose) {
+    _activePopoverClose();
+    _activePopoverClose = null;
+  }
+}
+</script>
+
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { X } from "lucide-vue-next";
@@ -55,6 +68,9 @@ const isOpen = ref(props.open);
 const triggerRef = ref<HTMLElement | null>(null);
 const contentRef = ref<HTMLElement | null>(null);
 
+// Posição fixa calculada a partir do trigger getBoundingClientRect()
+const fixedPos = ref<{ top: string; left: string } | null>(null);
+
 // Posição ajustada (pode mudar de placement se necessário)
 const adjustedPosition = ref<{ top?: string; left?: string; right?: string; bottom?: string; transform?: string } | null>(null);
 const adjustedPlacement = ref<Placement>(props.placement);
@@ -102,15 +118,22 @@ const contentClasses = computed(() => [
   },
 ]);
 
-// Styles do conteúdo
-const contentStyles = computed(() => ({
-  "--popover-offset": `${props.offset}px`,
-  "--popover-max-height": props.maxHeight,
-  ...(props.width !== "auto" && props.width !== "trigger"
-    ? { width: props.width }
-    : {}),
-  ...(adjustedPosition.value || {}),
-}));
+// Styles do conteúdo — usa fixed positioning
+const contentStyles = computed(() => {
+  const base: Record<string, string> = {
+    "--popover-offset": `${props.offset}px`,
+    "--popover-max-height": props.maxHeight,
+  };
+  if (props.width !== "auto" && props.width !== "trigger") {
+    base.width = props.width;
+  }
+  if (fixedPos.value) {
+    base.position = "fixed";
+    base.top = fixedPos.value.top;
+    base.left = fixedPos.value.left;
+  }
+  return base;
+});
 
 /**
  * Calcula e ajusta a posição do popover para evitar overflow
@@ -201,17 +224,56 @@ function toggle() {
 function openPopover() {
   if (props.disabled) return;
 
+  // Fecha qualquer popover aberto antes de abrir este
+  if (_activePopoverClose && _activePopoverClose !== close) {
+    _activePopoverClose();
+  }
+  _activePopoverClose = close;
+
+  // Calcula posição fixed baseada no trigger
+  calculateFixedPosition();
+
   isOpen.value = true;
   emit("update:open", true);
   emit("open");
 
   // Ajusta posição após renderização
   nextTick(() => {
-    // Aguarda um frame para garantir que o DOM está atualizado
     requestAnimationFrame(() => {
       adjustPositionIfNeeded();
     });
   });
+}
+
+/**
+ * Calcula posição fixed do popover baseada no getBoundingClientRect do trigger.
+ * Resolve o problema de overflow:hidden em pais.
+ */
+function calculateFixedPosition() {
+  if (!triggerRef.value) return;
+  const rect = triggerRef.value.getBoundingClientRect();
+  const offset = props.offset;
+  const base = props.placement.split("-")[0] as "top" | "bottom" | "left" | "right";
+  const align = props.placement.split("-")[1] as "start" | "end" | undefined;
+
+  let top = 0;
+  let left = 0;
+
+  if (base === "bottom") {
+    top = rect.bottom + offset;
+    left = align === "end" ? rect.right : align === "start" ? rect.left : rect.left + rect.width / 2;
+  } else if (base === "top") {
+    top = rect.top - offset;
+    left = align === "end" ? rect.right : align === "start" ? rect.left : rect.left + rect.width / 2;
+  } else if (base === "right") {
+    top = rect.top + rect.height / 2;
+    left = rect.right + offset;
+  } else {
+    top = rect.top + rect.height / 2;
+    left = rect.left - offset;
+  }
+
+  fixedPos.value = { top: `${top}px`, left: `${left}px` };
 }
 
 // Fechar
@@ -220,9 +282,15 @@ function close() {
   emit("update:open", false);
   emit("close");
 
+  // Limpa singleton
+  if (_activePopoverClose === close) {
+    _activePopoverClose = null;
+  }
+
   // Reset ajustes
   adjustedPosition.value = null;
   adjustedPlacement.value = props.placement;
+  fixedPos.value = null;
 
   // Retorna foco ao trigger
   nextTick(() => {
@@ -258,11 +326,20 @@ function handleKeydown(event: KeyboardEvent) {
   }
 }
 
-// Resize handler - reajusta posição
+// Resize handler - fecha (fixed não acompanha resize/scroll)
 function handleResize() {
-  if (isOpen.value && props.autoAdjust) {
-    adjustPositionIfNeeded();
-  }
+  if (isOpen.value) close();
+}
+
+// Scroll handler - fecha popover ao scrollar (debounce para evitar false positives)
+let scrollCloseTimer: ReturnType<typeof setTimeout> | null = null;
+function handleScroll(event: Event) {
+  if (!isOpen.value) return;
+  // Ignora scroll do próprio popover body
+  if (contentRef.value?.contains(event.target as Node)) return;
+  // Pequeno delay para evitar fechar em micro-scrolls do layout
+  if (scrollCloseTimer) clearTimeout(scrollCloseTimer);
+  scrollCloseTimer = setTimeout(() => close(), 50);
 }
 
 // Lifecycle
@@ -270,12 +347,18 @@ onMounted(() => {
   document.addEventListener("click", handleClickOutside);
   document.addEventListener("keydown", handleKeydown);
   window.addEventListener("resize", handleResize);
+  window.addEventListener("scroll", handleScroll, true); // capture para pegar scroll de containers
 });
 
 onUnmounted(() => {
   document.removeEventListener("click", handleClickOutside);
   document.removeEventListener("keydown", handleKeydown);
   window.removeEventListener("resize", handleResize);
+  window.removeEventListener("scroll", handleScroll, true);
+  // Limpa singleton se este popover estava ativo
+  if (_activePopoverClose === close) {
+    _activePopoverClose = null;
+  }
 });
 </script>
 
@@ -356,16 +439,20 @@ onUnmounted(() => {
 }
 
 .popover__content {
+  /* position: fixed is applied inline via contentStyles when fixedPos is set.
+     Falls back to absolute for backwards-compat when fixedPos is null. */
   position: absolute;
-  z-index: var(--z-popover);
-  min-width: 200px;
+  z-index: var(--z-popover, 9999);
+  min-width: 160px;
+  width: max-content;
+  max-width: min(420px, calc(100vw - 32px));
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
 }
 
-/* Posicionamento base */
+/* ── Posicionamento base (fallback absolute) ── */
 .popover__content--bottom {
   top: 100%;
   left: 50%;
@@ -394,7 +481,20 @@ onUnmounted(() => {
   margin-left: var(--popover-offset, 8px);
 }
 
-/* Alinhamentos start/end para bottom e top */
+/* ── Quando fixed (inline style position:fixed), reset transforms ── */
+.popover__content[style*="position: fixed"] {
+  margin: 0;
+}
+
+.popover__content[style*="position: fixed"].popover__content--align-end {
+  transform: translateX(-100%);
+}
+
+.popover__content[style*="position: fixed"].popover__content--bottom:not(.popover__content--align-start):not(.popover__content--align-end) {
+  transform: translateX(-50%);
+}
+
+/* Alinhamentos start/end para bottom e top (absolute fallback) */
 .popover__content--bottom.popover__content--align-start,
 .popover__content--top.popover__content--align-start {
   left: 0;

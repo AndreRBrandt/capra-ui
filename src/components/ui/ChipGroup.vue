@@ -69,58 +69,63 @@ function select(item: ChipGroupItem) {
 <style scoped>
 .chip-group {
   display: flex;
-  gap: 0.375rem;
+  gap: 4px;
   flex-wrap: wrap;
   overflow-x: auto;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-md, 8px);
-  background: var(--chip-group-bg, var(--color-brand-secondary, #3a1906));
+  padding: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chip-group::-webkit-scrollbar {
+  display: none;
 }
 
 /* Chip base */
 .chip-group__chip {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--color-text-muted, #6b7280);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
   line-height: 1.4;
   outline: none;
+  font-family: inherit;
 }
 
 /* Sizes */
 .chip-group__chip--md {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.82rem;
+  padding: 7px 14px;
+  font-size: 13px;
 }
 
 .chip-group__chip--sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 5px 10px;
+  font-size: 12px;
 }
 
 /* Hover */
 .chip-group__chip:hover:not(.chip-group__chip--active) {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text, #111827);
+  background: var(--color-surface, #fff);
 }
 
 /* Focus */
 .chip-group__chip:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-brand-highlight, #e5a22f);
+  box-shadow: 0 0 0 2px var(--color-brand-soft, rgba(99, 102, 241, 0.2));
 }
 
 /* Active */
 .chip-group__chip--active {
-  background: var(--chip-group-active-bg, var(--color-brand-highlight, #e5a22f));
-  color: var(--chip-group-active-color, var(--color-brand-secondary, #3a1906));
-  border-color: transparent;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #111827);
+  border-color: var(--color-border, #e2e8f0);
+  box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.06));
   font-weight: 600;
 }
 </style>
