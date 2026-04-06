@@ -34,3 +34,23 @@ export type {
   CapraDatePreset,
   DateRange,
 } from "./filter";
+
+// Dashboard Builder Types
+export type {
+  WidgetType,
+  WidgetBase,
+  WidgetQueryConfig,
+  WidgetGridConfig,
+  KpiGroupWidget,
+  DataTableWidget,
+  DataTableColumnConfig,
+  ChartWidget,
+  StatCardWidget,
+  CustomWidget,
+  WidgetDefinition,
+  DashboardFilterDefinition,
+  DashboardSectionDefinition,
+  DashboardDefinition,
+  NavSection,
+  NavDashboard,
+} from "./dashboard";

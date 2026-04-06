@@ -31,3 +31,6 @@ export * from "./ui";
 
 // Filters
 export * from "./filters";
+
+// Dashboard (renderer system)
+export * from "./dashboard";
