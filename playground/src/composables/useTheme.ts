@@ -93,7 +93,10 @@ function neutral(brandH: number, s: number, l: number): string {
 // ────────────────────────────────────────────────────────────────────
 
 function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, string> {
-  const bH = brand.h;
+  // Per user spec: greys/backgrounds/borders take their TONAL personality from
+  // Secondary (which the user picks as a complement to Brand). This makes the
+  // Secondary anchor visible across the whole UI, not just chart série 2.
+  const sH = secondary.h;
   return {
     // === V2 HSL anchors ===
     "--brand-h": String(brand.h),
@@ -121,26 +124,26 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
     "--color-hi-soft": hsl(shift(hi, -20, 28)),
     "--color-hi-subtle": hsl(shift(hi, -40, 35)),
 
-    // === Surfaces / backgrounds (low-sat brand tint) ===
-    "--color-bg": neutral(bH, 8, 95),
+    // === Surfaces / backgrounds (Secondary tint — low saturation) ===
+    "--color-bg": neutral(sH, 8, 95),
     "--color-surface": "#ffffff",
-    "--color-surface-alt": neutral(bH, 6, 97),
-    "--color-hover": neutral(bH, 8, 94),
-    "--color-active": neutral(bH, 10, 90),
+    "--color-surface-alt": neutral(sH, 6, 97),
+    "--color-hover": neutral(sH, 8, 94),
+    "--color-active": neutral(sH, 10, 90),
 
-    // === Text ===
-    "--color-text": neutral(bH, 20, 15),
-    "--color-text-strong": neutral(bH, 25, 8),
-    "--color-text-secondary": neutral(bH, 12, 30),
-    "--color-text-muted": neutral(bH, 8, 42),
-    "--color-text-subtle": neutral(bH, 6, 62),
-    "--color-text-tertiary": neutral(bH, 8, 55),
-    "--color-text-placeholder": neutral(bH, 6, 75),
+    // === Text (Secondary tint) ===
+    "--color-text": neutral(sH, 20, 15),
+    "--color-text-strong": neutral(sH, 25, 8),
+    "--color-text-secondary": neutral(sH, 12, 30),
+    "--color-text-muted": neutral(sH, 8, 42),
+    "--color-text-subtle": neutral(sH, 6, 62),
+    "--color-text-tertiary": neutral(sH, 8, 55),
+    "--color-text-placeholder": neutral(sH, 6, 75),
 
-    // === Borders ===
-    "--color-border": neutral(bH, 8, 90),
-    "--color-border-light": neutral(bH, 6, 95),
-    "--color-border-hover": neutral(bH, 12, 82),
+    // === Borders (Secondary tint) ===
+    "--color-border": neutral(sH, 8, 90),
+    "--color-border-light": neutral(sH, 6, 95),
+    "--color-border-hover": neutral(sH, 12, 82),
 
     // === Semantic states (kept globally consistent for trust signals) ===
     "--color-success": "#16a34a",
@@ -158,7 +161,7 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
     // === Trend (analytics) ===
     "--color-trend-positive": "#059669",
     "--color-trend-negative": "#dc2626",
-    "--color-trend-neutral": neutral(bH, 8, 50),
+    "--color-trend-neutral": neutral(sH, 8, 50),
 
     // === V1 legacy aliases (for older capra-ui internals) ===
     "--color-brand-primary": hsl(shift(brand, 0, -10)),
@@ -188,7 +191,8 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
 }
 
 function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, string> {
-  const bH = brand.h;
+  // Same approach as light: Secondary drives the grey/neutral tonal personality.
+  const sH = secondary.h;
   return {
     "--brand-h": String(brand.h),
     "--brand-s": `${brand.s}%`,
@@ -212,23 +216,23 @@ function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, str
     "--color-hi-soft": hsl({ h: hi.h, s: clamp(hi.s - 20, 0, 100), l: 30 }),
     "--color-hi-subtle": hsl({ h: hi.h, s: clamp(hi.s - 30, 0, 100), l: 25 }),
 
-    "--color-bg": neutral(bH, 15, 7),
-    "--color-surface": neutral(bH, 12, 12),
-    "--color-surface-alt": neutral(bH, 10, 16),
-    "--color-hover": neutral(bH, 15, 20),
-    "--color-active": neutral(bH, 18, 26),
+    "--color-bg": neutral(sH, 15, 7),
+    "--color-surface": neutral(sH, 12, 12),
+    "--color-surface-alt": neutral(sH, 10, 16),
+    "--color-hover": neutral(sH, 15, 20),
+    "--color-active": neutral(sH, 18, 26),
 
-    "--color-text": neutral(bH, 8, 92),
+    "--color-text": neutral(sH, 8, 92),
     "--color-text-strong": "#ffffff",
-    "--color-text-secondary": neutral(bH, 10, 78),
-    "--color-text-muted": neutral(bH, 10, 65),
-    "--color-text-subtle": neutral(bH, 8, 50),
-    "--color-text-tertiary": neutral(bH, 8, 55),
-    "--color-text-placeholder": neutral(bH, 6, 35),
+    "--color-text-secondary": neutral(sH, 10, 78),
+    "--color-text-muted": neutral(sH, 10, 65),
+    "--color-text-subtle": neutral(sH, 8, 50),
+    "--color-text-tertiary": neutral(sH, 8, 55),
+    "--color-text-placeholder": neutral(sH, 6, 35),
 
-    "--color-border": neutral(bH, 12, 22),
-    "--color-border-light": neutral(bH, 8, 18),
-    "--color-border-hover": neutral(bH, 18, 30),
+    "--color-border": neutral(sH, 12, 22),
+    "--color-border-light": neutral(sH, 8, 18),
+    "--color-border-hover": neutral(sH, 18, 30),
 
     "--color-success": "#4ade80",
     "--color-success-light": "hsl(142, 30%, 15%)",
@@ -244,7 +248,7 @@ function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, str
 
     "--color-trend-positive": "#4ade80",
     "--color-trend-negative": "#f87171",
-    "--color-trend-neutral": neutral(bH, 10, 60),
+    "--color-trend-neutral": neutral(sH, 10, 60),
 
     "--color-brand-primary": hsl({ h: brand.h, s: brand.s, l: 8 }),
     "--color-brand-secondary": hsl({ h: secondary.h, s: clamp(secondary.s - 10, 0, 100), l: 80 }),
@@ -259,11 +263,11 @@ function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, str
     "--color-chart-6": hsl(shift(hi, -10, 10)),
 
     "--color-accent-1": hsl(brand),
-    "--color-accent-1-bg": neutral(bH, 30, 20),
+    "--color-accent-1-bg": hsl({ h: brand.h, s: 30, l: 20 }),
     "--color-accent-2": hsl(secondary),
-    "--color-accent-2-bg": neutral(bH, 25, 18),
+    "--color-accent-2-bg": hsl({ h: secondary.h, s: 25, l: 18 }),
     "--color-accent-3": hsl(hi),
-    "--color-accent-3-bg": neutral(bH, 20, 22),
+    "--color-accent-3-bg": hsl({ h: hi.h, s: 20, l: 22 }),
 
     "--color-btn-primary-text": "#0f172a",
   };

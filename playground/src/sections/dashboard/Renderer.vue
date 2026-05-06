@@ -14,27 +14,13 @@ import widgetDataJson from "../../../data/widget-data.json";
 
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
-import LivePropsEditor from "../LivePropsEditor.vue";
 
-// Initial JSON for the live editor: full DashboardDefinition + minimal widgetData
-const liveInitial = JSON.stringify(
-  {
-    dashboard: dashboardJson,
-    widgetData: widgetDataJson,
-    widgetLoading: {},
-    widgetErrors: {},
-  },
-  null,
-  2,
-);
-
-const propsInfo = [
-  { name: "dashboard", type: "DashboardDefinition", default: "—", description: "Definição completa: filters, sections, widgets.", required: true },
-  { name: "widgetData", type: "Record<widgetId, CapraResult | null>", default: "—", description: "Dados pré-resolvidos por widget.id.", required: true },
-  { name: "widgetLoading", type: "Record<widgetId, boolean>", default: "{}", description: "Loading state por widget.", required: true },
-  { name: "widgetErrors", type: "Record<widgetId, string | null>", default: "{}", description: "Erro por widget.", required: true },
-  { name: "filterValues", type: "Record<string, unknown>", default: "—", description: "Valores controlados dos filtros (v-model:filterValues)." },
-];
+// NOTE: LivePropsEditor was REMOVED from this section.
+// Reason: re-spreading the full DashboardDefinition prop on each
+// keystroke causes 5 ECharts widgets to re-mount, freezing the main
+// thread. The 3-mode toggle below already exercises the renderer's
+// runtime behavior. JSON-driven config is exercised by editing
+// playground/data/dashboard-vendas.json directly (HMR-friendly).
 
 type Mode = "loaded" | "loading" | "error";
 
@@ -123,12 +109,11 @@ function setMode(next: Mode): void {
       </ul>
     </ExampleBlock>
 
-    <LivePropsEditor
-      :component="DashboardRenderer"
-      :initial="liveInitial"
-      :props-info="propsInfo"
-      notes="JSON completo da DashboardDefinition + widgetData. Edite filters[], sections[], widgets[] e veja o renderer reagir."
-    />
+    <ExampleBlock title="Editar config" note="Edite playground/data/dashboard-vendas.json e widget-data.json — HMR refletirá em tempo real. Editor inline foi removido para evitar re-mount de 5 charts a cada tecla.">
+      <code style="font-size: 0.7rem; color: var(--color-text-muted)">
+        playground/data/dashboard-vendas.json
+      </code>
+    </ExampleBlock>
   </SectionPage>
 </template>
 

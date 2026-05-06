@@ -55,8 +55,15 @@ function tryParse(raw: string): void {
   }
 }
 
+// Initial parse is sync; subsequent edits are debounced 350ms so that
+// heavy components (charts, KpiContainer with iconMap, etc.) don't get
+// re-mounted on every keystroke and freeze the main thread.
 tryParse(code.value);
-watch(code, (next) => tryParse(next));
+let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+watch(code, (next) => {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => tryParse(next), 350);
+});
 
 const slotText = computed(() => {
   const v = lastValidProps.value._slot;
