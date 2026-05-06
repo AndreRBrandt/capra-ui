@@ -15,40 +15,6 @@ import type { CapraResult } from "@/types/result";
 import type { CapraFilterDefinition, CapraFilterState, DateRange } from "@/types/filter";
 
 // =============================================================================
-// Tipos de Configuração
-// =============================================================================
-
-/**
- * Configuração do adapter BIMachine
- */
-export interface BIMachineConfig {
-  /** Nome da estrutura/cubo de dados */
-  dataSource: string;
-
-  /** Endpoint da API (default: '/spr/query/execute') */
-  endpoint?: string;
-
-  /** IDs de filtros a ignorar nas requisições */
-  ignoreFilterIds?: number[];
-
-  /** Request timeout in ms (default: 30000) */
-  timeout?: number;
-}
-
-/**
- * Configuração do adapter Mock (para desenvolvimento/testes)
- */
-export interface MockConfig {
-  /** Delay simulado em ms (default: 500) */
-  delay?: number;
-}
-
-/**
- * União de todas as configurações possíveis
- */
-export type AdapterConfig = BIMachineConfig | MockConfig;
-
-// =============================================================================
 // Tipos de Filtros (BIMachine)
 // =============================================================================
 
@@ -78,30 +44,6 @@ export interface BIMachineFilter {
 
   /** Tipo de restrição padrão (opcional) */
   defaultRestrictionType?: string;
-}
-
-// =============================================================================
-// Tipos de Resposta da API
-// =============================================================================
-
-/**
- * Estrutura da resposta bruta da API BIMachine
- */
-export interface BIMachineApiResponse {
-  result?: {
-    data: BIMachineDataPayload;
-  };
-  data?: BIMachineDataPayload;
-}
-
-/**
- * Payload de dados da resposta
- */
-export interface BIMachineDataPayload {
-  rows: {
-    nodes: Array<{ caption: string }>;
-  };
-  cells: Array<{ value: number }>;
 }
 
 // =============================================================================
@@ -344,19 +286,3 @@ export interface DataAdapterV2 {
   getProjectName(): string;
 }
 
-// =============================================================================
-// Tipos do Factory
-// =============================================================================
-
-/**
- * Tipos de adapter disponíveis
- */
-export type AdapterType = "bimachine" | "bimachine-external" | "mock";
-
-/**
- * Assinatura da função factory
- */
-export type CreateAdapterFn = {
-  (type: "bimachine", config: BIMachineConfig): DataAdapter;
-  (type: "mock", config?: MockConfig): DataAdapter;
-};
