@@ -2,6 +2,25 @@
 import { BarChart, LineChart, PieChart, HeatmapChart, StackedBarChart } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveBarInitial = JSON.stringify(
+  {
+    data: [
+      { categoria: "Bode BV", valor: 142300 },
+      { categoria: "Bode OL", valor: 98140 },
+      { categoria: "Bode AF", valor: 87502 },
+    ],
+    categoryKey: "categoria",
+    valueKey: "valor",
+    format: "currency",
+    horizontal: false,
+    height: "240px",
+    showLegend: true,
+  },
+  null,
+  2,
+);
 
 const filialData = [
   { NMFILIAL: "BDN BV", VALOR: 142300, VALOR_PREV: 128450 },
@@ -157,5 +176,12 @@ const heatmapData: [number, number, number][] = (() => {
         />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      title="BarChart — JSON config (live)"
+      :component="BarChart"
+      :initial="liveBarInitial"
+      notes="Props: data (array), categoryKey, valueKey, format (currency/number/percent/none), horizontal, height, showLegend, showLabels, color, etc."
+    />
   </SectionPage>
 </template>

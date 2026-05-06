@@ -2,6 +2,13 @@
 import { StatusBadge } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  { variant: "info", _slot: "11:30" },
+  null,
+  2,
+);
 </script>
 
 <template>
@@ -37,5 +44,11 @@ import ExampleBlock from "../ExampleBlock.vue";
       <StatusBadge variant="success">Success</StatusBadge>
       <StatusBadge variant="muted">Muted</StatusBadge>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="StatusBadge"
+      :initial="liveInitial"
+      notes="variant: info | success | muted. _slot vira o conteúdo do badge."
+    />
   </SectionPage>
 </template>

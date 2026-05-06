@@ -3,10 +3,17 @@ import { ref } from "vue";
 import { SearchInput } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const q1 = ref("");
 const q2 = ref("");
 const q3 = ref("BURGUER DO BODE");
+
+const liveInitial = JSON.stringify(
+  { placeholder: "Buscar produtos...", debounce: 300 },
+  null,
+  2,
+);
 </script>
 
 <template>
@@ -43,5 +50,12 @@ const q3 = ref("BURGUER DO BODE");
         <SearchInput v-model="q3" placeholder="Pesquisar..." />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="SearchInput"
+      :initial="liveInitial"
+      notes="placeholder, debounce (ms). v-model não funciona aqui — para testar binding use os exemplos acima."
+      preview-max-width="320px"
+    />
   </SectionPage>
 </template>

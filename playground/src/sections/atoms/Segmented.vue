@@ -3,10 +3,26 @@ import { ref } from "vue";
 import { SegmentedControl } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const mode = ref("marca");
 const size = ref("md");
 const time = ref("month");
+
+const liveInitial = JSON.stringify(
+  {
+    modelValue: "a",
+    size: "md",
+    fullWidth: false,
+    options: [
+      { id: "a", label: "Opção A" },
+      { id: "b", label: "Opção B" },
+      { id: "c", label: "Opção C", disabled: true },
+    ],
+  },
+  null,
+  2,
+);
 
 const modes = [
   { id: "marca", label: "Marca" },
@@ -55,5 +71,11 @@ const timeOptions = [
         <SegmentedControl v-model="mode" :options="modes" full-width />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="SegmentedControl"
+      :initial="liveInitial"
+      notes="props: options, modelValue, size (sm/md/lg), fullWidth. modelValue precisa bater com algum options[i].id."
+    />
   </SectionPage>
 </template>

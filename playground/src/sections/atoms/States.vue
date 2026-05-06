@@ -2,6 +2,18 @@
 import { LoadingState, EmptyState } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const loadingInitial = JSON.stringify(
+  { message: "Buscando dados, aguarde..." },
+  null,
+  2,
+);
+const emptyInitial = JSON.stringify(
+  { message: "Nenhuma transação no período selecionado." },
+  null,
+  2,
+);
 </script>
 
 <template>
@@ -32,5 +44,19 @@ import ExampleBlock from "../ExampleBlock.vue";
         message="Nenhum registro encontrado com os filtros atuais. Ajuste o período ou remova filtros."
       />
     </ExampleBlock>
+
+    <LivePropsEditor
+      title="LoadingState — JSON config (live)"
+      :component="LoadingState"
+      :initial="loadingInitial"
+      notes="props: message"
+    />
+
+    <LivePropsEditor
+      title="EmptyState — JSON config (live)"
+      :component="EmptyState"
+      :initial="emptyInitial"
+      notes="props: message"
+    />
   </SectionPage>
 </template>

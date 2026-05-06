@@ -5,10 +5,13 @@
  * Sidebar nav → section content. Each section demos a single component
  * (or pair) with all its variations: props, sizes, states, edge cases.
  *
- * Section state is persisted in window.location.hash so reloads keep
- * the user on the same component.
+ * State persisted in window.location.hash so reloads keep section.
+ *
+ * IMPORTANT (Vue 3 quirk fixed here): components stored in reactive state
+ * must be wrapped with markRaw to avoid Vue trying to make them reactive
+ * (which breaks dynamic <component :is>). We use markRaw on resolution.
  */
-import { computed, onMounted, ref } from "vue";
+import { computed, markRaw, onMounted, ref, type Component } from "vue";
 import { sectionsByGroup, findSection } from "./sections/registry";
 
 function currentHash(): string | null {
@@ -19,6 +22,16 @@ function currentHash(): string | null {
 const activeId = ref<string>(findSection(currentHash()).id);
 
 const activeSection = computed(() => findSection(activeId.value));
+
+// markRaw the resolved component to skip Vue's reactivity proxy.
+const ActiveComponent = computed<Component>(() =>
+  markRaw(activeSection.value.component as Component),
+);
+
+const activeGroupLabel = computed(() => {
+  const sec = activeSection.value;
+  return sectionsByGroup.find((g) => g.group.id === sec.group)?.group.label ?? "";
+});
 
 function selectSection(id: string): void {
   activeId.value = id;
@@ -31,7 +44,9 @@ onMounted(() => {
   if (typeof window !== "undefined") {
     window.addEventListener("hashchange", () => {
       const next = findSection(currentHash());
-      activeId.value = next.id;
+      if (next.id !== activeId.value) {
+        activeId.value = next.id;
+      }
     });
   }
 });
@@ -45,11 +60,16 @@ onMounted(() => {
         <span>Playground</span>
       </div>
       <nav class="playground-sidebar__nav">
-        <div v-for="{ group, items } in sectionsByGroup" :key="group.id" class="nav-group">
+        <div
+          v-for="{ group, items } in sectionsByGroup"
+          :key="group.id"
+          class="nav-group"
+        >
           <div class="nav-group__label">{{ group.label }}</div>
           <button
             v-for="s in items"
             :key="s.id"
+            type="button"
             class="nav-item"
             :class="{ 'nav-item--active': s.id === activeId }"
             @click="selectSection(s.id)"
@@ -61,8 +81,14 @@ onMounted(() => {
     </aside>
 
     <main class="playground-main">
+      <div class="playground-breadcrumb">
+        <span class="playground-breadcrumb__group">{{ activeGroupLabel }}</span>
+        <span class="playground-breadcrumb__sep">/</span>
+        <span class="playground-breadcrumb__label">{{ activeSection.label }}</span>
+        <span class="playground-breadcrumb__id">#{{ activeId }}</span>
+      </div>
       <div class="playground-content">
-        <component :is="activeSection.component" :key="activeSection.id" />
+        <component :is="ActiveComponent" :key="activeId" />
       </div>
     </main>
   </div>
@@ -137,6 +163,7 @@ onMounted(() => {
   cursor: pointer;
   border-radius: 0.375rem;
   font-family: inherit;
+  width: 100%;
 }
 .nav-item:hover {
   background: var(--color-hover, #f1f5f9);
@@ -152,11 +179,43 @@ onMounted(() => {
 
 .playground-main {
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.playground-breadcrumb {
+  padding: 0.625rem 1.5rem;
+  background: var(--color-surface, #ffffff);
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+}
+.playground-breadcrumb__group {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.playground-breadcrumb__sep {
+  opacity: 0.5;
+}
+.playground-breadcrumb__label {
+  color: var(--color-text, #1e293b);
+  font-weight: 500;
+}
+.playground-breadcrumb__id {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  opacity: 0.7;
 }
 
 .playground-content {
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+  width: 100%;
 }
 </style>

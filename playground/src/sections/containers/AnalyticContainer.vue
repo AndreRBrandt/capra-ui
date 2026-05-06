@@ -3,6 +3,22 @@ import { ref } from "vue";
 import { AnalyticContainer, BaseButton, KpiCard } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    title: "Indicadores",
+    subtitle: "5 filiais ativas",
+    variant: "default",
+    padding: "md",
+    loading: false,
+    error: null,
+    collapsible: false,
+    _slot: "[Slot vazio — para ver conteúdo de verdade use os exemplos acima]",
+  },
+  null,
+  2,
+);
 
 const loading = ref(false);
 const errored = ref(false);
@@ -66,5 +82,11 @@ function simulateError() {
         </AnalyticContainer>
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="AnalyticContainer"
+      :initial="liveInitial"
+      notes="Props: title, subtitle, variant (default/flat/outlined), padding (none/sm/md/lg), loading, error (string), collapsible, collapsed, highlightHeader. _slot vira o body."
+    />
   </SectionPage>
 </template>

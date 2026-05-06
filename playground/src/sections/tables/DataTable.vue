@@ -3,6 +3,29 @@ import { DataTable } from "@capra-ui/core";
 import type { Column } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    columns: [
+      { key: "filial", label: "Filial", format: "text", sticky: true },
+      { key: "valor", label: "Valor", format: "currency", align: "right", sortable: true },
+      { key: "qtd", label: "Qtde", format: "number", align: "right", sortable: true },
+    ],
+    data: [
+      { filial: "BDN BV", valor: 142300, qtd: 451 },
+      { filial: "BDN OL", valor: 98140, qtd: 312 },
+      { filial: "BDN AF", valor: 87502, qtd: 281 },
+    ],
+    rowKey: "filial",
+    sortable: true,
+    searchable: false,
+    compact: false,
+    stickyFirstColumn: true,
+  },
+  null,
+  2,
+);
 
 const data = [
   { filial: "BDN Boa Viagem", faturamento: 142300.5, cupons: 451, ticket: 315.52, modalidade: "salao" },
@@ -92,5 +115,11 @@ const filterOptions = [
         />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="DataTable"
+      :initial="liveInitial"
+      notes="Props: columns, data, rowKey, sortable, searchable, compact, stickyFirstColumn, maxHeight, filterOptions, filterKey, filterLabel."
+    />
   </SectionPage>
 </template>

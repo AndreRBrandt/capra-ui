@@ -2,6 +2,24 @@
 import { KpiCard } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    label: "Faturamento",
+    value: 152340.55,
+    secondaryValue: 138900,
+    format: "currency",
+    decimals: 2,
+    trendLabel: "vs período anterior",
+    showTrendValue: true,
+    invertTrend: false,
+    accentColor: "#e5a22f",
+    showAccent: true,
+  },
+  null,
+  2,
+);
 </script>
 
 <template>
@@ -98,5 +116,12 @@ import ExampleBlock from "../ExampleBlock.vue";
       <KpiCard label="Cupons" :value="487" :secondary-value="452" format="number" :show-trend-value="true" />
       <KpiCard label="Ticket médio" :value="312.81" :secondary-value="307.34" format="currency" :show-trend-value="true" />
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="KpiCard"
+      :initial="liveInitial"
+      notes="Props comuns: label, value, secondaryValue, format (currency/number/percent), decimals, trendLabel, showTrendValue, invertTrend, accentColor, showAccent, suffix, participation, participationLabel."
+      preview-max-width="280px"
+    />
   </SectionPage>
 </template>

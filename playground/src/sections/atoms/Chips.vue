@@ -3,9 +3,24 @@ import { ref } from "vue";
 import { ChipGroup } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const cat = ref("all");
 const small = ref("food");
+
+const liveInitial = JSON.stringify(
+  {
+    modelValue: "all",
+    size: "md",
+    items: [
+      { value: "all", label: "Todos" },
+      { value: "food", label: "Alimentação" },
+      { value: "drink", label: "Bebidas" },
+    ],
+  },
+  null,
+  2,
+);
 
 const categories = [
   { value: "all", label: "Todos" },
@@ -55,5 +70,11 @@ const categories = [
         />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="ChipGroup"
+      :initial="liveInitial"
+      notes="props: items, modelValue, size (sm/md). modelValue precisa bater com algum items[i].value."
+    />
   </SectionPage>
 </template>

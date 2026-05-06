@@ -2,6 +2,18 @@
 import { BaseButton } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    variant: "primary",
+    size: "md",
+    disabled: false,
+    _slot: "Botão editável",
+  },
+  null,
+  2,
+);
 </script>
 
 <template>
@@ -46,5 +58,11 @@ import ExampleBlock from "../ExampleBlock.vue";
         </span>
       </BaseButton>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="BaseButton"
+      :initial="liveInitial"
+      notes="Edite o JSON. Props aceitos: variant, size, disabled, type. _slot vira o texto do botão."
+    />
   </SectionPage>
 </template>
