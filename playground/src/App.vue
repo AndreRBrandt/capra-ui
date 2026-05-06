@@ -34,12 +34,23 @@ const activeGroupLabel = computed(() => {
   return sectionsByGroup.find((g) => g.group.id === sec.group)?.group.label ?? "";
 });
 
+// Visible click counter — if the user clicks sidebar but this number
+// does not change, the click handler is not firing (CSS overlay,
+// disabled state, broken event binding). If it changes but content
+// stays static, the dynamic <component :is> reactivity is broken.
+const navClicks = ref(0);
+
 function selectSection(id: string): void {
+  navClicks.value += 1;
   activeId.value = id;
   if (typeof window !== "undefined") {
     window.location.hash = id;
   }
 }
+
+// Build marker — bumped on every iteration so the user can confirm
+// they pulled the latest after a hard reload.
+const BUILD_MARKER = "v13 / 2026-05-06 / lazy-renderer + secondary-greys";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
@@ -88,6 +99,9 @@ onMounted(() => {
         <span class="playground-breadcrumb__sep">/</span>
         <span class="playground-breadcrumb__label">{{ activeSection.label }}</span>
         <span class="playground-breadcrumb__id">#{{ activeId }}</span>
+        <span class="playground-breadcrumb__clicks" :title="`Cliques registrados: ${navClicks}`">
+          ⓘ {{ navClicks }} cliques · {{ BUILD_MARKER }}
+        </span>
       </div>
       <div class="playground-content">
         <component :is="ActiveComponent" :key="activeId" />
@@ -208,10 +222,16 @@ onMounted(() => {
   font-weight: 500;
 }
 .playground-breadcrumb__id {
-  margin-left: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.7rem;
   opacity: 0.7;
+}
+.playground-breadcrumb__clicks {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.65rem;
+  color: var(--color-text-muted, #94a3b8);
+  white-space: nowrap;
 }
 
 .playground-content {

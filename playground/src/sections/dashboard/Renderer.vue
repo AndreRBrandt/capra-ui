@@ -7,6 +7,7 @@
  */
 import { computed, ref } from "vue";
 import { DashboardRenderer } from "../../../../src/components/dashboard";
+import { BaseButton } from "@capra-ui/core";
 import type { DashboardDefinition, CapraResult } from "../../../../src/types";
 
 import dashboardJson from "../../../data/dashboard-vendas.json";
@@ -15,12 +16,13 @@ import widgetDataJson from "../../../data/widget-data.json";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
 
-// NOTE: LivePropsEditor was REMOVED from this section.
-// Reason: re-spreading the full DashboardDefinition prop on each
-// keystroke causes 5 ECharts widgets to re-mount, freezing the main
-// thread. The 3-mode toggle below already exercises the renderer's
-// runtime behavior. JSON-driven config is exercised by editing
-// playground/data/dashboard-vendas.json directly (HMR-friendly).
+// LAZY MOUNT: the heavy demo (5 ECharts + DataTable + KpiCards) only
+// renders after the user clicks "Carregar dashboard". Without this,
+// switching to this section was pegging the main thread for 1–2s
+// while ECharts initialized 5 instances simultaneously, blocking the
+// sidebar nav (the user reported this as "trava" / "não consigo
+// trocar de conteúdo").
+const demoLoaded = ref(false);
 
 type Mode = "loaded" | "loading" | "error";
 
@@ -77,30 +79,43 @@ function setMode(next: Mode): void {
     import-from="@capra-ui/core"
     imports="DashboardRenderer (via subpath — F3 pendente)"
   >
-    <ExampleBlock title="Controles">
-      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap">
-        <button class="ctrl" :disabled="mode === 'loaded'" @click="setMode('loaded')">Loaded</button>
-        <button class="ctrl" :disabled="mode === 'loading'" @click="setMode('loading')">Loading</button>
-        <button class="ctrl" :disabled="mode === 'error'" @click="setMode('error')">Error</button>
-        <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-left: 0.5rem">
-          modo atual: <code>{{ mode }}</code>
-        </span>
-      </div>
+    <ExampleBlock
+      v-if="!demoLoaded"
+      title="Demo pesada — carregar sob demanda"
+      note="O demo monta 5 ECharts simultâneos. Em máquinas mais lentas isso pode travar momentaneamente o thread principal. Carregue só quando quiser ver."
+    >
+      <BaseButton variant="primary" @click="demoLoaded = true">
+        Carregar dashboard demo
+      </BaseButton>
     </ExampleBlock>
 
-    <ExampleBlock title="Dashboard renderizado">
-      <div style="width: 100%">
-        <DashboardRenderer
-          :dashboard="dashboard"
-          :widget-data="widgetData"
-          :widget-loading="widgetLoading"
-          :widget-errors="widgetErrors"
-          @filter-change="handleFilterChange"
-        />
-      </div>
-    </ExampleBlock>
+    <template v-if="demoLoaded">
+      <ExampleBlock title="Controles">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap">
+          <button class="ctrl" :disabled="mode === 'loaded'" @click="setMode('loaded')">Loaded</button>
+          <button class="ctrl" :disabled="mode === 'loading'" @click="setMode('loading')">Loading</button>
+          <button class="ctrl" :disabled="mode === 'error'" @click="setMode('error')">Error</button>
+          <button class="ctrl" @click="demoLoaded = false">Descarregar</button>
+          <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-left: 0.5rem">
+            modo atual: <code>{{ mode }}</code>
+          </span>
+        </div>
+      </ExampleBlock>
 
-    <ExampleBlock title="Event log">
+      <ExampleBlock title="Dashboard renderizado">
+        <div style="width: 100%">
+          <DashboardRenderer
+            :dashboard="dashboard"
+            :widget-data="widgetData"
+            :widget-loading="widgetLoading"
+            :widget-errors="widgetErrors"
+            @filter-change="handleFilterChange"
+          />
+        </div>
+      </ExampleBlock>
+    </template>
+
+    <ExampleBlock v-if="demoLoaded" title="Event log">
       <ul class="event-log">
         <li v-for="(line, i) in events" :key="i">{{ line }}</li>
         <li v-if="events.length === 0" style="color: var(--color-text-muted)">
