@@ -2,14 +2,15 @@
 /**
  * ThemeControls — playground-wide theme switcher.
  * =================================================
- * Lives at the top of the sidebar (always visible). Provides:
- *  - Light/Dark mode toggle (sun/moon)
- *  - Base palette: Brand + Highlight color pickers
- *  - Reset to defaults
+ * 3-color anchor system (70/20/10):
+ *  - Brand     (70% — predominant)
+ *  - Secondary (20% — complementary)
+ *  - Highlight (10% — accent)
  *
- * Changes propagate to ALL sections instantly via CSS variable
- * overrides on <html> + a data-theme attribute that activates
- * capra-ui's dark.css overrides.
+ * Greys/backgrounds/borders derive from the BRAND hue with very low
+ * saturation, so the whole UI carries a coherent tonal personality.
+ *
+ * Mounted at the top of the sidebar — visible on every section.
  */
 import { ref } from "vue";
 import { Sun, Moon, Palette } from "lucide-vue-next";
@@ -43,8 +44,13 @@ const expanded = ref(false);
     </div>
 
     <div v-show="expanded" class="theme-controls__panel">
-      <label class="theme-controls__label">
-        <span class="theme-controls__label-text">Brand</span>
+      <div class="theme-controls__legend">
+        Sistema 70/20/10 — greys derivam do hue da Brand.
+      </div>
+
+      <label class="theme-controls__label" data-pct="70%">
+        <span class="theme-controls__dot" :style="{ background: state.brandHex }" />
+        <span class="theme-controls__name">Brand</span>
         <input
           type="color"
           v-model="state.brandHex"
@@ -52,8 +58,21 @@ const expanded = ref(false);
         />
         <code class="theme-controls__hex">{{ state.brandHex }}</code>
       </label>
-      <label class="theme-controls__label">
-        <span class="theme-controls__label-text">Highlight</span>
+
+      <label class="theme-controls__label" data-pct="20%">
+        <span class="theme-controls__dot" :style="{ background: state.secondaryHex }" />
+        <span class="theme-controls__name">Secondary</span>
+        <input
+          type="color"
+          v-model="state.secondaryHex"
+          class="theme-controls__color"
+        />
+        <code class="theme-controls__hex">{{ state.secondaryHex }}</code>
+      </label>
+
+      <label class="theme-controls__label" data-pct="10%">
+        <span class="theme-controls__dot" :style="{ background: state.highlightHex }" />
+        <span class="theme-controls__name">Highlight</span>
         <input
           type="color"
           v-model="state.highlightHex"
@@ -61,6 +80,7 @@ const expanded = ref(false);
         />
         <code class="theme-controls__hex">{{ state.highlightHex }}</code>
       </label>
+
       <button
         type="button"
         class="theme-controls__btn theme-controls__btn--reset"
@@ -68,10 +88,6 @@ const expanded = ref(false);
       >
         Resetar tema
       </button>
-      <p class="theme-controls__hint">
-        Brand controla cor primária (botões, sidebar, charts).
-        Highlight é o accent (CTAs, badges).
-      </p>
     </div>
   </div>
 </template>
@@ -133,16 +149,42 @@ const expanded = ref(false);
   border-radius: 0.375rem;
 }
 
+.theme-controls__legend {
+  font-size: 0.65rem;
+  line-height: 1.4;
+  color: var(--color-text-muted, #94a3b8);
+  margin-bottom: 0.25rem;
+}
+
 .theme-controls__label {
   display: grid;
-  grid-template-columns: 4rem 1.75rem 1fr;
+  grid-template-columns: 0.875rem 4.5rem 1.5rem 1fr;
   align-items: center;
   gap: 0.375rem;
   font-size: 0.7rem;
+  position: relative;
 }
 
-.theme-controls__label-text {
-  color: var(--color-text-muted, #64748b);
+.theme-controls__label::after {
+  content: attr(data-pct);
+  position: absolute;
+  right: 0;
+  top: -0.7rem;
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  color: var(--color-text-subtle, #94a3b8);
+  font-weight: 600;
+}
+
+.theme-controls__dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.theme-controls__name {
+  color: var(--color-text-secondary, #475569);
   font-weight: 500;
 }
 
@@ -158,20 +200,13 @@ const expanded = ref(false);
 
 .theme-controls__hex {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--color-text, #334155);
 }
 
 .theme-controls__btn--reset {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   font-size: 0.7rem;
   padding: 0.3rem 0.5rem;
-}
-
-.theme-controls__hint {
-  margin: 0.25rem 0 0;
-  font-size: 0.65rem;
-  line-height: 1.4;
-  color: var(--color-text-muted, #94a3b8);
 }
 </style>
