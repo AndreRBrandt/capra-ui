@@ -9,11 +9,20 @@ const liveInitial = JSON.stringify(
     variant: "primary",
     size: "md",
     disabled: false,
+    type: "button",
     _slot: "Botão editável",
   },
   null,
   2,
 );
+
+const propsInfo = [
+  { name: "variant", type: "\"primary\" | \"secondary\" | \"outline\" | \"ghost\" | \"accent\"", default: "\"primary\"", description: "Estilo visual do botão." },
+  { name: "size", type: "\"sm\" | \"md\" | \"lg\"", default: "\"md\"", description: "Altura/padding/font-size." },
+  { name: "disabled", type: "boolean", default: "false", description: "Desabilita interação + reduz opacidade." },
+  { name: "type", type: "\"button\" | \"submit\" | \"reset\"", default: "\"button\"", description: "Atributo HTML type." },
+  { name: "_slot", type: "string (especial)", default: "—", description: "Texto do default slot (somente para o editor)." },
+];
 </script>
 
 <template>
@@ -62,7 +71,7 @@ const liveInitial = JSON.stringify(
     <LivePropsEditor
       :component="BaseButton"
       :initial="liveInitial"
-      notes="Edite o JSON. Props aceitos: variant, size, disabled, type. _slot vira o texto do botão."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

@@ -22,6 +22,23 @@ const liveBarInitial = JSON.stringify(
   2,
 );
 
+const barPropsInfo = [
+  { name: "data", type: "Array<Record<string, any>>", default: "—", description: "Dados do gráfico.", required: true },
+  { name: "categoryKey", type: "string", default: "—", description: "Chave do eixo X (categoria).", required: true },
+  { name: "valueKey", type: "string", default: "—", description: "Chave do valor principal.", required: true },
+  { name: "previousKey", type: "string", default: "—", description: "Chave do valor de comparação." },
+  { name: "seriesLabel", type: "string", default: "—", description: "Label da série principal na legenda." },
+  { name: "previousLabel", type: "string", default: "—", description: "Label da série de comparação." },
+  { name: "format", type: "\"currency\" | \"number\" | \"percent\" | \"none\"", default: "\"number\"", description: "Formato dos valores." },
+  { name: "decimals", type: "number", default: "—", description: "Casas decimais." },
+  { name: "horizontal", type: "boolean", default: "false", description: "Barras horizontais." },
+  { name: "height", type: "string", default: "\"240px\"", description: "Altura do gráfico." },
+  { name: "showLabels", type: "boolean", default: "false", description: "Mostra valores nas barras." },
+  { name: "showLegend", type: "boolean", default: "false", description: "Exibe legenda." },
+  { name: "color", type: "string (hex/var)", default: "—", description: "Cor da série principal." },
+  { name: "previousColor", type: "string", default: "—", description: "Cor da série de comparação." },
+];
+
 const filialData = [
   { NMFILIAL: "BDN BV", VALOR: 142300, VALOR_PREV: 128450 },
   { NMFILIAL: "BDN OL", VALOR: 98140, VALOR_PREV: 91200 },
@@ -181,7 +198,7 @@ const heatmapData: [number, number, number][] = (() => {
       title="BarChart — JSON config (live)"
       :component="BarChart"
       :initial="liveBarInitial"
-      notes="Props: data (array), categoryKey, valueKey, format (currency/number/percent/none), horizontal, height, showLegend, showLabels, color, etc."
+      :props-info="barPropsInfo"
     />
   </SectionPage>
 </template>

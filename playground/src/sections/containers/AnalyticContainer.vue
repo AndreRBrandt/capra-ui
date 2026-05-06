@@ -20,6 +20,20 @@ const liveInitial = JSON.stringify(
   2,
 );
 
+const propsInfo = [
+  { name: "title", type: "string", default: "—", description: "Título no header." },
+  { name: "subtitle", type: "string", default: "—", description: "Subtítulo abaixo do título." },
+  { name: "icon", type: "Component", default: "—", description: "Componente lucide-vue-next (não editável via JSON)." },
+  { name: "variant", type: "\"default\" | \"flat\" | \"outlined\"", default: "\"default\"", description: "Estilo visual." },
+  { name: "padding", type: "\"none\" | \"sm\" | \"md\" | \"lg\"", default: "\"sm\"", description: "Padding interno." },
+  { name: "loading", type: "boolean", default: "false", description: "Substitui body por spinner." },
+  { name: "error", type: "Error | string | null", default: "null", description: "Mensagem de erro com botão retry." },
+  { name: "collapsible", type: "boolean", default: "false", description: "Permite collapse." },
+  { name: "collapsed", type: "boolean", default: "false", description: "Estado de collapse (v-model)." },
+  { name: "highlightHeader", type: "boolean", default: "false", description: "Header com fundo destaque." },
+  { name: "_slot", type: "string (especial)", default: "—", description: "Texto do body (use exemplos para ver layout real)." },
+];
+
 const loading = ref(false);
 const errored = ref(false);
 
@@ -86,7 +100,7 @@ function simulateError() {
     <LivePropsEditor
       :component="AnalyticContainer"
       :initial="liveInitial"
-      notes="Props: title, subtitle, variant (default/flat/outlined), padding (none/sm/md/lg), loading, error (string), collapsible, collapsed, highlightHeader. _slot vira o body."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

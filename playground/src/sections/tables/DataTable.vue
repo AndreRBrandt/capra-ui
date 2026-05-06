@@ -27,6 +27,22 @@ const liveInitial = JSON.stringify(
   2,
 );
 
+const propsInfo = [
+  { name: "columns", type: "Column[]", default: "—", description: "Definições de colunas (key, label, format, sortable, sticky, align, width).", required: true },
+  { name: "data", type: "Record<string, any>[]", default: "—", description: "Linhas de dados.", required: true },
+  { name: "rowKey", type: "string", default: "—", description: "Coluna que identifica unicamente cada row." },
+  { name: "sortable", type: "boolean", default: "false", description: "Habilita sort (override por coluna)." },
+  { name: "searchable", type: "boolean", default: "false", description: "Mostra input de busca no header." },
+  { name: "searchPlaceholder", type: "string", default: "\"Buscar...\"", description: "Placeholder do search." },
+  { name: "searchKeys", type: "string[]", default: "—", description: "Quais colunas o search filtra (default: todas string)." },
+  { name: "filterOptions", type: "{ value, label }[]", default: "—", description: "Opções do dropdown de filtro categórico." },
+  { name: "filterKey", type: "string", default: "—", description: "Coluna alvo do filtro." },
+  { name: "filterLabel", type: "string", default: "—", description: "Label do filtro." },
+  { name: "compact", type: "boolean", default: "false", description: "Densidade visual maior." },
+  { name: "stickyFirstColumn", type: "boolean", default: "false", description: "Primeira coluna fica sticky no scroll horizontal." },
+  { name: "maxHeight", type: "string", default: "—", description: "Limite de altura (ex: \"480px\") com scroll vertical." },
+];
+
 const data = [
   { filial: "BDN Boa Viagem", faturamento: 142300.5, cupons: 451, ticket: 315.52, modalidade: "salao" },
   { filial: "BDN Olinda", faturamento: 98140.0, cupons: 312, ticket: 314.55, modalidade: "salao" },
@@ -119,7 +135,7 @@ const filterOptions = [
     <LivePropsEditor
       :component="DataTable"
       :initial="liveInitial"
-      notes="Props: columns, data, rowKey, sortable, searchable, compact, stickyFirstColumn, maxHeight, filterOptions, filterKey, filterLabel."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

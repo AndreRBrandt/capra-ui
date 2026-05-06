@@ -20,6 +20,23 @@ const liveInitial = JSON.stringify(
   null,
   2,
 );
+
+const propsInfo = [
+  { name: "label", type: "string", default: "—", description: "Título do card.", required: true },
+  { name: "value", type: "number", default: "—", description: "Valor principal.", required: true },
+  { name: "secondaryValue", type: "number", default: "—", description: "Valor de comparação (período anterior)." },
+  { name: "format", type: "\"currency\" | \"number\" | \"percent\"", default: "\"number\"", description: "Formato de exibição." },
+  { name: "decimals", type: "number", default: "—", description: "Casas decimais (default por formato)." },
+  { name: "suffix", type: "string", default: "—", description: "Sufixo após o valor (ex: \"h\")." },
+  { name: "trendLabel", type: "string", default: "\"\"", description: "Texto pequeno ao lado da variação." },
+  { name: "showTrendValue", type: "boolean", default: "false", description: "Mostra a % de variação se há secondaryValue." },
+  { name: "invertTrend", type: "boolean", default: "false", description: "Aumento = ruim (cancelamentos, despesas)." },
+  { name: "trendAffectsValue", type: "boolean", default: "false", description: "Aplica cor de tendência no valor principal." },
+  { name: "accentColor", type: "string (hex/var)", default: "—", description: "Cor de destaque do card." },
+  { name: "showAccent", type: "boolean", default: "false", description: "Exibe a barra colorida de destaque." },
+  { name: "participation", type: "number", default: "—", description: "% de participação (0-100)." },
+  { name: "participationLabel", type: "string", default: "—", description: "Texto da participação (ex: \"do total\")." },
+];
 </script>
 
 <template>
@@ -120,7 +137,7 @@ const liveInitial = JSON.stringify(
     <LivePropsEditor
       :component="KpiCard"
       :initial="liveInitial"
-      notes="Props comuns: label, value, secondaryValue, format (currency/number/percent), decimals, trendLabel, showTrendValue, invertTrend, accentColor, showAccent, suffix, participation, participationLabel."
+      :props-info="propsInfo"
       preview-max-width="280px"
     />
   </SectionPage>

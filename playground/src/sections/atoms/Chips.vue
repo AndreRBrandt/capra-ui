@@ -22,6 +22,12 @@ const liveInitial = JSON.stringify(
   2,
 );
 
+const propsInfo = [
+  { name: "items", type: "{ value: string, label: string }[]", default: "—", description: "Lista de chips.", required: true },
+  { name: "modelValue", type: "string", default: "—", description: "value do chip ativo.", required: true },
+  { name: "size", type: "\"sm\" | \"md\"", default: "\"md\"", description: "Tamanho dos chips." },
+];
+
 const categories = [
   { value: "all", label: "Todos" },
   { value: "food", label: "Alimentação" },
@@ -74,7 +80,7 @@ const categories = [
     <LivePropsEditor
       :component="ChipGroup"
       :initial="liveInitial"
-      notes="props: items, modelValue, size (sm/md). modelValue precisa bater com algum items[i].value."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

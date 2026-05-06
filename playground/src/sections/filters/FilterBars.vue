@@ -9,6 +9,50 @@ import {
 } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const filterBarInitial = JSON.stringify(
+  {
+    showReset: true,
+    resetLabel: "Resetar",
+    hasActiveFilters: true,
+    gap: "sm",
+    wrap: true,
+    align: "start",
+    _slotHtml: "<span style='font-size:0.875rem;color:var(--color-text-muted)'>[Coloque os FilterTrigger+Dropdown aqui]</span>",
+  },
+  null,
+  2,
+);
+
+const collapsibleInitial = JSON.stringify(
+  {
+    expanded: false,
+    hasActiveSecondary: false,
+    expandLabel: "Filtros",
+    sticky: false,
+    stickyTop: "4rem",
+  },
+  null,
+  2,
+);
+
+const filterBarPropsInfo = [
+  { name: "showReset", type: "boolean", default: "true", description: "Exibe botão Resetar." },
+  { name: "resetLabel", type: "string", default: "—", description: "Label do botão (default via i18n)." },
+  { name: "hasActiveFilters", type: "boolean", default: "false", description: "Habilita visual do reset (cor)." },
+  { name: "gap", type: "\"sm\" | \"md\" | \"lg\"", default: "\"sm\"", description: "Espaçamento entre filtros." },
+  { name: "wrap", type: "boolean", default: "true", description: "Permite quebra de linha em telas estreitas." },
+  { name: "align", type: "\"start\" | \"center\" | \"end\"", default: "\"start\"", description: "Alinhamento horizontal dos filtros." },
+];
+
+const collapsibleInfo = [
+  { name: "expanded", type: "boolean", default: "false", description: "v-model — painel secundário aberto." },
+  { name: "hasActiveSecondary", type: "boolean", default: "false", description: "Marca botão expand como ativo." },
+  { name: "expandLabel", type: "string", default: "\"Filtros\"", description: "Label do botão expandir." },
+  { name: "sticky", type: "boolean", default: "true", description: "Barra sticky ao topo." },
+  { name: "stickyTop", type: "string", default: "\"4rem\"", description: "Offset top em sticky." },
+];
 
 const expanded = ref(false);
 const filiais = ref<(string | number)[]>(["bv"]);
@@ -107,6 +151,20 @@ function reset() {
         </template>
       </CollapsibleFilterBar>
     </ExampleBlock>
+
+    <LivePropsEditor
+      title="FilterBar — JSON config (live)"
+      :component="FilterBar"
+      :initial="filterBarInitial"
+      :props-info="filterBarPropsInfo"
+    />
+
+    <LivePropsEditor
+      title="CollapsibleFilterBar — JSON config (live)"
+      :component="CollapsibleFilterBar"
+      :initial="collapsibleInitial"
+      :props-info="collapsibleInfo"
+    />
   </SectionPage>
 </template>
 

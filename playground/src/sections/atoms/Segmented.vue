@@ -24,6 +24,13 @@ const liveInitial = JSON.stringify(
   2,
 );
 
+const propsInfo = [
+  { name: "options", type: "{ id: string, label: string, disabled?: boolean }[]", default: "—", description: "Lista de opções.", required: true },
+  { name: "modelValue", type: "string", default: "—", description: "ID da opção selecionada.", required: true },
+  { name: "size", type: "\"sm\" | \"md\" | \"lg\"", default: "\"md\"", description: "Tamanho do controle." },
+  { name: "fullWidth", type: "boolean", default: "false", description: "Ocupa 100% do container." },
+];
+
 const modes = [
   { id: "marca", label: "Marca" },
   { id: "modalidade", label: "Modalidade" },
@@ -75,7 +82,7 @@ const timeOptions = [
     <LivePropsEditor
       :component="SegmentedControl"
       :initial="liveInitial"
-      notes="props: options, modelValue, size (sm/md/lg), fullWidth. modelValue precisa bater com algum options[i].id."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

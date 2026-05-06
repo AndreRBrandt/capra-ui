@@ -14,6 +14,13 @@ const emptyInitial = JSON.stringify(
   null,
   2,
 );
+
+const loadingProps = [
+  { name: "message", type: "string", default: "—", description: "Texto exibido abaixo do spinner." },
+];
+const emptyProps = [
+  { name: "message", type: "string", default: "—", description: "Mensagem de estado vazio." },
+];
 </script>
 
 <template>
@@ -49,14 +56,14 @@ const emptyInitial = JSON.stringify(
       title="LoadingState — JSON config (live)"
       :component="LoadingState"
       :initial="loadingInitial"
-      notes="props: message"
+      :props-info="loadingProps"
     />
 
     <LivePropsEditor
       title="EmptyState — JSON config (live)"
       :component="EmptyState"
       :initial="emptyInitial"
-      notes="props: message"
+      :props-info="emptyProps"
     />
   </SectionPage>
 </template>

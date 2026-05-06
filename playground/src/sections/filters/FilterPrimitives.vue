@@ -3,10 +3,38 @@ import { ref } from "vue";
 import { FilterTrigger, FilterDropdown, BaseButton } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const open1 = ref(false);
 const open2 = ref(false);
 const open3 = ref(false);
+
+const triggerInitial = JSON.stringify(
+  {
+    label: "Filial",
+    value: "3 selecionadas",
+    placeholder: "",
+    open: false,
+    active: true,
+    clearable: true,
+    disabled: false,
+    size: "md",
+  },
+  null,
+  2,
+);
+
+const triggerPropsInfo = [
+  { name: "label", type: "string", default: "—", description: "Rótulo (\"Período\", \"Filial\").", required: true },
+  { name: "value", type: "string", default: "—", description: "Texto do valor selecionado." },
+  { name: "placeholder", type: "string", default: "—", description: "Texto quando sem valor." },
+  { name: "icon", type: "Component", default: "—", description: "Lucide icon (não editável via JSON)." },
+  { name: "open", type: "boolean", default: "false", description: "Indica que o dropdown está aberto (gira chevron)." },
+  { name: "active", type: "boolean", default: "false", description: "Filtro tem valor diferente do default." },
+  { name: "clearable", type: "boolean", default: "true", description: "Mostra X quando active." },
+  { name: "disabled", type: "boolean", default: "false", description: "Bloqueia interação." },
+  { name: "size", type: "\"sm\" | \"md\"", default: "\"md\"", description: "Altura/padding." },
+];
 </script>
 
 <template>
@@ -91,6 +119,13 @@ const open3 = ref(false);
         </FilterDropdown>
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      title="FilterTrigger — JSON config (live)"
+      :component="FilterTrigger"
+      :initial="triggerInitial"
+      :props-info="triggerPropsInfo"
+    />
   </SectionPage>
 </template>
 

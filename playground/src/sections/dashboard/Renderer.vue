@@ -14,6 +14,27 @@ import widgetDataJson from "../../../data/widget-data.json";
 
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+// Initial JSON for the live editor: full DashboardDefinition + minimal widgetData
+const liveInitial = JSON.stringify(
+  {
+    dashboard: dashboardJson,
+    widgetData: widgetDataJson,
+    widgetLoading: {},
+    widgetErrors: {},
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "dashboard", type: "DashboardDefinition", default: "—", description: "Definição completa: filters, sections, widgets.", required: true },
+  { name: "widgetData", type: "Record<widgetId, CapraResult | null>", default: "—", description: "Dados pré-resolvidos por widget.id.", required: true },
+  { name: "widgetLoading", type: "Record<widgetId, boolean>", default: "{}", description: "Loading state por widget.", required: true },
+  { name: "widgetErrors", type: "Record<widgetId, string | null>", default: "{}", description: "Erro por widget.", required: true },
+  { name: "filterValues", type: "Record<string, unknown>", default: "—", description: "Valores controlados dos filtros (v-model:filterValues)." },
+];
 
 type Mode = "loaded" | "loading" | "error";
 
@@ -101,6 +122,13 @@ function setMode(next: Mode): void {
         </li>
       </ul>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="DashboardRenderer"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+      notes="JSON completo da DashboardDefinition + widgetData. Edite filters[], sections[], widgets[] e veja o renderer reagir."
+    />
   </SectionPage>
 </template>
 

@@ -2,6 +2,31 @@
 import { MetricsGrid, MetricItem } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    label: "Faturamento",
+    value: "R$ 152.340",
+    trend: 12.5,
+    trendInvert: false,
+    highlight: false,
+    variant: "default",
+    sublabel: "antes dos descontos",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "label", type: "string", default: "—", description: "Rótulo da métrica.", required: true },
+  { name: "value", type: "string | number", default: "—", description: "Valor a exibir.", required: true },
+  { name: "trend", type: "number | null", default: "—", description: "Variação % (cor automática)." },
+  { name: "trendInvert", type: "boolean", default: "false", description: "Inverte cor de tendência." },
+  { name: "highlight", type: "boolean", default: "false", description: "Destaque visual (background)." },
+  { name: "variant", type: "\"default\" | \"highlight\" | \"success\" | \"warning\" | \"error\"", default: "\"default\"", description: "Cor semântica." },
+  { name: "sublabel", type: "string", default: "—", description: "Texto pequeno sob o valor." },
+];
 </script>
 
 <template>
@@ -54,5 +79,13 @@ import ExampleBlock from "../ExampleBlock.vue";
         </MetricsGrid>
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      title="MetricItem — JSON config (live)"
+      :component="MetricItem"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+      preview-max-width="280px"
+    />
   </SectionPage>
 </template>

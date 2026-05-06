@@ -4,6 +4,7 @@ import { ListContainer } from "@capra-ui/core";
 import type { ListContainerGroup } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 interface DemoItem {
   id: number;
@@ -39,6 +40,40 @@ function toggle(key: string) {
 }
 
 const search = ref("");
+
+const liveInitial = JSON.stringify(
+  {
+    title: "Cupons",
+    summary: "3 cupons · R$ 297,60",
+    loading: false,
+    empty: false,
+    emptyMessage: "Nenhum cupom",
+    showSearch: true,
+    searchPlaceholder: "Buscar...",
+    variant: "default",
+    collapsible: false,
+    maxHeight: "320px",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "title", type: "string", default: "—", description: "Título do container." },
+  { name: "loading", type: "boolean", default: "false", description: "Estado de loading." },
+  { name: "error", type: "Error | string | null", default: "null", description: "Erro com retry." },
+  { name: "empty", type: "boolean", default: "false", description: "Mostra estado vazio." },
+  { name: "emptyMessage", type: "string", default: "\"Nenhum item encontrado\"", description: "Mensagem do estado vazio." },
+  { name: "maxHeight", type: "string", default: "—", description: "Altura máxima do scroll." },
+  { name: "variant", type: "\"default\" | \"flat\" | \"outlined\"", default: "\"default\"", description: "Estilo visual." },
+  { name: "collapsible", type: "boolean", default: "false", description: "Permite collapse do container inteiro." },
+  { name: "collapsed", type: "boolean", default: "false", description: "Estado de collapse." },
+  { name: "showSearch", type: "boolean", default: "true", description: "Mostra input de busca." },
+  { name: "searchPlaceholder", type: "string", default: "\"Buscar...\"", description: "Placeholder da busca." },
+  { name: "search", type: "string", default: "\"\"", description: "Valor da busca (v-model:search)." },
+  { name: "summary", type: "string", default: "—", description: "Texto de resumo (ex: \"34 itens · R$ 1.200\")." },
+  { name: "groups", type: "ListContainerGroup[]", default: "—", description: "Grupos com items[] (renderização agrupada com collapse)." },
+];
 </script>
 
 <template>
@@ -89,5 +124,12 @@ const search = ref("");
         <ListContainer title="Cupons" :loading="true" :show-search="false" />
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="ListContainer"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+      notes="Sem default slot/group-header — para ver layout com items, use os exemplos acima."
+    />
   </SectionPage>
 </template>

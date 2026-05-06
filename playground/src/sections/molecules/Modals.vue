@@ -3,11 +3,30 @@ import { ref } from "vue";
 import { Modal, BaseButton } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const open1 = ref(false);
 const open2 = ref(false);
 const open3 = ref(false);
 const open4 = ref(false);
+
+const liveInitial = JSON.stringify(
+  {
+    open: true,
+    title: "Modal de teste",
+    size: "md",
+    _slotHtml: "<p>Conteúdo editável do modal.</p><p style='color:#64748b;font-size:0.875rem'>Coloque <code>open: false</code> e clique fora pra ver o reabrir clicando no preview.</p>",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "open", type: "boolean", default: "false", description: "Visibilidade (v-model:open)." },
+  { name: "title", type: "string", default: "—", description: "Título no header." },
+  { name: "size", type: "\"sm\" | \"md\" | \"lg\" | \"xl\"", default: "\"md\"", description: "Largura máxima." },
+  { name: "_slotHtml", type: "string (especial)", default: "—", description: "HTML do body. Slots #header e #footer não acessíveis pelo editor." },
+];
 </script>
 
 <template>
@@ -60,5 +79,11 @@ const open4 = ref(false);
         </div>
       </Modal>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="Modal"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+    />
   </SectionPage>
 </template>

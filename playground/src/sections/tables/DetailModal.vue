@@ -3,9 +3,32 @@ import { ref } from "vue";
 import { DetailModal, BaseButton } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const open1 = ref(false);
 const open2 = ref(false);
+
+const liveInitial = JSON.stringify(
+  {
+    show: true,
+    title: "Faturamento — BDN Boa Viagem",
+    size: "lg",
+    periodLabel: "01/04 – 30/04",
+    previousPeriodLabel: "01/03 – 31/03",
+    _slotHtml: "<p>Conteúdo do modal — aqui caberia tabela ou gráfico de detalhamento.</p>",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "show", type: "boolean", default: "false", description: "Visibilidade (v-model:show)." },
+  { name: "title", type: "string", default: "—", description: "Título no header." },
+  { name: "size", type: "\"sm\" | \"md\" | \"lg\" | \"xl\"", default: "\"md\"", description: "Largura máxima." },
+  { name: "periodLabel", type: "string", default: "—", description: "Label de período atual (ex: \"01/04 – 30/04\")." },
+  { name: "previousPeriodLabel", type: "string", default: "—", description: "Label de período anterior para comparação." },
+  { name: "_slotHtml", type: "string (especial)", default: "—", description: "HTML do body. Slot #footer não acessível pelo editor." },
+];
 </script>
 
 <template>
@@ -53,5 +76,11 @@ const open2 = ref(false);
         <p>DetailModal sem period-label. Funciona como Modal normal.</p>
       </DetailModal>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="DetailModal"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+    />
   </SectionPage>
 </template>

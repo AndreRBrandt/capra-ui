@@ -4,6 +4,34 @@ import { DashboardFilterBar } from "../../../../src/components/dashboard";
 import type { DashboardFilterDefinition } from "../../../../src/types";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    filters: [
+      { key: "periodo", dimension: "DATA_REF", filterType: "date", label: "Período" },
+      {
+        key: "filial",
+        dimension: "NMFILIAL",
+        filterType: "multiselect",
+        label: "Filial",
+        options: [
+          { value: "bv", label: "BDN Boa Viagem" },
+          { value: "ol", label: "BDN Olinda" },
+        ],
+      },
+    ],
+    values: {},
+  },
+  null,
+  2,
+);
+
+const livePropsInfo = [
+  { name: "filters", type: "DashboardFilterDefinition[]", default: "—", description: "Lista de filtros com { key, dimension, filterType, label, options? }.", required: true },
+  { name: "values", type: "Record<string, unknown>", default: "{}", description: "Valores controlados (v-model:values) por filter.key.", required: true },
+  { name: "iconFor", type: "(filter) => Component", default: "—", description: "Override de ícone por filtro (não editável via JSON)." },
+];
 
 const filters: DashboardFilterDefinition[] = [
   {
@@ -80,6 +108,12 @@ function onChange(p: { key: string; value: unknown }) {
       <DashboardFilterBar :filters="[]" :values="{}" />
       <span style="font-size: 0.75rem; color: var(--color-text-muted)">— renderiza um wrapper vazio</span>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="DashboardFilterBar"
+      :initial="liveInitial"
+      :props-info="livePropsInfo"
+    />
   </SectionPage>
 </template>
 

@@ -10,10 +10,16 @@ const q2 = ref("");
 const q3 = ref("BURGUER DO BODE");
 
 const liveInitial = JSON.stringify(
-  { placeholder: "Buscar produtos...", debounce: 300 },
+  { placeholder: "Buscar produtos...", debounce: 300, modelValue: "" },
   null,
   2,
 );
+
+const propsInfo = [
+  { name: "modelValue", type: "string", default: "\"\"", description: "Valor inicial do input (v-model não funciona aqui)." },
+  { name: "placeholder", type: "string", default: "\"Buscar...\"", description: "Texto quando vazio." },
+  { name: "debounce", type: "number", default: "300", description: "Delay em ms antes de emitir update:modelValue." },
+];
 </script>
 
 <template>
@@ -54,7 +60,7 @@ const liveInitial = JSON.stringify(
     <LivePropsEditor
       :component="SearchInput"
       :initial="liveInitial"
-      notes="placeholder, debounce (ms). v-model não funciona aqui — para testar binding use os exemplos acima."
+      :props-info="propsInfo"
       preview-max-width="320px"
     />
   </SectionPage>

@@ -9,6 +9,11 @@ const liveInitial = JSON.stringify(
   null,
   2,
 );
+
+const propsInfo = [
+  { name: "variant", type: "\"info\" | \"success\" | \"muted\"", default: "\"info\"", description: "Esquema de cor (azul, verde, cinza)." },
+  { name: "_slot", type: "string (especial)", default: "—", description: "Conteúdo do badge." },
+];
 </script>
 
 <template>
@@ -48,7 +53,7 @@ const liveInitial = JSON.stringify(
     <LivePropsEditor
       :component="StatusBadge"
       :initial="liveInitial"
-      notes="variant: info | success | muted. _slot vira o conteúdo do badge."
+      :props-info="propsInfo"
     />
   </SectionPage>
 </template>

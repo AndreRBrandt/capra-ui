@@ -3,8 +3,28 @@ import { ref } from "vue";
 import { Collapsible } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
 
 const open = ref(true);
+
+const liveInitial = JSON.stringify(
+  {
+    defaultOpen: true,
+    disabled: false,
+    animate: true,
+    _slotHtml: "<div style='padding:0.75rem'>Body do collapsible (HTML via _slotHtml)</div>",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "defaultOpen", type: "boolean", default: "false", description: "Estado inicial (modo não-controlado)." },
+  { name: "modelValue", type: "boolean", default: "—", description: "v-model — modo controlado." },
+  { name: "disabled", type: "boolean", default: "false", description: "Desabilita o toggle." },
+  { name: "animate", type: "boolean", default: "true", description: "Ativa transição CSS de altura." },
+  { name: "_slotHtml", type: "string (especial)", default: "—", description: "HTML do body. Slots #header e #footer não são acessíveis pelo editor." },
+];
 </script>
 
 <template>
@@ -68,5 +88,11 @@ const open = ref(true);
         </Collapsible>
       </div>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="Collapsible"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+    />
   </SectionPage>
 </template>

@@ -2,6 +2,20 @@
 import { TrendBadge } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  { value: 12.5, invert: false, showIcon: true, format: "percent" },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "value", type: "number | null | undefined", default: "—", description: "Variação a exibir. Positivo verde, negativo vermelho, 0 neutro.", required: true },
+  { name: "invert", type: "boolean", default: "false", description: "Quando aumento = ruim (cancelamentos, despesas)." },
+  { name: "showIcon", type: "boolean", default: "true", description: "Mostra seta direcional." },
+  { name: "format", type: "\"percent\" | \"number\"", default: "\"percent\"", description: "Formato do valor (% ou número)." },
+];
 </script>
 
 <template>
@@ -38,5 +52,11 @@ import ExampleBlock from "../ExampleBlock.vue";
       <TrendBadge :value="-8.4" />
       <TrendBadge :value="0" />
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="TrendBadge"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+    />
   </SectionPage>
 </template>

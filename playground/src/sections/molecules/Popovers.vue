@@ -2,6 +2,25 @@
 import { Popover, BaseButton } from "@capra-ui/core";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
+import LivePropsEditor from "../LivePropsEditor.vue";
+
+const liveInitial = JSON.stringify(
+  {
+    placement: "bottom-end",
+    width: "240px",
+    showClose: false,
+    _slotHtml: "<div style='padding:0.75rem'>Conteúdo do popover (HTML editável)</div>",
+  },
+  null,
+  2,
+);
+
+const propsInfo = [
+  { name: "placement", type: "\"bottom-start\" | \"bottom-end\" | \"top-start\" | \"top-end\"", default: "\"bottom-end\"", description: "Posição do popover relativo ao trigger." },
+  { name: "width", type: "string", default: "—", description: "Largura fixa (ex: \"240px\")." },
+  { name: "showClose", type: "boolean", default: "false", description: "Mostra botão X no canto." },
+  { name: "_slotHtml", type: "string (especial)", default: "—", description: "HTML do conteúdo. Slot #trigger não acessível pelo editor (renderiza um trigger default)." },
+];
 </script>
 
 <template>
@@ -55,6 +74,12 @@ import ExampleBlock from "../ExampleBlock.vue";
         </div>
       </Popover>
     </ExampleBlock>
+
+    <LivePropsEditor
+      :component="Popover"
+      :initial="liveInitial"
+      :props-info="propsInfo"
+    />
   </SectionPage>
 </template>
 
