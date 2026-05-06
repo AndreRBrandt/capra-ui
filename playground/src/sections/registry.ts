@@ -25,7 +25,11 @@ import AnalyticsKpiCards from "./analytics/KpiCards.vue";
 import AnalyticsTrends from "./analytics/Trends.vue";
 import AnalyticsMetrics from "./analytics/Metrics.vue";
 
-import Charts from "./charts/Charts.vue";
+import ChartBar from "./charts/Bar.vue";
+import ChartLine from "./charts/Line.vue";
+import ChartPie from "./charts/Pie.vue";
+import ChartStacked from "./charts/Stacked.vue";
+import ChartHeatmap from "./charts/Heatmap.vue";
 
 import DataTable from "./tables/DataTable.vue";
 import DetailModal from "./tables/DetailModal.vue";
@@ -77,7 +81,11 @@ export const sections: PlaygroundSection[] = [
   { id: "analytics-metrics", label: "MetricsGrid / Item", group: "analytics", component: AnalyticsMetrics },
 
   // Charts
-  { id: "charts-all", label: "Bar/Line/Pie/Heatmap/Stacked", group: "charts", component: Charts },
+  { id: "charts-bar", label: "BarChart", group: "charts", component: ChartBar },
+  { id: "charts-line", label: "LineChart", group: "charts", component: ChartLine },
+  { id: "charts-pie", label: "PieChart", group: "charts", component: ChartPie },
+  { id: "charts-stacked", label: "StackedBarChart", group: "charts", component: ChartStacked },
+  { id: "charts-heatmap", label: "HeatmapChart", group: "charts", component: ChartHeatmap },
 
   // Tables
   { id: "tables-datatable", label: "DataTable", group: "tables", component: DataTable },

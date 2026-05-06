@@ -13,6 +13,7 @@
  */
 import { computed, markRaw, onMounted, ref, type Component } from "vue";
 import { sectionsByGroup, findSection } from "./sections/registry";
+import ThemeControls from "./components/ThemeControls.vue";
 
 function currentHash(): string | null {
   if (typeof window === "undefined") return null;
@@ -59,6 +60,7 @@ onMounted(() => {
         <strong>Capra UI</strong>
         <span>Playground</span>
       </div>
+      <ThemeControls />
       <nav class="playground-sidebar__nav">
         <div
           v-for="{ group, items } in sectionsByGroup"

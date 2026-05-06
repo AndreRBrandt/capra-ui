@@ -6,6 +6,7 @@ import { createCapraPlugin } from "@capra-ui/core";
 // not Tailwind utility classes (per ADR-019). See DECISIONS.md F5.
 import "../../src/styles/tokens-v2.css";
 import "../../src/styles/theme.css";
+import "../../src/styles/dark.css";
 import "../../src/styles/responsive.css";
 import "./playground.css";
 
