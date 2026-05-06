@@ -1,119 +1,162 @@
 <script setup lang="ts">
 /**
- * Capra UI Playground
- * ===================
- * Validates DashboardRenderer end-to-end against pure JSON inputs.
+ * Capra UI Playground — Component Gallery
+ * ========================================
+ * Sidebar nav → section content. Each section demos a single component
+ * (or pair) with all its variations: props, sizes, states, edge cases.
  *
- * Two states are exercised:
- *  - "loaded": dashboard + widget data populated (happy path)
- *  - "loading": all widgets in loading state
- *  - "error":   one widget in error state
- *
- * No fetch, no API. JSON files are imported statically — this is the
- * "framework only sees normalized data" proof-of-concept.
+ * Section state is persisted in window.location.hash so reloads keep
+ * the user on the same component.
  */
-import { computed, ref } from "vue";
-import { DashboardRenderer } from "../../src/components/dashboard";
-import type {
-  DashboardDefinition,
-  CapraResult,
-} from "../../src/types";
+import { computed, onMounted, ref } from "vue";
+import { sectionsByGroup, findSection } from "./sections/registry";
 
-import dashboardJson from "../data/dashboard-vendas.json";
-import widgetDataJson from "../data/widget-data.json";
+function currentHash(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.location.hash.replace(/^#/, "") || null;
+}
 
-type Mode = "loaded" | "loading" | "error";
+const activeId = ref<string>(findSection(currentHash()).id);
 
-const dashboard = ref<DashboardDefinition>(
-  dashboardJson as unknown as DashboardDefinition,
-);
+const activeSection = computed(() => findSection(activeId.value));
 
-const baseWidgetData = widgetDataJson as unknown as Record<
-  string,
-  CapraResult
->;
-
-const mode = ref<Mode>("loaded");
-const events = ref<string[]>([]);
-
-const widgetData = computed<Record<string, CapraResult | null>>(() => {
-  if (mode.value === "loading") {
-    // No data while loading — Renderer should show loading state per widget
-    return Object.fromEntries(
-      dashboard.value.widgets.map((w) => [w.id, null]),
-    );
+function selectSection(id: string): void {
+  activeId.value = id;
+  if (typeof window !== "undefined") {
+    window.location.hash = id;
   }
-  return baseWidgetData;
-});
-
-const widgetLoading = computed<Record<string, boolean>>(() => {
-  if (mode.value !== "loading") return {};
-  return Object.fromEntries(
-    dashboard.value.widgets.map((w) => [w.id, true]),
-  );
-});
-
-const widgetErrors = computed<Record<string, string | null>>(() => {
-  if (mode.value !== "error") return {};
-  // Inject a single error into the first widget; others render normally
-  const first = dashboard.value.widgets[0];
-  if (!first) return {};
-  return { [first.id]: "Falha simulada ao carregar dados (modo Error)." };
-});
-
-function logEvent(label: string, payload: unknown): void {
-  const ts = new Date().toISOString().slice(11, 19);
-  events.value.unshift(`[${ts}] ${label} ${JSON.stringify(payload)}`);
-  if (events.value.length > 30) events.value.length = 30;
 }
 
-function handleFilterChange(payload: { key: string; value: unknown }): void {
-  logEvent("filter-change", payload);
-}
-
-function setMode(next: Mode): void {
-  mode.value = next;
-  logEvent("mode-change", { mode: next });
-}
+onMounted(() => {
+  if (typeof window !== "undefined") {
+    window.addEventListener("hashchange", () => {
+      const next = findSection(currentHash());
+      activeId.value = next.id;
+    });
+  }
+});
 </script>
 
 <template>
-  <div class="playground-shell">
-    <div class="playground-topbar">
-      <h1>Capra UI — Playground</h1>
-      <span class="playground-topbar__sep" />
-      <p>DashboardRenderer · pure-JSON</p>
-      <div class="playground-controls">
-        <button :disabled="mode === 'loaded'" @click="setMode('loaded')">
-          Loaded
-        </button>
-        <button :disabled="mode === 'loading'" @click="setMode('loading')">
-          Loading
-        </button>
-        <button :disabled="mode === 'error'" @click="setMode('error')">
-          Error
-        </button>
+  <div class="playground-app">
+    <aside class="playground-sidebar">
+      <div class="playground-sidebar__header">
+        <strong>Capra UI</strong>
+        <span>Playground</span>
       </div>
-    </div>
+      <nav class="playground-sidebar__nav">
+        <div v-for="{ group, items } in sectionsByGroup" :key="group.id" class="nav-group">
+          <div class="nav-group__label">{{ group.label }}</div>
+          <button
+            v-for="s in items"
+            :key="s.id"
+            class="nav-item"
+            :class="{ 'nav-item--active': s.id === activeId }"
+            @click="selectSection(s.id)"
+          >
+            {{ s.label }}
+          </button>
+        </div>
+      </nav>
+    </aside>
 
     <main class="playground-main">
-      <DashboardRenderer
-        :dashboard="dashboard"
-        :widget-data="widgetData"
-        :widget-loading="widgetLoading"
-        :widget-errors="widgetErrors"
-        @filter-change="handleFilterChange"
-      />
-
-      <section class="playground-event-log">
-        <div class="playground-event-log__title">Event log</div>
-        <ul class="playground-event-log__list">
-          <li v-for="(line, i) in events" :key="i">{{ line }}</li>
-          <li v-if="events.length === 0">
-            (nenhum evento ainda — alterne os modos acima)
-          </li>
-        </ul>
-      </section>
+      <div class="playground-content">
+        <component :is="activeSection.component" :key="activeSection.id" />
+      </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.playground-app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: var(--color-bg, #f8fafc);
+}
+
+.playground-sidebar {
+  background: var(--color-surface, #ffffff);
+  border-right: 1px solid var(--color-border, #e2e8f0);
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.playground-sidebar__header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.playground-sidebar__header strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text, #1e293b);
+}
+.playground-sidebar__header span {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+}
+
+.playground-sidebar__nav {
+  padding: 0.75rem 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.nav-group__label {
+  padding: 0.375rem 0.75rem 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.nav-item {
+  appearance: none;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-text, #334155);
+  cursor: pointer;
+  border-radius: 0.375rem;
+  font-family: inherit;
+}
+.nav-item:hover {
+  background: var(--color-hover, #f1f5f9);
+}
+.nav-item--active {
+  background: var(--color-primary, #3b82f6);
+  color: white;
+  font-weight: 500;
+}
+.nav-item--active:hover {
+  background: var(--color-primary, #3b82f6);
+}
+
+.playground-main {
+  overflow-x: hidden;
+}
+
+.playground-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+</style>
