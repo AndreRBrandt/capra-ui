@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v22 / 2026-05-07 / playground mobile sidebar + collapsible groups";
+const BUILD_MARKER = "v23 / 2026-05-07 / topbar sticky fix (overflow-x: clip)";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
@@ -393,9 +393,15 @@ onMounted(() => {
 
 /* ---------- Main ---------- */
 .playground-main {
-  overflow-x: hidden;
+  /* `overflow-x: clip` instead of `hidden` so this column does NOT
+   * become a scroll container — `position: sticky` on the topbar
+   * needs the nearest scrolling ancestor to be the viewport for the
+   * sticky to engage as the page scrolls. `clip` provides the same
+   * cropping without scroll semantics. */
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .playground-topbar {
