@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v24 / 2026-05-07 / auto-contrast text-on-brand from luminance";
+const BUILD_MARKER = "v25 / 2026-05-07 / WCAG AA contrast on text tokens";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
