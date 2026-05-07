@@ -210,8 +210,14 @@ function copyEmpty(): void {
   appearance: none;
   border: 1px solid var(--color-border, #e2e8f0);
   background: var(--color-surface, #ffffff);
+  /* Without an explicit color, <button> falls back to the browser
+   * default (effectively black in light mode, also black in dark mode
+   * since user-agent doesn't observe our theme). The button then
+   * renders dark text on a dark surface. Bind to --color-text. */
+  color: var(--color-text, #1f2937);
   padding: 0.25rem 0.5rem;
   font-size: 0.7rem;
+  font-family: inherit;
   border-radius: 0.25rem;
   cursor: pointer;
 }
