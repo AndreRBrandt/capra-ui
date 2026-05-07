@@ -68,7 +68,7 @@ function openDemo(): void {
   }
 }
 
-const BUILD_MARKER = "v19 / 2026-05-07 / demo app skeleton";
+const BUILD_MARKER = "v20 / 2026-05-07 / mobile polish (pills scroll + topbar gear)";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
