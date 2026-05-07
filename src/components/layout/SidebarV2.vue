@@ -146,7 +146,10 @@ function closeOverlay() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  /* Auto-contrast: text on brand adapts to the chosen palette's
+   * luminance. Falls back to white when the consumer hasn't wired
+   * the auto-contrast theme. */
+  color: var(--color-on-brand, white);
   font-weight: 700;
   font-size: 15px;
   flex-shrink: 0;
@@ -199,7 +202,7 @@ function closeOverlay() {
 
 .sidebar-v2__item--active {
   background: var(--color-brand);
-  color: white;
+  color: var(--color-on-brand, white);
 }
 
 .sidebar-v2__item-icon {

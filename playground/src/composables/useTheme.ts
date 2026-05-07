@@ -89,6 +89,41 @@ function neutral(brandH: number, s: number, l: number): string {
 }
 
 // ────────────────────────────────────────────────────────────────────
+// WCAG-style readability: pick a text color that contrasts against
+// an arbitrary HSL background. Uses relative luminance per WCAG 2.1.
+//
+// HSL → sRGB → linearized RGB → relative luminance.
+// Threshold biased slightly below 0.5 (0.45) because perceptual
+// "lightness" is overestimated; this leans conservatively toward
+// dark text whenever the bg is in the mid range, which is safer
+// against common misjudgements like yellow/lime backgrounds.
+// ────────────────────────────────────────────────────────────────────
+
+function relativeLuminance(c: HSL): number {
+  // Convert HSL → RGB (0..1) using the formula at developer.mozilla.org
+  const s = c.s / 100;
+  const l = c.l / 100;
+  const a = s * Math.min(l, 1 - l);
+  const k = (n: number): number => (n + c.h / 30) % 12;
+  const f = (n: number): number =>
+    l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  const r = f(0);
+  const g = f(8);
+  const b = f(4);
+  // Linearize for luminance calc
+  const lin = (v: number): number =>
+    v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+const READABLE_DARK = "#0f172a"; // slate-900 — pairs well with most light bgs
+const READABLE_LIGHT = "#ffffff";
+
+function pickReadableTextOn(c: HSL): string {
+  return relativeLuminance(c) > 0.45 ? READABLE_DARK : READABLE_LIGHT;
+}
+
+// ────────────────────────────────────────────────────────────────────
 // Theme builders
 // ────────────────────────────────────────────────────────────────────
 
@@ -97,6 +132,14 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
   // Secondary (which the user picks as a complement to Brand). This makes the
   // Secondary anchor visible across the whole UI, not just chart série 2.
   const sH = secondary.h;
+
+  // Auto-contrast: text drawn on top of brand/secondary/highlight surfaces
+  // adapts to the user-picked palette. No more hardcoded "color: white" that
+  // breaks legibility when the user picks a light brand color.
+  const onBrand = pickReadableTextOn(brand);
+  const onSecondary = pickReadableTextOn(secondary);
+  const onHi = pickReadableTextOn(hi);
+
   return {
     // === V2 HSL anchors ===
     "--brand-h": String(brand.h),
@@ -185,14 +228,29 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
     "--color-accent-3": hsl(hi),
     "--color-accent-3-bg": hsl(shift(hi, -40, 28)),
 
-    // === Button text aliases ===
-    "--color-btn-primary-text": "#ffffff",
+    // === Auto-contrast text-on-* tokens (computed from luminance) ===
+    "--color-on-brand": onBrand,
+    "--color-on-secondary": onSecondary,
+    "--color-on-hi": onHi,
+
+    // === Aliases pointing at the auto-contrast tokens (kept for the
+    //     existing components that already use these names) ===
+    "--color-btn-primary-text": onBrand,
+    "--capra-nav-text-active": onBrand,
   };
 }
 
 function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, string> {
   // Same approach as light: Secondary drives the grey/neutral tonal personality.
   const sH = secondary.h;
+
+  // Auto-contrast text — same logic as light mode. Brand/secondary/highlight
+  // hex don't change with mode (palette identity is preserved), so the
+  // luminance pick is stable across mode toggles.
+  const onBrand = pickReadableTextOn(brand);
+  const onSecondary = pickReadableTextOn(secondary);
+  const onHi = pickReadableTextOn(hi);
+
   return {
     "--brand-h": String(brand.h),
     "--brand-s": `${brand.s}%`,
@@ -269,7 +327,14 @@ function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, str
     "--color-accent-3": hsl(hi),
     "--color-accent-3-bg": hsl({ h: hi.h, s: 20, l: 22 }),
 
-    "--color-btn-primary-text": "#0f172a",
+    // === Auto-contrast text-on-* tokens (computed from luminance) ===
+    "--color-on-brand": onBrand,
+    "--color-on-secondary": onSecondary,
+    "--color-on-hi": onHi,
+
+    // === Aliases pointing at the auto-contrast tokens ===
+    "--color-btn-primary-text": onBrand,
+    "--capra-nav-text-active": onBrand,
   };
 }
 

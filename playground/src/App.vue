@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v23 / 2026-05-07 / topbar sticky fix (overflow-x: clip)";
+const BUILD_MARKER = "v24 / 2026-05-07 / auto-contrast text-on-brand from luminance";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
@@ -384,7 +384,8 @@ onMounted(() => {
 }
 .nav-item--active {
   background: var(--color-primary, #3b82f6);
-  color: white;
+  /* Auto-contrast — text adapts to the user-picked brand luminance. */
+  color: var(--color-on-brand, white);
   font-weight: 500;
 }
 .nav-item--active:hover {
