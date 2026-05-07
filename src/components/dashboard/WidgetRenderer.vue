@@ -53,7 +53,7 @@ const componentData = computed(() => {
       //   `format` = custom formatter FUNCTION
       // Translate before passing.
       const FORMAT_TYPES = new Set(["currency", "number", "percent", "text"]);
-      const columns = (w.componentProps.columns as Array<Record<string, unknown>>).map((c) => ({
+      const columns = (w.componentProps.columns as unknown as Array<Record<string, unknown>>).map((c) => ({
         key: c.key,
         label: c.label,
         width: c.width,

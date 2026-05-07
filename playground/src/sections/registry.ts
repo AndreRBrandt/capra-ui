@@ -71,9 +71,11 @@ const DetailModal = m(DetailModalSrc);
 import AnalyticContainerSrc from "./containers/AnalyticContainer.vue";
 import KpiContainerSrc from "./containers/KpiContainer.vue";
 import ListContainerSrc from "./containers/ListContainer.vue";
+import TabbedSrc from "./containers/Tabbed.vue";
 const AnalyticContainer = m(AnalyticContainerSrc);
 const KpiContainer = m(KpiContainerSrc);
 const ListContainer = m(ListContainerSrc);
+const Tabbed = m(TabbedSrc);
 
 export const groups: PlaygroundGroup[] = [
   { id: "dashboard", label: "Dashboard", order: 0 },
@@ -132,6 +134,7 @@ export const sections: PlaygroundSection[] = [
   { id: "containers-analytic", label: "AnalyticContainer", group: "containers", component: AnalyticContainer },
   { id: "containers-kpi", label: "KpiContainer", group: "containers", component: KpiContainer },
   { id: "containers-list", label: "ListContainer", group: "containers", component: ListContainer },
+  { id: "containers-tabbed", label: "TabbedContainer", group: "containers", component: Tabbed },
 ];
 
 export const sectionsByGroup = groups

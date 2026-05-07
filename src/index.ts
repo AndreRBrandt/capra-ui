@@ -138,6 +138,8 @@ export {
   KpiContainer,
   ListContainer,
   RecordCardList,
+  TabbedContainer,
+  TabPanel,
   // Layout
   AppShell,
   AppShellV2,
@@ -192,5 +194,6 @@ export type { KpiConfigItem } from "./components/ui/KpiConfigPanel.vue";
 export type { SegmentedOption } from "./components/ui/SegmentedControl.vue";
 export type { ChipGroupItem } from "./components/ui/ChipGroup.vue";
 export type { ListContainerProps, ListContainerGroup } from "./components/containers/ListContainer.vue";
+export type { TabbedContainerProps, TabbedContainerTab } from "./components/containers/TabbedContainer.vue";
 export type { NavItemV2, SectionItemV2 } from "./components/layout/AppShellV2.vue";
 export type { SidebarNavItem } from "./components/layout/SidebarV2.vue";
