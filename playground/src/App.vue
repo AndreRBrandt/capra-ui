@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v25 / 2026-05-07 / WCAG AA contrast on text tokens";
+const BUILD_MARKER = "v26 / 2026-05-07 / brand-tinted neutral grays + BaseButton fix";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
