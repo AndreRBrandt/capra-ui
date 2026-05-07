@@ -50,7 +50,7 @@ function selectSection(id: string): void {
 
 // Build marker — bumped on every iteration so the user can confirm
 // they pulled the latest after a hard reload.
-const BUILD_MARKER = "v13 / 2026-05-06 / lazy-renderer + secondary-greys";
+const BUILD_MARKER = "v14 / 2026-05-07 / fix filter-bar reactive loop";
 
 onMounted(() => {
   if (typeof window !== "undefined") {

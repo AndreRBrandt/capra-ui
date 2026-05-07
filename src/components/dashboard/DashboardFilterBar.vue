@@ -139,6 +139,17 @@ function resolveIcon(
   return undefined;
 }
 
+// Frozen sentinels — returning a fresh {} or [] from a template helper
+// makes Vue see "prop changed identity" on every render, which triggers
+// watchers in child filter components and creates an emit/re-render
+// loop that pegs the main thread (user-reported "trava").
+const EMPTY_DATE: DateRangeValue = Object.freeze({
+  type: "preset",
+  preset: "lastday",
+}) as DateRangeValue;
+const EMPTY_ARRAY: readonly (string | number)[] = Object.freeze([]);
+const EMPTY_OPTIONS: readonly (MultiSelectOption | SelectOption)[] = Object.freeze([]);
+
 function asDateValue(v: unknown): DateRangeValue {
   if (
     v &&
@@ -147,11 +158,11 @@ function asDateValue(v: unknown): DateRangeValue {
   ) {
     return v as DateRangeValue;
   }
-  return { type: "preset", preset: "lastday" };
+  return EMPTY_DATE;
 }
 
-function asMultiselectValue(v: unknown): (string | number)[] {
-  return Array.isArray(v) ? (v as (string | number)[]) : [];
+function asMultiselectValue(v: unknown): readonly (string | number)[] {
+  return Array.isArray(v) ? (v as (string | number)[]) : EMPTY_ARRAY;
 }
 
 function asSelectValue(v: unknown): string | number {
@@ -161,8 +172,8 @@ function asSelectValue(v: unknown): string | number {
 
 function optionsAs<T extends MultiSelectOption | SelectOption>(
   filter: DashboardFilterDefinition,
-): T[] {
-  return (filter.options ?? []) as T[];
+): readonly T[] {
+  return (filter.options ?? (EMPTY_OPTIONS as readonly T[])) as readonly T[];
 }
 </script>
 
