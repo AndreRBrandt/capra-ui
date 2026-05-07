@@ -135,7 +135,7 @@ const expanded = ref(false);
 }
 .theme-controls__btn--icon.is-active {
   background: var(--color-brand, #6471dc);
-  color: white;
+  color: var(--color-on-brand, white);
   border-color: var(--color-brand, #6471dc);
 }
 
