@@ -63,7 +63,7 @@ const propsInfo = [
       <Popover placement="bottom-end" width="180px">
         <template #trigger>
           <button
-            style="appearance: none; width: 28px; height: 28px; border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 0.375rem; cursor: pointer; font-size: 1rem"
+            style="appearance: none; width: 28px; height: 28px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 0.375rem; cursor: pointer; font-size: 1rem"
             title="Ações"
           >⋮</button>
         </template>

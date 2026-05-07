@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v27 / 2026-05-07 / sweep of remaining hardcoded text-on-brand";
+const BUILD_MARKER = "v28 / 2026-05-07 / playground buttons inheriting browser default color";
 
 onMounted(() => {
   if (typeof window !== "undefined") {

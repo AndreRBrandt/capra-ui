@@ -53,7 +53,7 @@ const propsInfo = [
     <ExampleBlock title="Controlado via v-model" note="estado externo permite open/close programático">
       <div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 0.5rem">
         <button
-          style="appearance: none; padding: 0.375rem 0.625rem; font-size: 0.75rem; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); border-radius: 0.375rem; width: fit-content"
+          style="appearance: none; padding: 0.375rem 0.625rem; font-size: 0.75rem; cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); border-radius: 0.375rem; width: fit-content"
           @click="open = !open"
         >
           Toggle externo (estado: {{ open ? "aberto" : "fechado" }})
