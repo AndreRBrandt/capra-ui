@@ -141,6 +141,10 @@ function handleKeydown(event: KeyboardEvent, index: number) {
   border-radius: 0.5rem;
   padding: 0.1875rem;
   gap: 0.125rem;
+  /* Don't shrink when placed inside an overflow-x: auto flex parent —
+   * that would prevent the parent from ever overflowing and the
+   * pills would be cropped instead of becoming scrollable. */
+  flex-shrink: 0;
 }
 
 .segmented-control--full-width {
@@ -184,6 +188,9 @@ function handleKeydown(event: KeyboardEvent, index: number) {
   white-space: nowrap;
   line-height: 1.4;
   outline: none;
+  /* Each pill keeps its intrinsic width — important when the parent
+   * row uses overflow-x: auto for horizontal scrolling. */
+  flex-shrink: 0;
 }
 
 .segmented-control__option:hover:not(.segmented-control__option--active):not(.segmented-control__option--disabled) {

@@ -17,6 +17,7 @@
 import { ref } from "vue";
 import {
   AppShellV2,
+  Popover,
   TabbedContainer,
   TabPanel,
   type NavItemV2,
@@ -33,7 +34,9 @@ import {
   Settings,
   LogOut,
   Shield,
+  UserCog2,
   ChevronDown,
+  ArrowLeft,
   Calendar,
   SlidersHorizontal,
   ShoppingCart,
@@ -102,27 +105,37 @@ function backToPlayground(): void {
     @navigate="handleNavigate"
   >
     <template #header-actions>
-      <button class="topbar-action" type="button" title="Voltar ao playground" @click="backToPlayground">
-        ← Playground
+      <button class="topbar-action topbar-action--icon" type="button" title="Voltar ao playground" @click="backToPlayground">
+        <ArrowLeft :size="18" />
       </button>
 
-      <div class="topbar-divider" />
-
-      <button class="topbar-action topbar-action--pill" type="button">
-        Admin <ChevronDown :size="14" />
-      </button>
-
-      <button class="topbar-action topbar-action--icon" type="button" title="Segurança">
-        <Shield :size="18" />
-      </button>
-
-      <button class="topbar-action topbar-action--icon" type="button" title="Configurações">
-        <Settings :size="18" />
-      </button>
-
-      <button class="topbar-action topbar-action--icon" type="button" title="Sair">
-        <LogOut :size="18" />
-      </button>
+      <Popover placement="bottom-end" :show-close="false" width="220px">
+        <template #trigger>
+          <button class="topbar-action topbar-action--icon" type="button" title="Configurações da conta">
+            <Settings :size="18" />
+          </button>
+        </template>
+        <div class="account-menu">
+          <div class="account-menu__header">
+            <div class="account-menu__avatar"><UserCog2 :size="18" /></div>
+            <div class="account-menu__identity">
+              <strong>Admin</strong>
+              <span>admin@bodedono.com</span>
+            </div>
+          </div>
+          <div class="account-menu__divider" />
+          <button type="button" class="account-menu__item">
+            <Shield :size="16" /> Segurança
+          </button>
+          <button type="button" class="account-menu__item">
+            <Settings :size="16" /> Configurações
+          </button>
+          <div class="account-menu__divider" />
+          <button type="button" class="account-menu__item account-menu__item--danger">
+            <LogOut :size="16" /> Sair
+          </button>
+        </div>
+      </Popover>
     </template>
 
     <!-- Page content -->
@@ -133,16 +146,18 @@ function backToPlayground(): void {
       padding="none"
     >
       <template #header-actions>
-        <button class="page-action" type="button" title="Calendário">
-          <Calendar :size="16" />
-          <span class="page-action__badge">2</span>
-        </button>
+        <div class="page-actions">
+          <button class="page-action" type="button" title="Calendário">
+            <Calendar :size="16" />
+            <span class="page-action__badge">2</span>
+          </button>
 
-        <button class="page-action page-action--primary" type="button">
-          <SlidersHorizontal :size="16" />
-          <span>Filtros</span>
-          <ChevronDown :size="14" />
-        </button>
+          <button class="page-action page-action--primary" type="button">
+            <SlidersHorizontal :size="16" />
+            <span>Filtros</span>
+            <ChevronDown :size="14" />
+          </button>
+        </div>
       </template>
 
       <TabPanel name="visao-geral">
@@ -175,8 +190,11 @@ function backToPlayground(): void {
 .topbar-action {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.375rem;
-  padding: 0.4rem 0.75rem;
+  padding: 0;
+  width: 36px;
+  height: 36px;
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--color-text-muted);
@@ -190,25 +208,90 @@ function backToPlayground(): void {
   color: var(--color-text);
   background: var(--color-hover);
 }
-.topbar-action--pill {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--color-border);
-}
 .topbar-action--icon {
+  /* Same as base — kept for legibility/intent in the template. */
   width: 36px;
   height: 36px;
-  padding: 0;
-  justify-content: center;
 }
 
-.topbar-divider {
-  width: 1px;
-  height: 20px;
+/* ---------- Account menu (Settings popover content) ---------- */
+.account-menu {
+  display: flex;
+  flex-direction: column;
+}
+.account-menu__header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.25rem 0.75rem;
+}
+.account-menu__avatar {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-brand) 15%, transparent);
+  color: var(--color-brand);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.account-menu__identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.account-menu__identity strong {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+.account-menu__identity span {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-menu__divider {
+  height: 1px;
+  margin: 0.25rem 0;
   background: var(--color-border);
-  margin: 0 0.25rem;
+}
+.account-menu__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+.account-menu__item:hover {
+  background: var(--color-hover);
+}
+.account-menu__item--danger {
+  color: var(--color-danger, #ef4444);
+}
+.account-menu__item--danger:hover {
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 8%, transparent);
 }
 
 /* ---------- Page action buttons (calendar + filtros) ---------- */
+.page-actions {
+  display: inline-flex;
+  align-items: center;
+  /* Wider gap than the AnalyticContainer __actions default so the
+   * calendar and "Filtros" buttons are visually separate, especially
+   * on mobile where they collapse close together. */
+  gap: 0.625rem;
+}
+
 .page-action {
   position: relative;
   display: inline-flex;
