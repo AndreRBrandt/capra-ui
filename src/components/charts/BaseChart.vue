@@ -21,7 +21,7 @@
  * ```
  */
 
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { resolveCssColor } from "./css-utils";
 import { use } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
@@ -222,24 +222,6 @@ function getChartInstance() {
 function resize() {
   chartRef.value?.chart?.resize();
 }
-
-// =============================================================================
-// Lifecycle
-// =============================================================================
-
-onMounted(() => {
-  // Observar mudanças de tamanho do container se auto-resize
-  if (!props.noResize && chartRef.value) {
-    const observer = new ResizeObserver(() => {
-      resize();
-    });
-
-    const el = chartRef.value.$el;
-    if (el) {
-      observer.observe(el);
-    }
-  }
-});
 
 // Expor métodos
 defineExpose({
