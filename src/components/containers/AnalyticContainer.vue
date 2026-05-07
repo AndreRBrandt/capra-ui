@@ -721,7 +721,7 @@ function handleRetry() {
 }
 
 .analytic-container__header--highlight.analytic-container__header--clickable:hover .analytic-container__collapse-indicator {
-  color: #fff;
+  color: var(--color-on-brand, #fff);
 }
 
 /* Collapsed State */

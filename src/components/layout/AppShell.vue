@@ -826,7 +826,7 @@ const bottomNavItems = computed(() => {
   font-size: var(--font-size-caption);
   font-weight: 700;
   background-color: var(--color-brand-highlight);
-  color: var(--color-brand-secondary);
+  color: var(--color-on-hi, var(--color-brand-secondary));
   border-radius: var(--radius-full);
 }
 

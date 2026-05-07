@@ -315,7 +315,7 @@ watch(
 .filter-dropdown__footer-btn--primary {
   background-color: var(--color-brand-highlight, #e5a22f);
   border: 1px solid var(--color-brand-tertiary, #8f3f00);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
 }
 
 .filter-dropdown__footer-btn--primary:hover:not(:disabled) {

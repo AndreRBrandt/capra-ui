@@ -704,7 +704,7 @@ if (props.customFirst) {
 
 .date-range-filter__preset--selected {
   background-color: var(--color-brand-highlight, #e5a22f);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
 }
 
 .date-range-filter__preset--selected:hover {
@@ -742,7 +742,7 @@ if (props.customFirst) {
 
 .date-range-filter__custom-trigger--active {
   background-color: var(--color-brand-highlight, #e5a22f);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
 }
 
 .date-range-filter__custom-trigger--active:hover {
@@ -810,7 +810,7 @@ if (props.customFirst) {
 .date-range-filter__custom-btn--primary {
   background-color: var(--color-brand-highlight, #e5a22f);
   border: 1px solid var(--color-brand-tertiary, #8f3f00);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
 }
 
 .date-range-filter__custom-btn--primary:hover:not(:disabled) {
@@ -951,7 +951,7 @@ if (props.customFirst) {
 .drf-cal__day--start,
 .drf-cal__day--end {
   background: var(--color-brand-highlight, #e5a22f);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
   font-weight: 700;
   border-radius: 50%;
   z-index: 1;
