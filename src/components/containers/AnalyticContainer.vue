@@ -667,37 +667,40 @@ function handleRetry() {
   background-color: var(--color-brand-soft);
 }
 
-/* Highlighted Header — matches nav bar color for visual hierarchy */
+/* Highlighted Header — matches nav bar color for visual hierarchy.
+ * All foreground colors derive from --color-on-brand (auto-computed
+ * by the theme based on the brand's luminance), so text stays
+ * legible whether the user picks a dark or a light brand. */
 .analytic-container__header--highlight {
   background-color: var(--analytic-header-bg, var(--color-brand));
-  color: #fff;
+  color: var(--color-on-brand, #fff);
   border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
 }
 
 .analytic-container__header--highlight .analytic-container__icon {
-  background: rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--color-on-brand, #fff) 15%, transparent);
+  color: color-mix(in srgb, var(--color-on-brand, #fff) 90%, transparent);
 }
 
 .analytic-container__header--highlight .analytic-container__title {
-  color: #fff;
+  color: var(--color-on-brand, #fff);
 }
 
 .analytic-container__header--highlight .analytic-container__subtitle {
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in srgb, var(--color-on-brand, #fff) 70%, transparent);
 }
 
 .analytic-container__header--highlight .analytic-container__collapse-indicator {
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in srgb, var(--color-on-brand, #fff) 70%, transparent);
 }
 
 .analytic-container__header--highlight .analytic-container__action-btn {
-  color: rgba(255, 255, 255, 0.7);
+  color: color-mix(in srgb, var(--color-on-brand, #fff) 70%, transparent);
 }
 
 .analytic-container__header--highlight .analytic-container__action-btn:hover {
-  color: #fff;
-  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-on-brand, #fff);
+  background-color: color-mix(in srgb, var(--color-on-brand, #fff) 15%, transparent);
 }
 
 /* Clickable Header (collapsible) */

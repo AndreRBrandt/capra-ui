@@ -115,7 +115,9 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  /* Auto-contrast: text on brand uses the dynamically computed
+   * `--color-on-brand` (white or dark based on brand luminance). */
+  color: var(--color-on-brand, white);
   font-weight: 700;
   font-size: 15px;
 }
