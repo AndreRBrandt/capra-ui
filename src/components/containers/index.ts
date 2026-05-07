@@ -20,3 +20,11 @@ export { default as ListContainer } from "./ListContainer.vue";
 export type { ListContainerProps, ListContainerGroup } from "./ListContainer.vue";
 
 export { default as RecordCardList } from "./RecordCardList.vue";
+
+export { default as TabbedContainer } from "./TabbedContainer.vue";
+export type {
+  TabbedContainerProps,
+  TabbedContainerTab,
+} from "./TabbedContainer.vue";
+
+export { default as TabPanel } from "./TabPanel.vue";
