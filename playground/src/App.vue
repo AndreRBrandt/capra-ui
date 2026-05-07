@@ -48,7 +48,7 @@ function selectSection(id: string): void {
   }
 }
 
-const BUILD_MARKER = "v15 / 2026-05-07 / markRaw at registry + force-remount";
+const BUILD_MARKER = "v16 / 2026-05-07 / dashboard demo disabled";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
