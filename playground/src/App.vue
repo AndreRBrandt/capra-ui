@@ -14,13 +14,20 @@
 import { computed, onMounted, ref } from "vue";
 import { sectionsByGroup, findSection } from "./sections/registry";
 import ThemeControls from "./components/ThemeControls.vue";
+import DemoApp from "./demo/DemoApp.vue";
+
+const DEMO_HASH = "demo";
 
 function currentHash(): string | null {
   if (typeof window === "undefined") return null;
   return window.location.hash.replace(/^#/, "") || null;
 }
 
-const activeId = ref<string>(findSection(currentHash()).id);
+const activeId = ref<string>(
+  currentHash() === DEMO_HASH ? DEMO_HASH : findSection(currentHash()).id,
+);
+
+const isDemoMode = computed(() => activeId.value === DEMO_HASH);
 
 const activeSection = computed(() => findSection(activeId.value));
 
@@ -45,15 +52,35 @@ function selectSection(id: string): void {
   activeId.value = id;
   if (typeof window !== "undefined") {
     window.location.hash = id;
+    // Persist last gallery section so the demo can use it for a "back"
+    // button that lands the user where they were.
+    if (id !== DEMO_HASH) {
+      window.localStorage.setItem("playground:lastSection", id);
+    }
   }
 }
 
-const BUILD_MARKER = "v18 / 2026-05-07 / data-table column adapter";
+function openDemo(): void {
+  navClicks.value += 1;
+  activeId.value = DEMO_HASH;
+  if (typeof window !== "undefined") {
+    window.location.hash = DEMO_HASH;
+  }
+}
+
+const BUILD_MARKER = "v19 / 2026-05-07 / demo app skeleton";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
     window.addEventListener("hashchange", () => {
-      const next = findSection(currentHash());
+      const hash = currentHash();
+      if (hash === DEMO_HASH) {
+        if (activeId.value !== DEMO_HASH) {
+          activeId.value = DEMO_HASH;
+        }
+        return;
+      }
+      const next = findSection(hash);
       if (next.id !== activeId.value) {
         remountKey.value += 1;
         activeId.value = next.id;
@@ -64,12 +91,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="playground-app">
+  <!-- Demo mode: render the standalone Bode Analytics demo app full-screen,
+       bypassing the playground gallery chrome entirely. -->
+  <DemoApp v-if="isDemoMode" />
+
+  <!-- Gallery mode -->
+  <div v-else class="playground-app">
     <aside class="playground-sidebar">
       <div class="playground-sidebar__header">
         <strong>Capra UI</strong>
         <span>Playground</span>
       </div>
+      <button type="button" class="demo-link" @click="openDemo">
+        🚀 Abrir Demo App
+      </button>
       <ThemeControls />
       <nav class="playground-sidebar__nav">
         <div
@@ -143,6 +178,24 @@ onMounted(() => {
   font-weight: 600;
   color: var(--color-text, #1e293b);
 }
+.demo-link {
+  margin: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  color: var(--color-on-brand, #fff);
+  background: var(--color-brand);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.demo-link:hover {
+  filter: brightness(1.08);
+}
+
 .playground-sidebar__header span {
   font-size: 0.75rem;
   color: var(--color-text-muted, #64748b);
