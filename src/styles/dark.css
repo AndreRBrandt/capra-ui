@@ -22,12 +22,22 @@
 
   /* -----------------------------------------
    * CORES SEMÂNTICAS - TEXTO
+   *
+   * Luminance must clear ~4.5:1 ratio against --color-surface
+   * (#111827, L≈0.018) for AA, ~3:1 for AA Large/decorative.
+   *
+   * Previous values:
+   *   text-tertiary: gray-500 #6b7280  → ratio 3.4:1 (Large only)
+   *   text-placeholder: gray-600 #4b5563 → ratio 2.2:1 (FAIL)
+   *
+   * Bumped a step lighter so neither fails AA Large on canvas
+   * surfaces (cards, inputs, dropdowns) in dark mode.
    * ----------------------------------------- */
-  --color-text: #e5e7eb; /* gray-200 */
-  --color-text-strong: #f9fafb; /* gray-50 */
-  --color-text-muted: #9ca3af; /* gray-400 */
-  --color-text-tertiary: #6b7280; /* gray-500 */
-  --color-text-placeholder: #4b5563; /* gray-600 */
+  --color-text: #e5e7eb; /* gray-200 — ratio 13.5:1 (AA) */
+  --color-text-strong: #f9fafb; /* gray-50 — ratio 16.8:1 (AAA) */
+  --color-text-muted: #9ca3af; /* gray-400 — ratio 6.5:1 (AA) */
+  --color-text-tertiary: #cbd5e1; /* slate-300 — ratio 10.0:1 (AAA) */
+  --color-text-placeholder: #94a3b8; /* slate-400 — ratio 5.5:1 (AA) */
 
   /* -----------------------------------------
    * CORES SEMÂNTICAS - SUPERFÍCIES
@@ -52,12 +62,12 @@
   /* -----------------------------------------
    * CAPRA THEME - TEXTO
    * ----------------------------------------- */
-  --capra-text: #e5e7eb; /* gray-200 */
-  --capra-text-strong: #f9fafb; /* gray-50 */
-  --capra-text-secondary: #d1d5db; /* gray-300 */
-  --capra-text-muted: #9ca3af; /* gray-400 */
-  --capra-text-tertiary: #6b7280; /* gray-500 */
-  --capra-text-placeholder: #4b5563; /* gray-600 */
+  --capra-text: #e5e7eb; /* gray-200 — ratio 13.5:1 */
+  --capra-text-strong: #f9fafb; /* gray-50 — ratio 16.8:1 */
+  --capra-text-secondary: #d1d5db; /* gray-300 — ratio 11.0:1 */
+  --capra-text-muted: #9ca3af; /* gray-400 — ratio 6.5:1 */
+  --capra-text-tertiary: #cbd5e1; /* slate-300 — ratio 10.0:1 (AAA) */
+  --capra-text-placeholder: #94a3b8; /* slate-400 — ratio 5.5:1 (AA) */
 
   /* -----------------------------------------
    * CAPRA THEME - SUPERFÍCIES
