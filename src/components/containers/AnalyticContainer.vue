@@ -462,7 +462,13 @@ function handleRetry() {
 .analytic-container__actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  /* Component-scoped token so consumers can adjust gap without
+   * overriding the class. Default 0.5rem (8px) — wide enough that
+   * an iconified button + a labeled button (e.g. a calendar icon
+   * next to a "Filtros" pill) read as separate actions even on
+   * mobile. The previous default (--spacing-xs / 4px) made them
+   * visually run together. */
+  gap: var(--analytic-actions-gap, var(--spacing-sm, 0.5rem));
 }
 
 /* Content */
