@@ -262,10 +262,47 @@ defineExpose({
 </template>
 
 <style scoped>
+/* Pills row: horizontal scroll on overflow with touch panning, hidden
+ * scrollbar, and a fade indicator on the right edge so users see there
+ * is more content to scroll into. The fade is implemented as a mask
+ * image so it does not steal click events from the pills underneath.
+ */
 .tabbed-container__pills-row {
   display: flex;
   align-items: center;
   margin-bottom: 0.75rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* iOS momentum scroll */
+  -webkit-overflow-scrolling: touch;
+  /* Hide native scrollbar without losing scrollability */
+  scrollbar-width: none;
+  /* Edge fade hint: clip the right ~24px so users perceive the cut-off */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 24px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 24px),
+    transparent
+  );
+}
+
+.tabbed-container__pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Disable the fade once the row is short enough to fit — the negative
+ * scroll-end-snap variable hint approach is unreliable cross-browser,
+ * so a simple media query on the desktop default keeps the row clean
+ * when there is no overflow on wide screens. */
+@media (min-width: 1024px) {
+  .tabbed-container__pills-row {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 .tabbed-container__panels {
