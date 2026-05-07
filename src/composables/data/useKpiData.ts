@@ -240,7 +240,7 @@ export function useKpiData(config: UseKpiDataConfig): UseKpiDataReturn {
         previousValue.value = prevValue;
 
         if (prevValue !== null && prevValue !== 0) {
-          variationValue.value = variation(currentValue, prevValue) ?? null;
+          variationValue.value = _engine.variation(currentValue, prevValue) ?? null;
         } else {
           variationValue.value = null;
         }
