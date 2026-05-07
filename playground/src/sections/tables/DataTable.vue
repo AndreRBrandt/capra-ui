@@ -8,9 +8,9 @@ import LivePropsEditor from "../LivePropsEditor.vue";
 const liveInitial = JSON.stringify(
   {
     columns: [
-      { key: "filial", label: "Filial", format: "text", sticky: true },
-      { key: "valor", label: "Valor", format: "currency", align: "right", sortable: true },
-      { key: "qtd", label: "Qtde", format: "number", align: "right", sortable: true },
+      { key: "filial", label: "Filial", type: "text" },
+      { key: "valor", label: "Valor", type: "currency", align: "right", sortable: true },
+      { key: "qtd", label: "Qtde", type: "number", align: "right", sortable: true },
     ],
     data: [
       { filial: "BDN BV", valor: 142300, qtd: 451 },
@@ -28,7 +28,7 @@ const liveInitial = JSON.stringify(
 );
 
 const propsInfo = [
-  { name: "columns", type: "Column[]", default: "—", description: "Definições de colunas (key, label, format, sortable, sticky, align, width).", required: true },
+  { name: "columns", type: "Column[]", default: "—", description: "Definições de colunas (key, label, type, sortable, align, width). Use stickyFirstColumn no componente para fixar a primeira coluna.", required: true },
   { name: "data", type: "Record<string, any>[]", default: "—", description: "Linhas de dados.", required: true },
   { name: "rowKey", type: "string", default: "—", description: "Coluna que identifica unicamente cada row." },
   { name: "sortable", type: "boolean", default: "false", description: "Habilita sort (override por coluna)." },
@@ -52,10 +52,10 @@ const data = [
 ];
 
 const columns: Column[] = [
-  { key: "filial", label: "Filial", format: "text", sortable: true, sticky: true },
-  { key: "faturamento", label: "Faturamento", format: "currency", sortable: true, align: "right" },
-  { key: "cupons", label: "Cupons", format: "number", sortable: true, align: "right" },
-  { key: "ticket", label: "Ticket médio", format: "currency", sortable: true, align: "right" },
+  { key: "filial", label: "Filial", type: "text", sortable: true },
+  { key: "faturamento", label: "Faturamento", type: "currency", sortable: true, align: "right" },
+  { key: "cupons", label: "Cupons", type: "number", sortable: true, align: "right" },
+  { key: "ticket", label: "Ticket médio", type: "currency", sortable: true, align: "right" },
 ];
 
 const filterOptions = [
