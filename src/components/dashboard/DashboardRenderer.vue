@@ -16,10 +16,11 @@
  * handles API calls and passes results back via widgetData prop.
  */
 
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import type { DashboardDefinition } from "../../types/dashboard";
 import type { CapraResult } from "../../types/result";
 import DashboardSection from "./DashboardSection.vue";
+import DashboardFilterBar from "./DashboardFilterBar.vue";
 
 // =============================================================================
 // Props & Events
@@ -34,12 +35,50 @@ const props = defineProps<{
   widgetLoading: Record<string, boolean>;
   /** Error state per widget */
   widgetErrors: Record<string, string | null>;
+  /**
+   * Filter values keyed by `dashboard.filters[].key`.
+   * Optional — if omitted, the renderer manages state internally
+   * (initialized from each filter's `defaultValue`). When provided,
+   * acts as the controlled v-model:filterValues source of truth.
+   */
+  filterValues?: Record<string, unknown>;
 }>();
 
 const emit = defineEmits<{
   /** Emitted when filter state changes — parent should re-fetch affected widgets */
   (e: "filter-change", payload: { key: string; value: unknown }): void;
+  /** Full filter values record changed (controlled-mode mirror) */
+  (e: "update:filterValues", values: Record<string, unknown>): void;
 }>();
+
+// =============================================================================
+// Filter state
+// =============================================================================
+
+const internalFilterValues = ref<Record<string, unknown>>(
+  Object.fromEntries(
+    (props.dashboard.filters ?? []).map((f) => [f.key, f.defaultValue]),
+  ),
+);
+
+watch(
+  () => props.filterValues,
+  (next) => {
+    if (next) internalFilterValues.value = { ...next };
+  },
+  { immediate: true, deep: true },
+);
+
+const effectiveFilterValues = computed(() => internalFilterValues.value);
+
+function handleFilterValuesUpdate(values: Record<string, unknown>): void {
+  internalFilterValues.value = values;
+  emit("update:filterValues", values);
+}
+
+function handleFilterChange(payload: { key: string; value: unknown }): void {
+  emit("filter-change", payload);
+}
 
 // =============================================================================
 // Computed
@@ -69,6 +108,15 @@ const unsectionedWidgets = computed(() =>
 
 <template>
   <div class="dashboard-renderer" :data-dashboard-slug="dashboard.slug">
+    <!-- Filter bar (rendered only when the dashboard declares filters) -->
+    <DashboardFilterBar
+      v-if="dashboard.filters && dashboard.filters.length > 0"
+      :filters="dashboard.filters"
+      :values="effectiveFilterValues"
+      @update:values="handleFilterValuesUpdate"
+      @change="handleFilterChange"
+    />
+
     <!-- Unsectioned widgets (top-level, no section header) -->
     <DashboardSection
       v-if="unsectionedWidgets.length > 0"

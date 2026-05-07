@@ -122,20 +122,19 @@ visualmente incompleto.
 um registry global de ícones do framework, ou exigir Component diretamente
 no JSON via convenção (lookup por nome no plugin).
 
-### F2 — `DashboardRenderer` declara `filter-change` mas **não renderiza filter bar**
+### F2 — `DashboardRenderer` declara `filter-change` mas **não renderiza filter bar** ✅ RESOLVIDO em PR2
 
 **Local:** `src/components/dashboard/DashboardRenderer.vue`.
 
-**Problema:** o emit `filter-change` está declarado (linha 41) mas o template
-não tem filter bar. `DashboardDefinition.filters[]` existe mas é ignorado.
+**Problema:** o emit `filter-change` estava declarado (linha 41) mas o template
+não tinha filter bar. `DashboardDefinition.filters[]` existia mas era ignorado.
 
-**Impacto:** dashboards JSON-driven não conseguem expor filtros. Críticos
-para qualquer demo real.
-
-**Sugestão:** **PR2** dedicado a implementar render da filter bar dentro
-do `DashboardRenderer`, usando `CollapsibleFilterBar` + componentes de
-filtro existentes em `src/components/filters/`. JSON declara `filters[]`,
-Renderer instancia, emite `filter-change` quando usuário altera.
+**Resolução (PR2):** novo `DashboardFilterBar.vue` que recebe
+`DashboardFilterDefinition[]` + valores controlados, renderiza
+`FilterTrigger + FilterDropdown` por filtro com o componente apropriado
+por `filterType` (`date` → `DateRangeFilter`, `multiselect` → `MultiSelectFilter`,
+`select` → `SelectFilter`). `DashboardRenderer` instancia + propaga
+`filter-change` (per-filter) e `update:filterValues` (record completo).
 
 ### F3 — `DashboardRenderer` não está no barrel de `@capra-ui/core`
 
