@@ -82,7 +82,7 @@ const liveInitialWithIcon = computed(() => liveInitial);
 const propsInfo = [
   { name: "schema", type: "KpiSchemaItem[]", default: "—", description: "Definições estáticas dos KPIs (key, label, format, icon, category).", required: true },
   { name: "kpis", type: "Record<string, KpiData>", default: "—", description: "Valores em runtime: { [key]: { value, previousValue, participation, ... } }.", required: true },
-  { name: "iconMap", type: "Record<string, Component>", default: "—", description: "Mapping icon-name → Vue Component. NÃO editável via JSON — injete fora do editor." },
+  { name: "iconMap", type: "Record<string, Component>", default: "{}", description: "Opcional. Mapping icon-name → Vue Component. Não editável via JSON; quando ausente os cards renderizam sem ícone." },
   { name: "title", type: "string", default: "—", description: "Título do container." },
   { name: "subtitle", type: "string", default: "—", description: "Subtítulo." },
   { name: "loading", type: "boolean", default: "false", description: "Estado de loading." },
@@ -107,7 +107,7 @@ const propsInfo = [
     import-from="@capra-ui/core"
     imports="KpiContainer, KpiSchemaItem, KpiData"
   >
-    <ExampleBlock title="Default — 4 KPIs com schema + iconMap" note="iconMap é OBRIGATÓRIO (gap conhecido — F1)">
+    <ExampleBlock title="Default — 4 KPIs com schema + iconMap" note="Quando omitido, cards renderizam sem ícone.">
       <div style="width: 100%; max-width: 800px">
         <KpiContainer
           title="Indicadores principais"
@@ -151,7 +151,7 @@ const propsInfo = [
       :component="KpiContainer"
       :initial="liveInitialWithIcon"
       :props-info="propsInfo"
-      notes="iconMap não pode ir no JSON (são objetos Component). O KpiContainer renderiza sem ícones quando iconMap é vazio — esperado neste editor."
+      notes="iconMap não pode ir no JSON (são objetos Component). Sem iconMap, os cards renderizam sem ícone — esperado neste editor."
     />
   </SectionPage>
 </template>

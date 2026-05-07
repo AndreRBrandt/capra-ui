@@ -71,8 +71,9 @@ interface Props {
   schema: KpiSchemaItem[];
   /** Runtime KPI data keyed by KPI key (required) */
   kpis: Record<string, KpiData>;
-  /** Map of icon name string → Vue component (required) */
-  iconMap: Record<string, Component>;
+  /** Map of icon name string → Vue component. Optional — when omitted
+   *  or a key is missing, KpiCards render without an icon. */
+  iconMap?: Record<string, Component>;
   /** Keys visible by default (if not provided, all are visible) */
   defaultVisible?: string[];
   /** localStorage key for layout persistence */
@@ -114,6 +115,9 @@ const props = withDefaults(defineProps<Props>(), {
   collapsed: false,
   loading: false,
   error: null,
+  // Default to an empty record so accesses like iconMap[name] return
+  // undefined (no icon) instead of throwing on undefined.
+  iconMap: () => ({}),
   storageKey: "capra:kpi-layout",
   showConfig: true,
   configTitle: "Configurar KPIs",
