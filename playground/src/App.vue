@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v26 / 2026-05-07 / brand-tinted neutral grays + BaseButton fix";
+const BUILD_MARKER = "v27 / 2026-05-07 / sweep of remaining hardcoded text-on-brand";
 
 onMounted(() => {
   if (typeof window !== "undefined") {

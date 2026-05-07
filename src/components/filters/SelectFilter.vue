@@ -276,7 +276,7 @@ watch(searchQuery, () => {
 
 .select-filter__option--selected {
   background-color: var(--color-brand-highlight, #e5a22f);
-  color: var(--color-brand-secondary, #4a2c00);
+  color: var(--color-on-hi, #4a2c00);
 }
 
 .select-filter__option--selected:hover {

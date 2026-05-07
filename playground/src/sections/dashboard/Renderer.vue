@@ -148,7 +148,7 @@ function setMode(next: Mode): void {
 }
 .ctrl:disabled {
   background: var(--color-primary, #3b82f6);
-  color: white;
+  color: var(--color-on-brand, white);
   cursor: default;
 }
 .event-log {

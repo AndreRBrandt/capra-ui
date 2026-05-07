@@ -447,7 +447,7 @@ function handleRemove(id: string) {
   font-size: 0.75rem;
   font-weight: 500;
   background: var(--capra-brand-tertiary, #8f3f00);
-  color: white;
+  color: var(--color-on-brand, white);
   border: none;
   border-radius: 6px;
   cursor: pointer;

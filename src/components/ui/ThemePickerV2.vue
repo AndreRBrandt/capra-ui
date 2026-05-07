@@ -316,7 +316,7 @@ const avatarRing = computed(() => ({
 
 .tp-auto-btn--active {
   background: var(--color-brand, #6366f1);
-  color: white;
+  color: var(--color-on-brand, white);
   border-color: var(--color-brand, #6366f1);
 }
 
@@ -342,7 +342,7 @@ const avatarRing = computed(() => ({
 
 .tp-mode-btn--active {
   background: var(--color-brand, #6366f1);
-  color: white;
+  color: var(--color-on-brand, white);
   border-color: var(--color-brand, #6366f1);
 }
 </style>
