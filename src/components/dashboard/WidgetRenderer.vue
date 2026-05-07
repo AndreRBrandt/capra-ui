@@ -44,7 +44,30 @@ const componentData = computed(() => {
   const w = props.widget;
 
   switch (w.widgetType) {
-    case "data-table":
+    case "data-table": {
+      // The dashboard JSON column schema differs from DataTable's Column type:
+      //   JSON `type` is dimension|measure (semantic role, used by query builder)
+      //   JSON `format` is "currency"|"number"|"percent" (built-in format)
+      // DataTable's API expects:
+      //   `type` = built-in format string
+      //   `format` = custom formatter FUNCTION
+      // Translate before passing.
+      const FORMAT_TYPES = new Set(["currency", "number", "percent", "text"]);
+      const columns = (w.componentProps.columns as Array<Record<string, unknown>>).map((c) => ({
+        key: c.key,
+        label: c.label,
+        width: c.width,
+        align: c.align,
+        sortable: c.sortable,
+        decimals: c.decimals,
+        trend: c.trend,
+        html: c.html,
+        filterable: c.filterable,
+        type:
+          typeof c.format === "string" && FORMAT_TYPES.has(c.format)
+            ? c.format
+            : undefined,
+      }));
       return {
         data: props.data.rows.map((row) => ({
           ...row.dimensions,
@@ -55,11 +78,12 @@ const componentData = computed(() => {
               )
             : {}),
         })),
-        columns: w.componentProps.columns,
+        columns,
         sortable: w.componentProps.sortable ?? true,
         searchable: w.componentProps.searchable ?? false,
         showTotals: w.componentProps.showTotals ?? true,
       };
+    }
 
     case "bar-chart":
     case "line-chart":
