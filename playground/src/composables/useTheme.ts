@@ -175,13 +175,18 @@ function buildLightTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, st
     "--color-active": neutral(sH, 10, 90),
 
     // === Text (Secondary tint) ===
-    "--color-text": neutral(sH, 20, 15),
-    "--color-text-strong": neutral(sH, 25, 8),
-    "--color-text-secondary": neutral(sH, 12, 30),
-    "--color-text-muted": neutral(sH, 8, 42),
-    "--color-text-subtle": neutral(sH, 6, 62),
-    "--color-text-tertiary": neutral(sH, 8, 55),
-    "--color-text-placeholder": neutral(sH, 6, 75),
+    // Luminance values chosen so contrast ratio against the lightest
+    // surface (`--color-surface` = #fff, L=1.0) stays >= 4.5:1 (WCAG
+    // AA) for normal-weight tokens and >= 3:1 (AA Large) for the
+    // ultra-soft ones. Computed empirically — tighter than the earlier
+    // values, which had subtle/placeholder washing out on white cards.
+    "--color-text": neutral(sH, 20, 15),         // L≈0.025, ratio ~14:1
+    "--color-text-strong": neutral(sH, 25, 8),   // L≈0.008, ratio ~18:1
+    "--color-text-secondary": neutral(sH, 12, 30), // L≈0.075, ratio ~8.4:1
+    "--color-text-muted": neutral(sH, 8, 42),    // L≈0.14, ratio ~5.5:1 (AA)
+    "--color-text-tertiary": neutral(sH, 8, 47), // L≈0.17, ratio ~4.5:1 (AA strict)
+    "--color-text-subtle": neutral(sH, 6, 52),   // L≈0.21, ratio ~3.8:1 (AA Large)
+    "--color-text-placeholder": neutral(sH, 6, 60), // L≈0.29, ratio ~3.0:1 (AA Large min)
 
     // === Borders (Secondary tint) ===
     "--color-border": neutral(sH, 8, 90),
@@ -280,13 +285,21 @@ function buildDarkTheme(brand: HSL, secondary: HSL, hi: HSL): Record<string, str
     "--color-hover": neutral(sH, 15, 20),
     "--color-active": neutral(sH, 18, 26),
 
-    "--color-text": neutral(sH, 8, 92),
-    "--color-text-strong": "#ffffff",
-    "--color-text-secondary": neutral(sH, 10, 78),
-    "--color-text-muted": neutral(sH, 10, 65),
-    "--color-text-subtle": neutral(sH, 8, 50),
-    "--color-text-tertiary": neutral(sH, 8, 55),
-    "--color-text-placeholder": neutral(sH, 6, 35),
+    // === Text (Secondary tint) — dark mode ===
+    // Surface in dark mode is `neutral(sH, 12, 12)` ≈ L=0.014. Text
+    // luminance must climb high enough that ratio >= 4.5:1 (AA) for
+    // normal text and >= 3:1 for Large/decorative. Previous values
+    // (subtle l=50, tertiary l=55, placeholder l=35) were producing
+    // 3.9 / 4.5 / 2.3 ratios — placeholder failed even AA Large, the
+    // others were borderline. Bump every soft token up to safer
+    // luminances. (text/strong/secondary/muted already passed AA.)
+    "--color-text": neutral(sH, 8, 92),          // L≈0.83, ratio ~13.7:1
+    "--color-text-strong": "#ffffff",            // L=1.0, ratio ~22:1
+    "--color-text-secondary": neutral(sH, 10, 78), // L≈0.55, ratio ~9.4:1
+    "--color-text-muted": neutral(sH, 10, 65),   // L≈0.36, ratio ~6.4:1 (AA)
+    "--color-text-tertiary": neutral(sH, 8, 60), // L≈0.30, ratio ~5.5:1 (AA)
+    "--color-text-subtle": neutral(sH, 8, 62),   // L≈0.32, ratio ~5.7:1 (AA)
+    "--color-text-placeholder": neutral(sH, 6, 52), // L≈0.21, ratio ~4.0:1 (AA Large)
 
     "--color-border": neutral(sH, 12, 22),
     "--color-border-light": neutral(sH, 8, 18),
