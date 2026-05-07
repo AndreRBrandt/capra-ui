@@ -59,7 +59,12 @@ withDefaults(defineProps<Props>(), {
 /* Variants — cores via CSS variables (resolvidas pelo app consumidor) */
 .base-btn--primary {
   background: var(--color-brand);
-  color: var(--color-btn-primary-text, var(--color-bg, #1a1a1a));
+  /* Auto-contrast text on brand (computed by useTheme/dark.css from
+   * brand luminance). Fallback white because the legacy fallback was
+   * --color-bg, which is the BACKGROUND surface — this caused dark
+   * text on dark brands (and vice versa). White is the historical
+   * default for primary buttons. */
+  color: var(--color-on-brand, var(--color-btn-primary-text, #ffffff));
   border-color: transparent;
   font-weight: 600;
 }
@@ -101,7 +106,11 @@ withDefaults(defineProps<Props>(), {
 /* CTA — accent color (highlight) */
 .base-btn--accent {
   background: var(--color-hi, var(--color-brand-highlight));
-  color: #000;
+  /* Auto-contrast against the highlight color (yellow/orange are
+   * common, where black reads better; if the consumer picks a dark
+   * highlight, white wins). Falls back to black for legacy themes
+   * that don't expose --color-on-hi. */
+  color: var(--color-on-hi, #000);
   border-color: transparent;
   font-weight: 700;
 }
