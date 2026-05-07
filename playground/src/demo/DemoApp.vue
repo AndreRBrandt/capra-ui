@@ -146,18 +146,16 @@ function backToPlayground(): void {
       padding="none"
     >
       <template #header-actions>
-        <div class="page-actions">
-          <button class="page-action" type="button" title="Calendário">
-            <Calendar :size="16" />
-            <span class="page-action__badge">2</span>
-          </button>
+        <button class="page-action" type="button" title="Calendário">
+          <Calendar :size="16" />
+          <span class="page-action__badge">2</span>
+        </button>
 
-          <button class="page-action page-action--primary" type="button">
-            <SlidersHorizontal :size="16" />
-            <span>Filtros</span>
-            <ChevronDown :size="14" />
-          </button>
-        </div>
+        <button class="page-action page-action--primary" type="button">
+          <SlidersHorizontal :size="16" />
+          <span>Filtros</span>
+          <ChevronDown :size="14" />
+        </button>
       </template>
 
       <TabPanel name="visao-geral">
@@ -283,15 +281,6 @@ function backToPlayground(): void {
 }
 
 /* ---------- Page action buttons (calendar + filtros) ---------- */
-.page-actions {
-  display: inline-flex;
-  align-items: center;
-  /* Wider gap than the AnalyticContainer __actions default so the
-   * calendar and "Filtros" buttons are visually separate, especially
-   * on mobile where they collapse close together. */
-  gap: 0.625rem;
-}
-
 .page-action {
   position: relative;
   display: inline-flex;

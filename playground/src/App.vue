@@ -68,7 +68,7 @@ function openDemo(): void {
   }
 }
 
-const BUILD_MARKER = "v20 / 2026-05-07 / mobile polish (pills scroll + topbar gear)";
+const BUILD_MARKER = "v21 / 2026-05-07 / actions gap moved into AnalyticContainer";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
