@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   TabbedContainer,
   TabPanel,
@@ -7,9 +7,13 @@ import {
   BaseButton,
   StatusBadge,
   DateRangeFilter,
+  MultiSelectFilter,
+  FilterTrigger,
+  FilterDropdown,
   type DateRangeValue,
+  type MultiSelectOption,
 } from "@capra-ui/core";
-import { BarChart3, Wallet, Users } from "lucide-vue-next";
+import { BarChart3, Wallet, Users, Calendar, Store } from "lucide-vue-next";
 import SectionPage from "../SectionPage.vue";
 import ExampleBlock from "../ExampleBlock.vue";
 import LivePropsEditor from "../LivePropsEditor.vue";
@@ -25,7 +29,8 @@ const basicTabs = [
 const basicActive = ref("vendas");
 
 // ---------------------------------------------------------------------------
-// Example 2 — global filter applied to all views
+// Example 2 — global filters in header (rendered as pill triggers + dropdowns,
+// the same pattern DashboardFilterBar uses).
 // ---------------------------------------------------------------------------
 const filteredTabs = [
   { key: "marca", label: "Marca" },
@@ -33,7 +38,51 @@ const filteredTabs = [
   { key: "turno", label: "Turno" },
 ];
 const filteredActive = ref("marca");
+
 const dateRange = ref<DateRangeValue>({ type: "preset", preset: "thismonth" });
+const dateOpen = ref(false);
+
+const filiaisOptions: MultiSelectOption[] = [
+  { value: "bode-1", label: "Bode 1" },
+  { value: "bode-2", label: "Bode 2" },
+  { value: "bode-3", label: "Bode 3" },
+  { value: "burguer-pampulha", label: "Burguer Pampulha" },
+];
+const filiais = ref<(string | number)[]>(["bode-1", "bode-2"]);
+const filiaisOpen = ref(false);
+
+const PRESET_LABELS: Record<string, string> = {
+  today: "Hoje",
+  yesterday: "Ontem",
+  lastday: "Último dia",
+  last7: "Últimos 7 dias",
+  last30: "Últimos 30 dias",
+  thismonth: "Este mês",
+  lastmonth: "Mês passado",
+  thisyear: "Este ano",
+};
+
+const dateLabel = computed(() => {
+  if (dateRange.value.type === "preset") {
+    return PRESET_LABELS[dateRange.value.preset ?? ""] ?? "Período";
+  }
+  if (dateRange.value.type === "custom" && dateRange.value.startDate && dateRange.value.endDate) {
+    const fmt = (d: Date) => new Date(d).toLocaleDateString("pt-BR");
+    return `${fmt(dateRange.value.startDate)} – ${fmt(dateRange.value.endDate)}`;
+  }
+  return "";
+});
+
+const filiaisLabel = computed(() => {
+  if (filiais.value.length === 0) return "";
+  if (filiais.value.length === 1) {
+    return (
+      filiaisOptions.find((o) => o.value === filiais.value[0])?.label ??
+      String(filiais.value[0])
+    );
+  }
+  return `${filiais.value.length} selecionadas`;
+});
 
 // ---------------------------------------------------------------------------
 // Example 3 — keep-alive (preserves panel state across tab switches)
@@ -177,11 +226,11 @@ const propsInfo = [
     </ExampleBlock>
 
     <!-- =================================================================
-         2 — Global filter in header
+         2 — Global filters in header (FilterTrigger + Dropdown pattern)
          ================================================================= -->
     <ExampleBlock
-      title="Filtro global no header"
-      note="Slot #header-actions vai pro slot de actions do AnalyticContainer. Aplica-se a todas as views."
+      title="Filtros globais no header"
+      note="Mesmo padrão do DashboardFilterBar: FilterTrigger (pill) + FilterDropdown. Aplica-se a todas as views. Pode ter quantos quiser."
     >
       <div style="width: 100%; max-width: 720px">
         <TabbedContainer
@@ -192,23 +241,60 @@ const propsInfo = [
           v-model:active-key="filteredActive"
         >
           <template #header-actions>
-            <DateRangeFilter v-model="dateRange" />
+            <!-- Período -->
+            <div class="filter-item">
+              <FilterTrigger
+                label="Período"
+                :icon="Calendar"
+                :value="dateLabel"
+                :active="dateRange.type !== 'preset' || dateRange.preset !== 'thismonth'"
+                :open="dateOpen"
+                size="sm"
+                @click="dateOpen = !dateOpen"
+                @clear="dateRange = { type: 'preset', preset: 'thismonth' }"
+              />
+              <FilterDropdown :open="dateOpen" @update:open="(v) => (dateOpen = v)">
+                <DateRangeFilter
+                  v-model="dateRange"
+                  @apply="dateOpen = false"
+                  @cancel="dateOpen = false"
+                />
+              </FilterDropdown>
+            </div>
+
+            <!-- Filiais -->
+            <div class="filter-item">
+              <FilterTrigger
+                label="Filial"
+                :icon="Store"
+                :value="filiaisLabel"
+                :active="filiais.length > 0"
+                :open="filiaisOpen"
+                size="sm"
+                @click="filiaisOpen = !filiaisOpen"
+                @clear="filiais = []"
+              />
+              <FilterDropdown :open="filiaisOpen" @update:open="(v) => (filiaisOpen = v)">
+                <MultiSelectFilter
+                  v-model="filiais"
+                  :options="filiaisOptions"
+                  searchable
+                />
+              </FilterDropdown>
+            </div>
           </template>
 
           <TabPanel name="marca">
-            <p>📊 Vendas agregadas <strong>por Marca</strong> no período selecionado.</p>
+            <p>📊 Vendas agregadas <strong>por Marca</strong> com os filtros globais aplicados.</p>
             <p style="font-size: 0.75rem; color: var(--color-text-muted)">
-              filtro ativo:
-              <code>{{
-                dateRange.type === "preset" ? dateRange.preset : "custom"
-              }}</code>
+              período: <code>{{ dateLabel }}</code> · filiais: <code>{{ filiaisLabel || "todas" }}</code>
             </p>
           </TabPanel>
           <TabPanel name="modalidade">
-            <p>📊 Vendas agregadas <strong>por Modalidade</strong> (salão / delivery / iFood) no período.</p>
+            <p>📊 Vendas agregadas <strong>por Modalidade</strong> (salão / delivery / iFood).</p>
           </TabPanel>
           <TabPanel name="turno">
-            <p>📊 Vendas agregadas <strong>por Turno</strong> (almoço / jantar / madrugada) no período.</p>
+            <p>📊 Vendas agregadas <strong>por Turno</strong> (almoço / jantar / madrugada).</p>
           </TabPanel>
         </TabbedContainer>
       </div>
@@ -328,3 +414,11 @@ const propsInfo = [
     />
   </SectionPage>
 </template>
+
+<style scoped>
+/* Required by FilterDropdown — anchors absolute positioning to the trigger */
+.filter-item {
+  position: relative;
+  display: inline-flex;
+}
+</style>
