@@ -1,0 +1,174 @@
+{
+  "id": "demo-vendas",
+  "slug": "vendas",
+  "title": "Vendas — Overview",
+  "description": "Dashboard de demonstracao do DashboardRenderer com dados estaticos",
+  "icon": "BarChart3",
+  "filters": [
+    {
+      "key": "periodo",
+      "dimension": "DATA_REF",
+      "filterType": "date",
+      "label": "Periodo"
+    },
+    {
+      "key": "filial",
+      "dimension": "NMFILIAL",
+      "filterType": "multiselect",
+      "label": "Filial",
+      "options": [
+        { "value": "BDN_BV", "label": "BDN Boa Viagem" },
+        { "value": "BDN_OL", "label": "BDN Olinda" },
+        { "value": "BDN_AF", "label": "BDN Aflitos" },
+        { "value": "BDN_GUA", "label": "BDN Guararapes" },
+        { "value": "BDN_TAC", "label": "BDN Tacaruna" }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "kpis",
+      "key": "kpis",
+      "title": "Indicadores",
+      "sortOrder": 0,
+      "collapsible": false,
+      "collapsedDefault": false
+    },
+    {
+      "id": "details",
+      "key": "details",
+      "title": "Detalhamento",
+      "sortOrder": 1,
+      "collapsible": true,
+      "collapsedDefault": false
+    }
+  ],
+  "widgets": [
+    {
+      "id": "stat-faturamento",
+      "key": "stat-faturamento",
+      "sectionKey": "kpis",
+      "schemaId": "vendas",
+      "widgetType": "stat-card",
+      "componentProps": {
+        "measureKey": "VALOR_LIQUIDO",
+        "label": "Faturamento",
+        "format": "currency"
+      },
+      "queryConfig": {
+        "measures": [{ "name": "VALOR_LIQUIDO", "aggregation": "sum" }]
+      },
+      "filterBindings": ["periodo", "filial"],
+      "grid": { "colSpan": 4 },
+      "sortOrder": 0
+    },
+    {
+      "id": "stat-cupons",
+      "key": "stat-cupons",
+      "sectionKey": "kpis",
+      "schemaId": "vendas",
+      "widgetType": "stat-card",
+      "componentProps": {
+        "measureKey": "QTD_CUPONS",
+        "label": "Cupons emitidos",
+        "format": "number"
+      },
+      "queryConfig": {
+        "measures": [{ "name": "QTD_CUPONS", "aggregation": "sum" }]
+      },
+      "filterBindings": ["periodo", "filial"],
+      "grid": { "colSpan": 4 },
+      "sortOrder": 1
+    },
+    {
+      "id": "stat-ticket",
+      "key": "stat-ticket",
+      "sectionKey": "kpis",
+      "schemaId": "vendas",
+      "widgetType": "stat-card",
+      "componentProps": {
+        "measureKey": "TICKET_MEDIO",
+        "label": "Ticket medio",
+        "format": "currency"
+      },
+      "queryConfig": {
+        "measures": [{ "name": "TICKET_MEDIO", "aggregation": "avg" }]
+      },
+      "filterBindings": ["periodo", "filial"],
+      "grid": { "colSpan": 4 },
+      "sortOrder": 2
+    },
+    {
+      "id": "bar-vendas-filial",
+      "key": "bar-vendas-filial",
+      "sectionKey": "details",
+      "schemaId": "vendas",
+      "widgetType": "bar-chart",
+      "componentProps": {
+        "categoryKey": "NMFILIAL",
+        "valueKey": "VALOR_LIQUIDO",
+        "previousKey": "VALOR_LIQUIDO_prev",
+        "format": "currency",
+        "horizontal": false,
+        "height": "320px",
+        "seriesLabel": "Periodo atual",
+        "previousLabel": "Periodo anterior",
+        "showLegend": true
+      },
+      "queryConfig": {
+        "measures": [{ "name": "VALOR_LIQUIDO", "aggregation": "sum" }],
+        "dimensions": [{ "name": "NMFILIAL" }]
+      },
+      "filterBindings": ["periodo", "filial"],
+      "grid": { "colSpan": 12 },
+      "sortOrder": 0
+    },
+    {
+      "id": "table-vendas-filial",
+      "key": "table-vendas-filial",
+      "sectionKey": "details",
+      "schemaId": "vendas",
+      "widgetType": "data-table",
+      "componentProps": {
+        "columns": [
+          { "key": "NMFILIAL", "label": "Filial", "type": "dimension" },
+          {
+            "key": "VALOR_LIQUIDO",
+            "label": "Faturamento",
+            "type": "measure",
+            "format": "currency",
+            "sortable": true
+          },
+          {
+            "key": "QTD_CUPONS",
+            "label": "Cupons",
+            "type": "measure",
+            "format": "number",
+            "sortable": true
+          },
+          {
+            "key": "TICKET_MEDIO",
+            "label": "Ticket medio",
+            "type": "measure",
+            "format": "currency",
+            "sortable": true
+          }
+        ],
+        "sortable": true,
+        "searchable": true,
+        "showTotals": true
+      },
+      "queryConfig": {
+        "measures": [
+          { "name": "VALOR_LIQUIDO", "aggregation": "sum" },
+          { "name": "QTD_CUPONS", "aggregation": "sum" },
+          { "name": "TICKET_MEDIO", "aggregation": "avg" }
+        ],
+        "dimensions": [{ "name": "NMFILIAL" }]
+      },
+      "filterBindings": ["periodo", "filial"],
+      "grid": { "colSpan": 12 },
+      "sortOrder": 1
+    }
+  ]
+}

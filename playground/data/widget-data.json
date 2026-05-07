@@ -1,0 +1,148 @@
+{
+  "stat-faturamento": {
+    "rows": [],
+    "totals": { "VALOR_LIQUIDO": 487253.18 },
+    "metadata": {
+      "rowCount": 0,
+      "executionMs": 0,
+      "cached": true,
+      "source": "playground-static"
+    }
+  },
+  "stat-cupons": {
+    "rows": [],
+    "totals": { "QTD_CUPONS": 1582 },
+    "metadata": {
+      "rowCount": 0,
+      "executionMs": 0,
+      "cached": true,
+      "source": "playground-static"
+    }
+  },
+  "stat-ticket": {
+    "rows": [],
+    "totals": { "TICKET_MEDIO": 307.93 },
+    "metadata": {
+      "rowCount": 0,
+      "executionMs": 0,
+      "cached": true,
+      "source": "playground-static"
+    }
+  },
+  "bar-vendas-filial": {
+    "rows": [
+      {
+        "dimensions": { "NMFILIAL": "BDN Boa Viagem" },
+        "measures": { "VALOR_LIQUIDO": 142300.5, "QTD_CUPONS": 451 },
+        "comparison": { "VALOR_LIQUIDO": 128450.1, "QTD_CUPONS": 422 }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Olinda" },
+        "measures": { "VALOR_LIQUIDO": 98140.0, "QTD_CUPONS": 312 },
+        "comparison": { "VALOR_LIQUIDO": 91200.0, "QTD_CUPONS": 296 }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Aflitos" },
+        "measures": { "VALOR_LIQUIDO": 87502.4, "QTD_CUPONS": 281 },
+        "comparison": { "VALOR_LIQUIDO": 80100.0, "QTD_CUPONS": 268 }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Guararapes" },
+        "measures": { "VALOR_LIQUIDO": 79800.28, "QTD_CUPONS": 268 },
+        "comparison": { "VALOR_LIQUIDO": 75400.0, "QTD_CUPONS": 254 }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Tacaruna" },
+        "measures": { "VALOR_LIQUIDO": 79510.0, "QTD_CUPONS": 270 },
+        "comparison": { "VALOR_LIQUIDO": 81100.0, "QTD_CUPONS": 277 }
+      }
+    ],
+    "totals": { "VALOR_LIQUIDO": 487253.18, "QTD_CUPONS": 1582 },
+    "metadata": {
+      "rowCount": 5,
+      "executionMs": 0,
+      "cached": true,
+      "source": "playground-static"
+    }
+  },
+  "table-vendas-filial": {
+    "rows": [
+      {
+        "dimensions": { "NMFILIAL": "BDN Boa Viagem" },
+        "measures": {
+          "VALOR_LIQUIDO": 142300.5,
+          "QTD_CUPONS": 451,
+          "TICKET_MEDIO": 315.52
+        },
+        "comparison": {
+          "VALOR_LIQUIDO": 128450.1,
+          "QTD_CUPONS": 422,
+          "TICKET_MEDIO": 304.4
+        }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Olinda" },
+        "measures": {
+          "VALOR_LIQUIDO": 98140.0,
+          "QTD_CUPONS": 312,
+          "TICKET_MEDIO": 314.55
+        },
+        "comparison": {
+          "VALOR_LIQUIDO": 91200.0,
+          "QTD_CUPONS": 296,
+          "TICKET_MEDIO": 308.11
+        }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Aflitos" },
+        "measures": {
+          "VALOR_LIQUIDO": 87502.4,
+          "QTD_CUPONS": 281,
+          "TICKET_MEDIO": 311.39
+        },
+        "comparison": {
+          "VALOR_LIQUIDO": 80100.0,
+          "QTD_CUPONS": 268,
+          "TICKET_MEDIO": 298.88
+        }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Guararapes" },
+        "measures": {
+          "VALOR_LIQUIDO": 79800.28,
+          "QTD_CUPONS": 268,
+          "TICKET_MEDIO": 297.76
+        },
+        "comparison": {
+          "VALOR_LIQUIDO": 75400.0,
+          "QTD_CUPONS": 254,
+          "TICKET_MEDIO": 296.85
+        }
+      },
+      {
+        "dimensions": { "NMFILIAL": "BDN Tacaruna" },
+        "measures": {
+          "VALOR_LIQUIDO": 79510.0,
+          "QTD_CUPONS": 270,
+          "TICKET_MEDIO": 294.48
+        },
+        "comparison": {
+          "VALOR_LIQUIDO": 81100.0,
+          "QTD_CUPONS": 277,
+          "TICKET_MEDIO": 292.78
+        }
+      }
+    ],
+    "totals": {
+      "VALOR_LIQUIDO": 487253.18,
+      "QTD_CUPONS": 1582,
+      "TICKET_MEDIO": 307.93
+    },
+    "metadata": {
+      "rowCount": 5,
+      "executionMs": 0,
+      "cached": true,
+      "source": "playground-static"
+    }
+  }
+}
