@@ -48,7 +48,7 @@ function selectSection(id: string): void {
   }
 }
 
-const BUILD_MARKER = "v16 / 2026-05-07 / dashboard demo disabled";
+const BUILD_MARKER = "v18 / 2026-05-07 / data-table column adapter";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
