@@ -1,42 +1,79 @@
+import { markRaw, type Component } from "vue";
 import type { PlaygroundGroup, PlaygroundSection } from "./types";
 
-import DashboardRenderer from "./dashboard/Renderer.vue";
-import DashboardFilterBar from "./dashboard/FilterBar.vue";
+// markRaw at import time (singleton) — guarantees Vue NEVER tries to
+// make the component reactive when stored in computed/ref state.
+// This is the canonical fix for "<component :is> stuck on stale value"
+// in Vue 3 dynamic component switching.
+const m = <T extends Component>(c: T): T => markRaw(c);
 
-import Buttons from "./atoms/Buttons.vue";
-import Badges from "./atoms/Badges.vue";
-import Inputs from "./atoms/Inputs.vue";
-import States from "./atoms/States.vue";
-import Segmented from "./atoms/Segmented.vue";
-import Chips from "./atoms/Chips.vue";
+import DashboardRendererSrc from "./dashboard/Renderer.vue";
+import DashboardFilterBarSrc from "./dashboard/FilterBar.vue";
+const DashboardRenderer = m(DashboardRendererSrc);
+const DashboardFilterBar = m(DashboardFilterBarSrc);
 
-import Collapsible from "./molecules/Collapsible.vue";
-import RecordCards from "./molecules/RecordCards.vue";
-import Modals from "./molecules/Modals.vue";
-import Popovers from "./molecules/Popovers.vue";
+import ButtonsSrc from "./atoms/Buttons.vue";
+import BadgesSrc from "./atoms/Badges.vue";
+import InputsSrc from "./atoms/Inputs.vue";
+import StatesSrc from "./atoms/States.vue";
+import SegmentedSrc from "./atoms/Segmented.vue";
+import ChipsSrc from "./atoms/Chips.vue";
+const Buttons = m(ButtonsSrc);
+const Badges = m(BadgesSrc);
+const Inputs = m(InputsSrc);
+const States = m(StatesSrc);
+const Segmented = m(SegmentedSrc);
+const Chips = m(ChipsSrc);
 
-import FilterPrimitives from "./filters/FilterPrimitives.vue";
-import FilterSelect from "./filters/Select.vue";
-import FilterMultiSelect from "./filters/MultiSelect.vue";
-import FilterDateRange from "./filters/DateRange.vue";
-import FilterBars from "./filters/FilterBars.vue";
+import CollapsibleSrc from "./molecules/Collapsible.vue";
+import RecordCardsSrc from "./molecules/RecordCards.vue";
+import ModalsSrc from "./molecules/Modals.vue";
+import PopoversSrc from "./molecules/Popovers.vue";
+const Collapsible = m(CollapsibleSrc);
+const RecordCards = m(RecordCardsSrc);
+const Modals = m(ModalsSrc);
+const Popovers = m(PopoversSrc);
 
-import AnalyticsKpiCards from "./analytics/KpiCards.vue";
-import AnalyticsTrends from "./analytics/Trends.vue";
-import AnalyticsMetrics from "./analytics/Metrics.vue";
+import FilterPrimitivesSrc from "./filters/FilterPrimitives.vue";
+import FilterSelectSrc from "./filters/Select.vue";
+import FilterMultiSelectSrc from "./filters/MultiSelect.vue";
+import FilterDateRangeSrc from "./filters/DateRange.vue";
+import FilterBarsSrc from "./filters/FilterBars.vue";
+const FilterPrimitives = m(FilterPrimitivesSrc);
+const FilterSelect = m(FilterSelectSrc);
+const FilterMultiSelect = m(FilterMultiSelectSrc);
+const FilterDateRange = m(FilterDateRangeSrc);
+const FilterBars = m(FilterBarsSrc);
 
-import ChartBar from "./charts/Bar.vue";
-import ChartLine from "./charts/Line.vue";
-import ChartPie from "./charts/Pie.vue";
-import ChartStacked from "./charts/Stacked.vue";
-import ChartHeatmap from "./charts/Heatmap.vue";
+import AnalyticsKpiCardsSrc from "./analytics/KpiCards.vue";
+import AnalyticsTrendsSrc from "./analytics/Trends.vue";
+import AnalyticsMetricsSrc from "./analytics/Metrics.vue";
+const AnalyticsKpiCards = m(AnalyticsKpiCardsSrc);
+const AnalyticsTrends = m(AnalyticsTrendsSrc);
+const AnalyticsMetrics = m(AnalyticsMetricsSrc);
 
-import DataTable from "./tables/DataTable.vue";
-import DetailModal from "./tables/DetailModal.vue";
+import ChartBarSrc from "./charts/Bar.vue";
+import ChartLineSrc from "./charts/Line.vue";
+import ChartPieSrc from "./charts/Pie.vue";
+import ChartStackedSrc from "./charts/Stacked.vue";
+import ChartHeatmapSrc from "./charts/Heatmap.vue";
+const ChartBar = m(ChartBarSrc);
+const ChartLine = m(ChartLineSrc);
+const ChartPie = m(ChartPieSrc);
+const ChartStacked = m(ChartStackedSrc);
+const ChartHeatmap = m(ChartHeatmapSrc);
 
-import AnalyticContainer from "./containers/AnalyticContainer.vue";
-import KpiContainer from "./containers/KpiContainer.vue";
-import ListContainer from "./containers/ListContainer.vue";
+import DataTableSrc from "./tables/DataTable.vue";
+import DetailModalSrc from "./tables/DetailModal.vue";
+const DataTable = m(DataTableSrc);
+const DetailModal = m(DetailModalSrc);
+
+import AnalyticContainerSrc from "./containers/AnalyticContainer.vue";
+import KpiContainerSrc from "./containers/KpiContainer.vue";
+import ListContainerSrc from "./containers/ListContainer.vue";
+const AnalyticContainer = m(AnalyticContainerSrc);
+const KpiContainer = m(KpiContainerSrc);
+const ListContainer = m(ListContainerSrc);
 
 export const groups: PlaygroundGroup[] = [
   { id: "dashboard", label: "Dashboard", order: 0 },

@@ -11,7 +11,7 @@
  * must be wrapped with markRaw to avoid Vue trying to make them reactive
  * (which breaks dynamic <component :is>). We use markRaw on resolution.
  */
-import { computed, markRaw, onMounted, ref, type Component } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { sectionsByGroup, findSection } from "./sections/registry";
 import ThemeControls from "./components/ThemeControls.vue";
 
@@ -24,39 +24,38 @@ const activeId = ref<string>(findSection(currentHash()).id);
 
 const activeSection = computed(() => findSection(activeId.value));
 
-// markRaw the resolved component to skip Vue's reactivity proxy.
-const ActiveComponent = computed<Component>(() =>
-  markRaw(activeSection.value.component as Component),
-);
-
 const activeGroupLabel = computed(() => {
   const sec = activeSection.value;
   return sectionsByGroup.find((g) => g.group.id === sec.group)?.group.label ?? "";
 });
 
 // Visible click counter — if the user clicks sidebar but this number
-// does not change, the click handler is not firing (CSS overlay,
-// disabled state, broken event binding). If it changes but content
-// stays static, the dynamic <component :is> reactivity is broken.
+// does not change, the click handler is not firing.
 const navClicks = ref(0);
+
+// Force-remount counter — incremented on every nav click. Used as
+// :key on <component :is>. This GUARANTEES a fresh mount of the
+// section component, defeating any stale-binding/HMR-preserved-state
+// pathology that the regular activeId-based key might miss.
+const remountKey = ref(0);
 
 function selectSection(id: string): void {
   navClicks.value += 1;
+  remountKey.value += 1;
   activeId.value = id;
   if (typeof window !== "undefined") {
     window.location.hash = id;
   }
 }
 
-// Build marker — bumped on every iteration so the user can confirm
-// they pulled the latest after a hard reload.
-const BUILD_MARKER = "v14 / 2026-05-07 / fix filter-bar reactive loop";
+const BUILD_MARKER = "v15 / 2026-05-07 / markRaw at registry + force-remount";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
     window.addEventListener("hashchange", () => {
       const next = findSection(currentHash());
       if (next.id !== activeId.value) {
+        remountKey.value += 1;
         activeId.value = next.id;
       }
     });
@@ -104,7 +103,10 @@ onMounted(() => {
         </span>
       </div>
       <div class="playground-content">
-        <component :is="ActiveComponent" :key="activeId" />
+        <component
+          :is="activeSection.component"
+          :key="`${activeId}-${remountKey}`"
+        />
       </div>
     </main>
   </div>
