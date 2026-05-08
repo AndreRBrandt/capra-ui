@@ -175,7 +175,7 @@ function toggleExpanded() {
 .collapsible-filter-bar__expand-btn--active {
   color: var(--color-brand-highlight, #e5a22f);
   border-color: var(--color-brand-highlight, #e5a22f);
-  background: rgba(229, 162, 47, 0.08);
+  background: color-mix(in srgb, var(--color-hi, #e5a22f) 10%, transparent);
 }
 
 /* ── Chevron animado ────────────────────────────────────── */

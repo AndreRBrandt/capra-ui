@@ -148,10 +148,14 @@ const defaultTheme = computed<ChartTheme>(() => ({
     fontFamily: "inherit",
   },
   tooltip: {
-    backgroundColor: "rgba(50, 40, 30, 0.95)",
+    /* Resolve tooltip surface and text from the active theme so the
+     * default chart tooltip respects light/dark mode and the user
+     * palette. Previously these were hardcoded to a warm-dark look
+     * that always looked the same regardless of mode. */
+    backgroundColor: resolveCssColor("var(--color-surface, #ffffff)"),
     borderColor: resolveCssColor("var(--color-brand-primary, #e5a22f)"),
     textStyle: {
-      color: "#f5f0e8",
+      color: resolveCssColor("var(--color-text, #1f1f1f)"),
     },
   },
 }));

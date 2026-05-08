@@ -409,11 +409,11 @@ function getClearAllClasses() {
 }
 
 .multi-select-filter__option--selected {
-  background-color: rgba(229, 162, 47, 0.1);
+  background-color: color-mix(in srgb, var(--color-hi, #e5a22f) 12%, transparent);
 }
 
 .multi-select-filter__option--selected:hover {
-  background-color: rgba(229, 162, 47, 0.15);
+  background-color: color-mix(in srgb, var(--color-hi, #e5a22f) 18%, transparent);
 }
 
 .multi-select-filter__option--disabled {

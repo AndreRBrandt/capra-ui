@@ -362,14 +362,24 @@ const trendChartOption = computed(() => {
   const format = selectedSchema.value?.format || "number";
   const decimals = selectedSchema.value?.decimals;
 
+  // ECharts canvas cannot read CSS variables — resolve theme tokens
+  // to concrete hex values so the trend chart respects light/dark mode
+  // and the user's palette instead of being hardcoded to a light look.
+  const tooltipBg = resolveCssColor("var(--color-surface, #ffffff)");
+  const tooltipBorder = resolveCssColor("var(--color-border, #e5e7eb)");
+  const tooltipText = resolveCssColor("var(--color-text, #374151)");
+  const axisLabelColor = resolveCssColor("var(--color-text-muted, #9ca3af)");
+  const axisLineColor = resolveCssColor("var(--color-border, #e5e7eb)");
+  const seriesBorder = resolveCssColor("var(--color-surface, #ffffff)");
+
   return {
     tooltip: {
       trigger: "axis",
-      backgroundColor: "rgba(255, 255, 255, 0.95)",
-      borderColor: "#e5e7eb",
+      backgroundColor: tooltipBg,
+      borderColor: tooltipBorder,
       borderWidth: 1,
       padding: [8, 12],
-      textStyle: { color: "#374151", fontSize: 12 },
+      textStyle: { color: tooltipText, fontSize: 12 },
       formatter: (params: any) => {
         if (!params?.[0]) return "";
         const p = params[0];
@@ -383,8 +393,8 @@ const trendChartOption = computed(() => {
     xAxis: {
       type: "category",
       data: history.map((h) => h.label),
-      axisLabel: { fontSize: 10, color: "#9ca3af" },
-      axisLine: { lineStyle: { color: "#e5e7eb" } },
+      axisLabel: { fontSize: 10, color: axisLabelColor },
+      axisLine: { lineStyle: { color: axisLineColor } },
       axisTick: { show: false },
     },
     yAxis: {
@@ -399,7 +409,7 @@ const trendChartOption = computed(() => {
         symbol: "circle",
         symbolSize: 6,
         lineStyle: { color: accent, width: 2 },
-        itemStyle: { color: accent, borderWidth: 2, borderColor: "#fff" },
+        itemStyle: { color: accent, borderWidth: 2, borderColor: seriesBorder },
         areaStyle: {
           color: {
             type: "linear",

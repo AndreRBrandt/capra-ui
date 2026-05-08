@@ -443,7 +443,7 @@ function handleCustomColorInput(category: KpiCategory, event: Event) {
   font-family: monospace;
   border: 1px solid var(--color-border, #e5e7eb);
   border-radius: var(--radius-sm, 0.25rem);
-  background: white;
+  background: var(--color-surface, white);
   color: var(--color-text, #374151);
 }
 
