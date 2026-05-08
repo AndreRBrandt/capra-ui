@@ -91,6 +91,11 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   align-items: center;
   justify-content: center;
   background: var(--color-surface);
+  /* Without an explicit color, the SVG inside (which uses
+   * currentColor for stroke) falls back to the user-agent default
+   * (effectively black), producing dark-on-dark in dark mode. Bind
+   * to --color-text so the icon follows the active theme. */
+  color: var(--color-text);
   border: none;
   border-radius: 12px;
   cursor: pointer;
