@@ -17,6 +17,7 @@
 import { ref } from "vue";
 import {
   AppShellV2,
+  Modal,
   Popover,
   TabbedContainer,
   TabPanel,
@@ -45,7 +46,9 @@ import {
   PercentCircle,
   UserCircle,
   AlertTriangle,
+  Palette,
 } from "lucide-vue-next";
+import ThemeControls from "../components/ThemeControls.vue";
 
 // ---------------------------------------------------------------------------
 // Sidebar nav — mirrors bi.bodedono top-level areas
@@ -93,6 +96,16 @@ function backToPlayground(): void {
       : "atoms-buttons";
   window.location.hash = last;
 }
+
+// ---------------------------------------------------------------------------
+// Theme & palette controls — exposed inside the Settings popover so the
+// demo can be exercised across palettes without bouncing back to the
+// gallery just to retune the brand colors.
+// ---------------------------------------------------------------------------
+const isThemeOpen = ref(false);
+function openThemeSettings(): void {
+  isThemeOpen.value = true;
+}
 </script>
 
 <template>
@@ -126,6 +139,9 @@ function backToPlayground(): void {
           <div class="account-menu__divider" />
           <button type="button" class="account-menu__item">
             <Shield :size="16" /> Segurança
+          </button>
+          <button type="button" class="account-menu__item" @click="openThemeSettings">
+            <Palette :size="16" /> Tema e paleta
           </button>
           <button type="button" class="account-menu__item">
             <Settings :size="16" /> Configurações
@@ -181,6 +197,17 @@ function backToPlayground(): void {
       </TabPanel>
     </TabbedContainer>
   </AppShellV2>
+
+  <!-- Theme & palette modal — opened from the Settings popover.
+       Lets the user retune brand/secondary/highlight without leaving
+       the demo, so any palette change can be observed in context. -->
+  <Modal v-model:open="isThemeOpen" title="Tema e paleta" size="sm">
+    <ThemeControls />
+    <p class="theme-modal-hint">
+      As cores ajustadas aqui são as mesmas do playground — alteram tudo
+      no ato, salvas em <code>localStorage</code>.
+    </p>
+  </Modal>
 </template>
 
 <style scoped>
@@ -340,5 +367,20 @@ function backToPlayground(): void {
 .placeholder p {
   margin: 0;
   font-size: 0.875rem;
+}
+
+/* ---------- Theme modal ---------- */
+.theme-modal-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+.theme-modal-hint code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  padding: 0.05rem 0.25rem;
+  border-radius: 0.25rem;
+  background: var(--color-surface-alt);
 }
 </style>
