@@ -35,7 +35,6 @@ import {
   Settings,
   LogOut,
   Shield,
-  UserCog2,
   ChevronDown,
   ArrowLeft,
   Calendar,
@@ -130,7 +129,7 @@ function openThemeSettings(): void {
         </template>
         <div class="account-menu">
           <div class="account-menu__header">
-            <div class="account-menu__avatar"><UserCog2 :size="18" /></div>
+            <div class="account-menu__avatar"><UserCog :size="18" /></div>
             <div class="account-menu__identity">
               <strong>Admin</strong>
               <span>admin@bodedono.com</span>
