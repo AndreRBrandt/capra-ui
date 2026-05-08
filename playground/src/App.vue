@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v28 / 2026-05-07 / playground buttons inheriting browser default color";
+const BUILD_MARKER = "v29 / 2026-05-08 / theme settings inside DemoApp";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
