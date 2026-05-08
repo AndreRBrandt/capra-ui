@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v29 / 2026-05-08 / theme settings inside DemoApp";
+const BUILD_MARKER = "v30 / 2026-05-08 / hotfix: UserCog2 → UserCog (icon does not exist)";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
