@@ -1651,7 +1651,9 @@ defineExpose({
 .data-table__search-input:focus {
   outline: none;
   border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 2px rgba(229, 162, 47, 0.2);
+  /* Focus ring derived from the theme's highlight color so it picks
+   * up the active palette instead of the legacy amber hex. */
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-hi, #e5a22f) 25%, transparent);
 }
 
 .data-table__search-input::placeholder {
@@ -1977,11 +1979,11 @@ defineExpose({
 }
 
 .data-table__row.selected {
-  background-color: rgba(229, 162, 47, 0.15);
+  background-color: color-mix(in srgb, var(--color-hi, #e5a22f) 15%, transparent);
 }
 
 .data-table__row.selected:hover {
-  background-color: rgba(229, 162, 47, 0.25);
+  background-color: color-mix(in srgb, var(--color-hi, #e5a22f) 25%, transparent);
 }
 
 /* =============================================================================
