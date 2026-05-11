@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Corrigido (2026-05-11) — DataTable container sticky-pins to page on mobile
+- **DataTable.vue** — The container itself (`.data-table-container--sticky`) now becomes `position: sticky` at `<768px`, pinning to the page just below the topbar (`--data-table-sticky-top` offset). Previous "internal-scroll" model required the user to discover that the table region scrolled independently of the page — they didn't, and reported the thead as "still moving". Now the page scrolls normally until the container reaches the sticky offset, at which point the container pins, and the thead inside it stays at the top of the pinned region. Net effect: the column header reads as fixed below the topbar while the user scrolls
+- **DataTable.vue** — Container keeps `max-height: 60vh; overflow-y: auto` on mobile so that, once pinned, rows beyond the visible portion are reachable via internal scroll
+- **Demo (DemoApp.vue)** — Re-adds `style="--data-table-sticky-top: 60px"` on the AppShellV2 wrapper to match the TopBarV2 height; the previous reverts dropped this
+
 ### Corrigido (2026-05-11) — DataTable sticky thead via internal mobile scroll
 - **DataTable.vue** — Reverted the page-level sticky attempt (the previous "sticky to page scroll" approach) and restored the mobile-only `max-height: 60vh; overflow-y: auto` on `.data-table-container--sticky`. **Pure-CSS limit:** the container needs `overflow-x: auto` to let columns scroll horizontally on narrow viewports, but `overflow-x: auto` alone is enough to make the container a scroll container on both axes (CSS spec), so any sticky descendant is anchored to the container — never to the viewport. Setting `top: 60px` to pin "just below the topbar" actually offset the thead inside a moving container, and at certain page-scroll positions the thead ended up rendered below the first row. The internal-scroll approach makes the table its own scroll region on mobile so the thead pins at the top of that internal scroll while the rest of the page scrolls freely
 - **DataTable.vue** — Sticky thead simplified to `position: sticky; top: 0; z-index: 10` (always applied when `stickyFirstColumn=true`). The `--data-table-sticky-top` CSS variable from the previous attempt is removed
