@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Corrigido (2026-05-11) — DataTable sticky thead respects page-level scroll
+- **DataTable.vue** — Removed mobile-only rule that wrapped `data-table-container--sticky` with `max-height: 70vh; overflow-y: auto`. That rule created a sticky context inside the container that captured the thead, but on mobile the container rarely exceeded 70vh, so when the user scrolled the *page* (the natural mobile gesture) the container scrolled with the page and the thead came along with it — appearing not-sticky
+- **DataTable.vue** — Sticky thead now applies at all viewport sizes when `stickyFirstColumn=true` (not just mobile). The thead now sticks relative to the nearest real scroll context, which is the page by default. New CSS variable `--data-table-sticky-top` (default `0`) lets consumers with a sticky page-level top bar offset the thead so it pins just below the bar instead of disappearing behind it
+- **Demo (DemoApp.vue)** — Sets `--data-table-sticky-top: 60px` to match the TopBarV2 height so the DataTable thead pins just below the sticky topbar
+
 ### Corrigido (2026-05-11) — Mobile-responsive AnalyticContainer header
 - **AnalyticContainer.vue** — Header now stacks vertically on viewports `< 640px` so the title block and the actions block each get the full row width. Without this, right-side actions (filter pills, config buttons) consumed their natural width on narrow viewports and squeezed the title column down to a few characters wide, causing the subtitle to wrap one word per line (visible on iPhone SE 375px)
 - **AnalyticContainer.vue** — `.analytic-container__header-content` and `.analytic-container__titles` now get `flex: 1 1 auto; min-width: 0` so text wraps naturally instead of forcing the parent flex item to its intrinsic min-content width
