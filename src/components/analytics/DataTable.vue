@@ -2118,22 +2118,26 @@ defineExpose({
   pointer-events: none;
 }
 
-/* Mobile: sticky tables get bounded height + sticky header */
-@media (max-width: 768px) {
-  .data-table-container--sticky {
-    max-height: 70vh;
-    overflow-y: auto;
-  }
+/* Sticky thead: stays pinned at the top of the page scroll when the
+ * column-pinning feature is on. Previous version wrapped the container
+ * with `max-height: 70vh; overflow-y: auto` on mobile, which created a
+ * scroll context that captured the thead's stickiness — when the user
+ * scrolled the *page* (the natural mobile gesture), the container moved
+ * with the page and the thead moved with it. Removing the container's
+ * own scroll context lets the thead stick to the page's scroll instead.
+ *
+ * Consumers with a sticky page-level top bar can offset the thead via
+ * `--data-table-sticky-top` (e.g. `60px` to match a topbar height) so
+ * the column header pins just below the bar rather than disappearing
+ * behind it. */
+.data-table-container--sticky .data-table thead {
+  position: sticky;
+  top: var(--data-table-sticky-top, 0);
+  z-index: 10;
+}
 
-  .data-table-container--sticky .data-table thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .data-table-container--sticky .data-table thead .data-table__header--sticky {
-    z-index: 12;
-  }
+.data-table-container--sticky .data-table thead .data-table__header--sticky {
+  z-index: 12;
 }
 
 /* =============================================================================
