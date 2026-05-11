@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v37 / 2026-05-11 / DataTable internal scroll + sticky thead";
+const BUILD_MARKER = "v38 / 2026-05-11 / DataTable container sticky-pin to page";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
