@@ -9,10 +9,10 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
-### Corrigido (2026-05-11) — DataTable sticky thead respects page-level scroll
-- **DataTable.vue** — Removed mobile-only rule that wrapped `data-table-container--sticky` with `max-height: 70vh; overflow-y: auto`. That rule created a sticky context inside the container that captured the thead, but on mobile the container rarely exceeded 70vh, so when the user scrolled the *page* (the natural mobile gesture) the container scrolled with the page and the thead came along with it — appearing not-sticky
-- **DataTable.vue** — Sticky thead now applies at all viewport sizes when `stickyFirstColumn=true` (not just mobile). The thead now sticks relative to the nearest real scroll context, which is the page by default. New CSS variable `--data-table-sticky-top` (default `0`) lets consumers with a sticky page-level top bar offset the thead so it pins just below the bar instead of disappearing behind it
-- **Demo (DemoApp.vue)** — Sets `--data-table-sticky-top: 60px` to match the TopBarV2 height so the DataTable thead pins just below the sticky topbar
+### Corrigido (2026-05-11) — DataTable sticky thead via internal mobile scroll
+- **DataTable.vue** — Reverted the page-level sticky attempt (the previous "sticky to page scroll" approach) and restored the mobile-only `max-height: 60vh; overflow-y: auto` on `.data-table-container--sticky`. **Pure-CSS limit:** the container needs `overflow-x: auto` to let columns scroll horizontally on narrow viewports, but `overflow-x: auto` alone is enough to make the container a scroll container on both axes (CSS spec), so any sticky descendant is anchored to the container — never to the viewport. Setting `top: 60px` to pin "just below the topbar" actually offset the thead inside a moving container, and at certain page-scroll positions the thead ended up rendered below the first row. The internal-scroll approach makes the table its own scroll region on mobile so the thead pins at the top of that internal scroll while the rest of the page scrolls freely
+- **DataTable.vue** — Sticky thead simplified to `position: sticky; top: 0; z-index: 10` (always applied when `stickyFirstColumn=true`). The `--data-table-sticky-top` CSS variable from the previous attempt is removed
+- **Demo (DemoApp.vue)** — Drops the `style="--data-table-sticky-top: 60px"` from the AppShellV2 wrapper — no longer needed under the internal-scroll model
 
 ### Corrigido (2026-05-11) — Mobile-responsive AnalyticContainer header
 - **AnalyticContainer.vue** — Header now stacks vertically on viewports `< 640px` so the title block and the actions block each get the full row width. Without this, right-side actions (filter pills, config buttons) consumed their natural width on narrow viewports and squeezed the title column down to a few characters wide, causing the subtitle to wrap one word per line (visible on iPhone SE 375px)
