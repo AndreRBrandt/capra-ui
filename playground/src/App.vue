@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v32 / 2026-05-11 / Visão Geral filiais comparativo (3 filtros reativos)";
+const BUILD_MARKER = "v33 / 2026-05-11 / global filters (data + filiais) vs local (turno + modalidade + comparativo)";
 
 onMounted(() => {
   if (typeof window !== "undefined") {

@@ -17,20 +17,20 @@
 import { computed, ref } from "vue";
 import {
   AppShellV2,
+  DateRangeFilter,
   FilterDropdown,
   FilterTrigger,
   Modal,
   MultiSelectFilter,
   Popover,
-  SelectFilter,
   TabbedContainer,
   TabPanel,
+  type DateRangeValue,
   type MultiSelectOption,
   type NavItemV2,
-  type SelectOption,
 } from "@capra-ui/core";
 import VisaoGeral from "./views/VisaoGeral.vue";
-import type { ComparativoMode, Modalidade, Turno } from "./data/vendas";
+import { FILIAIS, resolveTargetDate } from "./data/vendas";
 import {
   Home,
   DollarSign,
@@ -44,9 +44,8 @@ import {
   LogOut,
   Shield,
   ArrowLeft,
-  Clock,
-  Store,
-  TrendingUp,
+  Calendar,
+  Building2,
   ShoppingCart,
   PackageSearch,
   UserCog,
@@ -115,66 +114,55 @@ function openThemeSettings(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Filtros reativos da Visão Geral
+// Global filters — apply to every view in the TabbedContainer.
+// View-specific filters (e.g. turno/modalidade/comparativo for Visão Geral)
+// live inside each view's own header, not here.
 // ---------------------------------------------------------------------------
 
-const TURNO_OPTIONS: MultiSelectOption[] = [
-  { value: "almoco", label: "Almoço" },
-  { value: "jantar", label: "Jantar" },
-];
+const FILIAL_OPTIONS: MultiSelectOption[] = FILIAIS.map((f) => ({ value: f, label: f }));
 
-const MODALIDADE_OPTIONS: MultiSelectOption[] = [
-  { value: "salao", label: "Salão" },
-  { value: "delivery", label: "Delivery" },
-];
+const dateRange = ref<DateRangeValue>({ type: "preset", preset: "yesterday" });
+const filiaisSelected = ref<(string | number)[]>([...FILIAIS]);
 
-const COMPARATIVO_OPTIONS: SelectOption[] = [
-  { value: "yoy", label: "Ano anterior (mesmo dia da semana)" },
-  { value: "lastweek", label: "Semana anterior (mesmo dia)" },
-  { value: "avg4", label: "Média das últimas 4 ocorrências" },
-];
+const dateOpen = ref(false);
+const filiaisOpen = ref(false);
 
-const turnoSelected = ref<(string | number)[]>(["almoco", "jantar"]);
-const modalidadeSelected = ref<(string | number)[]>(["salao", "delivery"]);
-const comparativoSelected = ref<string | number>("yoy");
+const PRESET_LABELS: Record<string, string> = {
+  today: "Hoje",
+  yesterday: "Ontem",
+  lastday: "Último dia",
+  last7: "Últimos 7 dias",
+  last30: "Últimos 30 dias",
+  thismonth: "Este mês",
+  lastmonth: "Mês passado",
+  thisyear: "Este ano",
+};
 
-const turnoOpen = ref(false);
-const modalidadeOpen = ref(false);
-const comparativoOpen = ref(false);
-
-const turnoLabel = computed(() => {
-  if (turnoSelected.value.length === 0) return "";
-  if (turnoSelected.value.length === TURNO_OPTIONS.length) return "Todos";
-  if (turnoSelected.value.length === 1) {
-    return TURNO_OPTIONS.find((o) => o.value === turnoSelected.value[0])?.label ?? "";
+const dateLabel = computed(() => {
+  if (dateRange.value.type === "preset") {
+    return PRESET_LABELS[dateRange.value.preset ?? ""] ?? "—";
   }
-  return `${turnoSelected.value.length} selecionados`;
+  if (
+    dateRange.value.type === "custom" &&
+    dateRange.value.startDate &&
+    dateRange.value.endDate
+  ) {
+    const fmt = (d: Date) => new Date(d).toLocaleDateString("pt-BR");
+    return `${fmt(dateRange.value.startDate)} – ${fmt(dateRange.value.endDate)}`;
+  }
+  return "";
 });
 
-const modalidadeLabel = computed(() => {
-  if (modalidadeSelected.value.length === 0) return "";
-  if (modalidadeSelected.value.length === MODALIDADE_OPTIONS.length) return "Todas";
-  if (modalidadeSelected.value.length === 1) {
-    return MODALIDADE_OPTIONS.find((o) => o.value === modalidadeSelected.value[0])?.label ?? "";
-  }
-  return `${modalidadeSelected.value.length} selecionadas`;
+const filiaisLabel = computed(() => {
+  if (filiaisSelected.value.length === 0) return "—";
+  if (filiaisSelected.value.length === FILIAIS.length) return "Todas";
+  if (filiaisSelected.value.length === 1) return String(filiaisSelected.value[0]);
+  return `${filiaisSelected.value.length} selecionadas`;
 });
 
-const comparativoLabel = computed(
-  () =>
-    COMPARATIVO_OPTIONS.find((o) => o.value === comparativoSelected.value)?.label ??
-    "—",
-);
-
-// Tipos estreitos pra passar à VisaoGeral
-const turnoTyped = computed<Turno[]>(
-  () => turnoSelected.value.filter((v) => v === "almoco" || v === "jantar") as Turno[],
-);
-const modalidadeTyped = computed<Modalidade[]>(
-  () => modalidadeSelected.value.filter((v) => v === "salao" || v === "delivery") as Modalidade[],
-);
-const comparativoTyped = computed<ComparativoMode>(
-  () => comparativoSelected.value as ComparativoMode,
+const targetDate = computed(() => resolveTargetDate(dateRange.value));
+const filiaisTyped = computed<string[]>(() =>
+  filiaisSelected.value.map((v) => String(v)),
 );
 </script>
 
@@ -232,80 +220,54 @@ const comparativoTyped = computed<ComparativoMode>(
       padding="none"
     >
       <template #header-actions>
-        <!-- Turno -->
+        <!-- Período (global) -->
         <div class="filter-item">
           <FilterTrigger
-            label="Turno"
-            :icon="Clock"
-            :value="turnoLabel"
-            :active="turnoSelected.length !== TURNO_OPTIONS.length"
-            :open="turnoOpen"
+            label="Período"
+            :icon="Calendar"
+            :value="dateLabel"
+            :active="dateRange.type !== 'preset' || dateRange.preset !== 'yesterday'"
+            :open="dateOpen"
             size="sm"
-            @click="turnoOpen = !turnoOpen"
-            @clear="turnoSelected = ['almoco', 'jantar']"
+            @click="dateOpen = !dateOpen"
+            @clear="dateRange = { type: 'preset', preset: 'yesterday' }"
           />
-          <FilterDropdown :open="turnoOpen" @update:open="(v) => (turnoOpen = v)">
-            <MultiSelectFilter
-              v-model="turnoSelected"
-              :options="TURNO_OPTIONS"
+          <FilterDropdown :open="dateOpen" @update:open="(v) => (dateOpen = v)">
+            <DateRangeFilter
+              v-model="dateRange"
+              @apply="dateOpen = false"
+              @cancel="dateOpen = false"
             />
           </FilterDropdown>
         </div>
 
-        <!-- Modalidade -->
+        <!-- Filiais (global) -->
         <div class="filter-item">
           <FilterTrigger
-            label="Modalidade"
-            :icon="Store"
-            :value="modalidadeLabel"
-            :active="modalidadeSelected.length !== MODALIDADE_OPTIONS.length"
-            :open="modalidadeOpen"
+            label="Filial"
+            :icon="Building2"
+            :value="filiaisLabel"
+            :active="filiaisSelected.length !== FILIAIS.length"
+            :open="filiaisOpen"
             size="sm"
-            @click="modalidadeOpen = !modalidadeOpen"
-            @clear="modalidadeSelected = ['salao', 'delivery']"
+            @click="filiaisOpen = !filiaisOpen"
+            @clear="filiaisSelected = [...FILIAIS]"
           />
           <FilterDropdown
-            :open="modalidadeOpen"
-            @update:open="(v) => (modalidadeOpen = v)"
+            :open="filiaisOpen"
+            @update:open="(v) => (filiaisOpen = v)"
           >
             <MultiSelectFilter
-              v-model="modalidadeSelected"
-              :options="MODALIDADE_OPTIONS"
-            />
-          </FilterDropdown>
-        </div>
-
-        <!-- Comparativo -->
-        <div class="filter-item">
-          <FilterTrigger
-            label="Comparativo"
-            :icon="TrendingUp"
-            :value="comparativoLabel"
-            :active="comparativoSelected !== 'yoy'"
-            :open="comparativoOpen"
-            size="sm"
-            @click="comparativoOpen = !comparativoOpen"
-            @clear="comparativoSelected = 'yoy'"
-          />
-          <FilterDropdown
-            :open="comparativoOpen"
-            @update:open="(v) => (comparativoOpen = v)"
-          >
-            <SelectFilter
-              :model-value="comparativoSelected"
-              :options="COMPARATIVO_OPTIONS"
-              @update:model-value="(v) => { comparativoSelected = v; comparativoOpen = false; }"
+              v-model="filiaisSelected"
+              :options="FILIAL_OPTIONS"
+              searchable
             />
           </FilterDropdown>
         </div>
       </template>
 
       <TabPanel name="visao-geral">
-        <VisaoGeral
-          :turno="turnoTyped"
-          :modalidade="modalidadeTyped"
-          :comparativo="comparativoTyped"
-        />
+        <VisaoGeral :target-date="targetDate" :filiais="filiaisTyped" />
       </TabPanel>
       <TabPanel name="produtos">
         <div class="placeholder"><h3>Produtos</h3><p>(em construção)</p></div>
