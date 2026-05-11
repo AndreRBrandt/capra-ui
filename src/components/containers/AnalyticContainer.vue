@@ -425,6 +425,11 @@ function handleRetry() {
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-md);
+  /* Participate in flex shrinking — without min-width: 0 the title block
+   * refuses to shrink and the right-side actions force their full width,
+   * collapsing the title column to ~1 word per line on narrow viewports. */
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* Icon — V2: colored background (container-icon pattern) */
@@ -444,6 +449,10 @@ function handleRetry() {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* Let the inner text wrap naturally instead of forcing the parent
+   * flex item to its intrinsic min-content width. */
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .analytic-container__title {
@@ -469,6 +478,11 @@ function handleRetry() {
    * mobile. The previous default (--spacing-xs / 4px) made them
    * visually run together. */
   gap: var(--analytic-actions-gap, var(--spacing-sm, 0.5rem));
+  /* Keep actions at their natural width on desktop. Mobile breakpoint
+   * below allows wrap when the row stacks vertically. */
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* Content */
@@ -727,5 +741,22 @@ function handleRetry() {
 /* Collapsed State */
 .analytic-container--collapsed .analytic-container__header {
   border-bottom: none;
+}
+
+/* Mobile: stack header vertically so title block + actions block each get
+ * the full row width. Without this, the right-side actions (filter pills,
+ * config buttons) consume their natural width on narrow viewports and
+ * squeeze the title column down to a few characters wide, causing the
+ * subtitle to wrap one word per line. */
+@media (max-width: 640px) {
+  .analytic-container__header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm, 0.5rem);
+  }
+
+  .analytic-container__actions {
+    justify-content: flex-start;
+  }
 }
 </style>

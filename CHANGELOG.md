@@ -9,6 +9,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+### Corrigido (2026-05-11) — Mobile-responsive AnalyticContainer header
+- **AnalyticContainer.vue** — Header now stacks vertically on viewports `< 640px` so the title block and the actions block each get the full row width. Without this, right-side actions (filter pills, config buttons) consumed their natural width on narrow viewports and squeezed the title column down to a few characters wide, causing the subtitle to wrap one word per line (visible on iPhone SE 375px)
+- **AnalyticContainer.vue** — `.analytic-container__header-content` and `.analytic-container__titles` now get `flex: 1 1 auto; min-width: 0` so text wraps naturally instead of forcing the parent flex item to its intrinsic min-content width
+- **AnalyticContainer.vue** — `.analytic-container__actions` now `flex-shrink: 0; flex-wrap: wrap` — keeps natural width on desktop, wraps gracefully when stacked on mobile
+
 ### Alterado (S219) — Dark mode: framework components use CSS tokens natively
 - **tokens-v2.css** — Added missing light-mode defaults for `--color-hover`, `--color-surface-hover`, `--color-surface-secondary`, `--color-text-secondary`, `--color-text-placeholder`, `--color-info`, `--color-info-light`, `--color-success-light`, `--color-overlay`, `--color-scrollbar-thumb`, `--color-scrollbar-thumb-hover`, `--color-scrollbar-track`. Dark mode block also gets overlay + scrollbar tokens
 - **DetailModal.vue** — Replaced all hardcoded colors (`rgba(0,0,0,0.5)`, `white`, `#fef3e2`, `#8f3f00`, `#f9fafb`, `#e5e7eb`, `#374151`, `#6b7280`) and legacy `--capra-*` tokens with `var(--color-*)` V2 tokens. Added backdrop blur, scrollbar styling, explicit header/footer/content backgrounds
