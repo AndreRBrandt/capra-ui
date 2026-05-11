@@ -21,7 +21,7 @@
 
 export type Turno = "almoco" | "jantar";
 export type Modalidade = "salao" | "delivery";
-export type ComparativoMode = "yoy" | "lastweek" | "avg4";
+export type ComparativoMode = "yoy" | "lastweek" | "avg4" | "custom";
 
 export interface VendaRow {
   /** Data ISO yyyy-mm-dd */
@@ -228,9 +228,19 @@ export function generateMockData(today: Date = new Date()): VendaRow[] {
  * YoY ajustado: encontra a mesma semana-do-mês + mesmo dia-da-semana
  * no ano anterior. Aproximação: ano-1, então ajusta -3/+3 dias até
  * bater o dayOfWeek desejado e a semana-do-mês mais próxima.
+ *
+ * Custom: usa a data passada em `customDate` diretamente (1 ponto de
+ * comparação). Quando `mode === "custom"` mas `customDate` é
+ * undefined, retorna [] — caller exibe "comparação não selecionada".
  */
-export function getComparisonDates(target: Date, mode: ComparativoMode): Date[] {
-  const dow = target.getDay();
+export function getComparisonDates(
+  target: Date,
+  mode: ComparativoMode,
+  customDate?: Date,
+): Date[] {
+  if (mode === "custom") {
+    return customDate ? [new Date(customDate)] : [];
+  }
 
   if (mode === "lastweek") {
     const d = new Date(target);
@@ -250,6 +260,7 @@ export function getComparisonDates(target: Date, mode: ComparativoMode): Date[] 
   // Estratégia: ano-1 e ajuste o offset de dia pra alinhar o dayOfWeek
   // (entre -3 e +3 dias). Mantém a semana do mês aproximadamente
   // estável porque o ajuste é menor que ±4.
+  const dow = target.getDay();
   const ly = new Date(target.getFullYear() - 1, target.getMonth(), target.getDate());
   const lyDow = ly.getDay();
   let offset = dow - lyDow;
@@ -321,19 +332,23 @@ function pctVar(current: number, previous: number): number | null {
  * Constrói as linhas Filial × KPIs da Visão Geral pra um dia-alvo
  * com filtros + modo de comparativo. Cada KPI vem com seu pct de
  * variação contra o período anterior (ou null se previous=0).
+ *
+ * `customDate` é honrado apenas quando `mode === "custom"`; nos
+ * outros modos é ignorado.
  */
 export function buildFilialRows(
   all: VendaRow[],
   targetDate: Date,
   filters: AggregationFilters,
   mode: ComparativoMode,
+  customDate?: Date,
 ): FilialRow[] {
   const targetISO = isoDate(targetDate);
   const targetRows = rowsFor(all, targetISO, filters);
   const targetAgg = aggregate(targetRows);
 
   // Comparativo: agregar 1 ou N datas anteriores e dividir por N pra média
-  const comparisonDates = getComparisonDates(targetDate, mode);
+  const comparisonDates = getComparisonDates(targetDate, mode, customDate);
   const comparisonAggs: Map<string, FilialAggregate>[] = comparisonDates.map((d) =>
     aggregate(rowsFor(all, isoDate(d), filters)),
   );
