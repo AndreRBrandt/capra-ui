@@ -14,15 +14,23 @@
  * (TabbedContainer with sub-views per top-level area).
  */
 
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   AppShellV2,
+  FilterDropdown,
+  FilterTrigger,
   Modal,
+  MultiSelectFilter,
   Popover,
+  SelectFilter,
   TabbedContainer,
   TabPanel,
+  type MultiSelectOption,
   type NavItemV2,
+  type SelectOption,
 } from "@capra-ui/core";
+import VisaoGeral from "./views/VisaoGeral.vue";
+import type { ComparativoMode, Modalidade, Turno } from "./data/vendas";
 import {
   Home,
   DollarSign,
@@ -35,10 +43,10 @@ import {
   Settings,
   LogOut,
   Shield,
-  ChevronDown,
   ArrowLeft,
-  Calendar,
-  SlidersHorizontal,
+  Clock,
+  Store,
+  TrendingUp,
   ShoppingCart,
   PackageSearch,
   UserCog,
@@ -105,6 +113,69 @@ const isThemeOpen = ref(false);
 function openThemeSettings(): void {
   isThemeOpen.value = true;
 }
+
+// ---------------------------------------------------------------------------
+// Filtros reativos da Visão Geral
+// ---------------------------------------------------------------------------
+
+const TURNO_OPTIONS: MultiSelectOption[] = [
+  { value: "almoco", label: "Almoço" },
+  { value: "jantar", label: "Jantar" },
+];
+
+const MODALIDADE_OPTIONS: MultiSelectOption[] = [
+  { value: "salao", label: "Salão" },
+  { value: "delivery", label: "Delivery" },
+];
+
+const COMPARATIVO_OPTIONS: SelectOption[] = [
+  { value: "yoy", label: "Ano anterior (mesmo dia da semana)" },
+  { value: "lastweek", label: "Semana anterior (mesmo dia)" },
+  { value: "avg4", label: "Média das últimas 4 ocorrências" },
+];
+
+const turnoSelected = ref<(string | number)[]>(["almoco", "jantar"]);
+const modalidadeSelected = ref<(string | number)[]>(["salao", "delivery"]);
+const comparativoSelected = ref<string | number>("yoy");
+
+const turnoOpen = ref(false);
+const modalidadeOpen = ref(false);
+const comparativoOpen = ref(false);
+
+const turnoLabel = computed(() => {
+  if (turnoSelected.value.length === 0) return "";
+  if (turnoSelected.value.length === TURNO_OPTIONS.length) return "Todos";
+  if (turnoSelected.value.length === 1) {
+    return TURNO_OPTIONS.find((o) => o.value === turnoSelected.value[0])?.label ?? "";
+  }
+  return `${turnoSelected.value.length} selecionados`;
+});
+
+const modalidadeLabel = computed(() => {
+  if (modalidadeSelected.value.length === 0) return "";
+  if (modalidadeSelected.value.length === MODALIDADE_OPTIONS.length) return "Todas";
+  if (modalidadeSelected.value.length === 1) {
+    return MODALIDADE_OPTIONS.find((o) => o.value === modalidadeSelected.value[0])?.label ?? "";
+  }
+  return `${modalidadeSelected.value.length} selecionadas`;
+});
+
+const comparativoLabel = computed(
+  () =>
+    COMPARATIVO_OPTIONS.find((o) => o.value === comparativoSelected.value)?.label ??
+    "—",
+);
+
+// Tipos estreitos pra passar à VisaoGeral
+const turnoTyped = computed<Turno[]>(
+  () => turnoSelected.value.filter((v) => v === "almoco" || v === "jantar") as Turno[],
+);
+const modalidadeTyped = computed<Modalidade[]>(
+  () => modalidadeSelected.value.filter((v) => v === "salao" || v === "delivery") as Modalidade[],
+);
+const comparativoTyped = computed<ComparativoMode>(
+  () => comparativoSelected.value as ComparativoMode,
+);
 </script>
 
 <template>
@@ -161,23 +232,80 @@ function openThemeSettings(): void {
       padding="none"
     >
       <template #header-actions>
-        <button class="page-action" type="button" title="Calendário">
-          <Calendar :size="16" />
-          <span class="page-action__badge">2</span>
-        </button>
+        <!-- Turno -->
+        <div class="filter-item">
+          <FilterTrigger
+            label="Turno"
+            :icon="Clock"
+            :value="turnoLabel"
+            :active="turnoSelected.length !== TURNO_OPTIONS.length"
+            :open="turnoOpen"
+            size="sm"
+            @click="turnoOpen = !turnoOpen"
+            @clear="turnoSelected = ['almoco', 'jantar']"
+          />
+          <FilterDropdown :open="turnoOpen" @update:open="(v) => (turnoOpen = v)">
+            <MultiSelectFilter
+              v-model="turnoSelected"
+              :options="TURNO_OPTIONS"
+            />
+          </FilterDropdown>
+        </div>
 
-        <button class="page-action page-action--primary" type="button">
-          <SlidersHorizontal :size="16" />
-          <span>Filtros</span>
-          <ChevronDown :size="14" />
-        </button>
+        <!-- Modalidade -->
+        <div class="filter-item">
+          <FilterTrigger
+            label="Modalidade"
+            :icon="Store"
+            :value="modalidadeLabel"
+            :active="modalidadeSelected.length !== MODALIDADE_OPTIONS.length"
+            :open="modalidadeOpen"
+            size="sm"
+            @click="modalidadeOpen = !modalidadeOpen"
+            @clear="modalidadeSelected = ['salao', 'delivery']"
+          />
+          <FilterDropdown
+            :open="modalidadeOpen"
+            @update:open="(v) => (modalidadeOpen = v)"
+          >
+            <MultiSelectFilter
+              v-model="modalidadeSelected"
+              :options="MODALIDADE_OPTIONS"
+            />
+          </FilterDropdown>
+        </div>
+
+        <!-- Comparativo -->
+        <div class="filter-item">
+          <FilterTrigger
+            label="Comparativo"
+            :icon="TrendingUp"
+            :value="comparativoLabel"
+            :active="comparativoSelected !== 'yoy'"
+            :open="comparativoOpen"
+            size="sm"
+            @click="comparativoOpen = !comparativoOpen"
+            @clear="comparativoSelected = 'yoy'"
+          />
+          <FilterDropdown
+            :open="comparativoOpen"
+            @update:open="(v) => (comparativoOpen = v)"
+          >
+            <SelectFilter
+              :model-value="comparativoSelected"
+              :options="COMPARATIVO_OPTIONS"
+              @update:model-value="(v) => { comparativoSelected = v; comparativoOpen = false; }"
+            />
+          </FilterDropdown>
+        </div>
       </template>
 
       <TabPanel name="visao-geral">
-        <div class="placeholder">
-          <h3>Visão Geral</h3>
-          <p>Esqueleto pronto. Conteúdo da página será preenchido nas próximas sessões.</p>
-        </div>
+        <VisaoGeral
+          :turno="turnoTyped"
+          :modalidade="modalidadeTyped"
+          :comparativo="comparativoTyped"
+        />
       </TabPanel>
       <TabPanel name="produtos">
         <div class="placeholder"><h3>Produtos</h3><p>(em construção)</p></div>
@@ -306,48 +434,10 @@ function openThemeSettings(): void {
   background: color-mix(in srgb, var(--color-danger, #ef4444) 8%, transparent);
 }
 
-/* ---------- Page action buttons (calendar + filtros) ---------- */
-.page-action {
+/* ---------- Page action filters (anchors FilterDropdown positioning) ---------- */
+.filter-item {
   position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.page-action:hover {
-  background: var(--color-hover);
-}
-.page-action--primary {
-  background: var(--color-brand);
-  color: var(--color-on-brand, #fff);
-  border-color: var(--color-brand);
-}
-.page-action--primary:hover {
-  filter: brightness(1.05);
-}
-.page-action__badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--color-on-brand, #fff);
-  background: var(--color-brand);
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* ---------- Placeholder content ---------- */

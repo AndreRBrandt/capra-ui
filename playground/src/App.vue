@@ -93,7 +93,7 @@ watch(isMobileSidebarOpen, (open) => {
   document.body.style.overflow = open ? "hidden" : "";
 });
 
-const BUILD_MARKER = "v31 / 2026-05-08 / framework hardcoded colors swept into theme tokens";
+const BUILD_MARKER = "v32 / 2026-05-11 / Visão Geral filiais comparativo (3 filtros reativos)";
 
 onMounted(() => {
   if (typeof window !== "undefined") {
