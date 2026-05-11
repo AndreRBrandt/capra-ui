@@ -266,19 +266,25 @@ export function getComparisonDates(target: Date, mode: ComparativoMode): Date[] 
 export interface AggregationFilters {
   turno: Turno[];
   modalidade: Modalidade[];
+  /** When omitted or empty, all filiais are included. */
+  filiais?: string[];
 }
 
-/** Filtra rows por data específica (ISO) + dimensões. */
+/** Filtra rows por data específica (ISO) + dimensões. Filial é
+ *  aplicado quando o filtro tem ao menos um item; vazio = todas. */
 function rowsFor(
   all: VendaRow[],
   dateISO: string,
   filters: AggregationFilters,
 ): VendaRow[] {
+  const filialFilter =
+    filters.filiais && filters.filiais.length > 0 ? new Set(filters.filiais) : null;
   return all.filter(
     (r) =>
       r.date === dateISO &&
       filters.turno.includes(r.turno) &&
-      filters.modalidade.includes(r.modalidade),
+      filters.modalidade.includes(r.modalidade) &&
+      (filialFilter === null || filialFilter.has(r.filial)),
   );
 }
 
@@ -332,8 +338,14 @@ export function buildFilialRows(
     aggregate(rowsFor(all, isoDate(d), filters)),
   );
 
+  // When a filial filter is set, only iterate the selected subset
+  // (keeps the table in sync with the global filter without showing
+  // ghost zero-rows for excluded filiais).
+  const filiaisToShow =
+    filters.filiais && filters.filiais.length > 0 ? filters.filiais : FILIAIS;
+
   const result: FilialRow[] = [];
-  for (const filial of FILIAIS) {
+  for (const filial of filiaisToShow) {
     const cur = targetAgg.get(filial);
     const prevs = comparisonAggs
       .map((m) => m.get(filial))
@@ -372,6 +384,59 @@ export function buildFilialRows(
 export function yesterday(): Date {
   const t = new Date();
   return new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1);
+}
+
+/**
+ * Resolve um DateRangeValue (do DateRangeFilter do framework) para o
+ * "dia alvo" da Visão Geral. Para presets aceitos, mapeia direto.
+ * Para custom range, usa endDate. Fallback: ontem.
+ *
+ * Visões diferentes podem interpretar o range global de forma diferente
+ * — esta versão é específica da Visão Geral, que sempre olha 1 dia.
+ */
+export function resolveTargetDate(range: {
+  type: string;
+  preset?: string;
+  startDate?: Date;
+  endDate?: Date;
+} | null | undefined): Date {
+  if (!range) return yesterday();
+
+  if (range.type === "preset") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    switch (range.preset) {
+      case "today":
+        return today;
+      case "yesterday":
+      case "lastday": {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 1);
+        return d;
+      }
+      case "last7": {
+        const d = new Date(today);
+        d.setDate(d.getDate() - 1); // último dia completo
+        return d;
+      }
+      case "last30":
+      case "thismonth":
+      case "lastmonth":
+      case "thisyear":
+        // Pra range maior, a Visão Geral foca no último dia completo
+        return yesterday();
+      default:
+        return yesterday();
+    }
+  }
+
+  if (range.type === "custom" && range.endDate) {
+    const d = new Date(range.endDate);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  return yesterday();
 }
 
 /** Formata "2026-05-08" → "qui, 08/05/2026". */
