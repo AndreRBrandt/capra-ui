@@ -173,7 +173,6 @@ const filiaisTyped = computed<string[]>(() =>
     :active-item="activeArea"
     logo-text="Bode Analytics"
     logo-icon="N"
-    style="--data-table-sticky-top: 60px"
     @navigate="handleNavigate"
   >
     <template #header-actions>

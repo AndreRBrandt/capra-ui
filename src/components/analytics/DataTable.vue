@@ -2118,26 +2118,43 @@ defineExpose({
   pointer-events: none;
 }
 
-/* Sticky thead: stays pinned at the top of the page scroll when the
- * column-pinning feature is on. Previous version wrapped the container
- * with `max-height: 70vh; overflow-y: auto` on mobile, which created a
- * scroll context that captured the thead's stickiness — when the user
- * scrolled the *page* (the natural mobile gesture), the container moved
- * with the page and the thead moved with it. Removing the container's
- * own scroll context lets the thead stick to the page's scroll instead.
+/* Sticky thead: pinned to the top of the table's own scroll container.
  *
- * Consumers with a sticky page-level top bar can offset the thead via
- * `--data-table-sticky-top` (e.g. `60px` to match a topbar height) so
- * the column header pins just below the bar rather than disappearing
- * behind it. */
+ * Pure-CSS limit: the container needs `overflow-x: auto` for horizontal
+ * column scrolling on narrow viewports. That alone makes the container
+ * a scroll container on *both* axes (CSS spec), so any sticky descendant
+ * is anchored to this container — never to the viewport. An earlier
+ * attempt tried `top: 60px` to pin below the page topbar, but with the
+ * container scrolling along with the page, that just offset the thead
+ * *inside* a moving container — at certain scroll positions the thead
+ * ended up *below* the first row.
+ *
+ * The CSS-only resolution is to make the table its own scroll region
+ * on mobile (max-height + overflow-y). The user scrolls inside the
+ * table; the thead pins at the top of that internal scroll. The page
+ * stays free to scroll on the surrounding content. */
 .data-table-container--sticky .data-table thead {
   position: sticky;
-  top: var(--data-table-sticky-top, 0);
+  top: 0;
   z-index: 10;
 }
 
 .data-table-container--sticky .data-table thead .data-table__header--sticky {
   z-index: 12;
+}
+
+/* Mobile: bound the table's height so internal scroll actually engages.
+ * Without this, an 8-row table fits within the viewport and the
+ * container effectively never overflows — the user ends up scrolling
+ * the page, dragging the container (and its sticky thead) along.
+ * 60vh leaves enough room above/below for the rest of the layout
+ * while clearly cutting the table off so the user discovers the
+ * internal scroll. */
+@media (max-width: 768px) {
+  .data-table-container--sticky {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
 }
 
 /* =============================================================================
